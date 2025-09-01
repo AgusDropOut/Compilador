@@ -11,12 +11,15 @@ public class AnalizadorLexico {
     String content;
     StringBuilder lexema;
     int estadoActual = 0;
-    public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas) throws IOException {
+    private TablaDeSimbolos tablaDeSimbolos;
+
+    public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos) throws IOException {
         this.matrizDeTransicion = matrizDeTransicion;
         this.puntero = new Puntero(0);
         this.content = new String(Files.readAllBytes(Paths.get(codigoFuente)));
         this.lexema = new StringBuilder();
         this.tablaAccionesSemanticas = accionesSemanticas;
+        this.tablaDeSimbolos = tablaDeSimbolos;
     }
 
     public void analizar() throws IOException {
@@ -29,7 +32,7 @@ public class AnalizadorLexico {
                 System.out.println("FINAL");
                 // Ejecutar la acción correspondiente al estado actual antes de reiniciar
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
-                        .realizar(content, puntero, lexema, null);
+                        .realizar(content, puntero, lexema, tablaDeSimbolos);
                 estadoActual = 0; // reiniciar
             } else if (siguienteEstado == MatrizDeTransicion.ERROR) {
                 // Manejar error
@@ -38,7 +41,7 @@ public class AnalizadorLexico {
             } else {
                 estadoActual = siguienteEstado;
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
-                        .realizar(content, puntero, lexema, null);
+                        .realizar(content, puntero, lexema, tablaDeSimbolos);
                 System.out.println(siguienteEstado);
             }
             puntero.avanzar();

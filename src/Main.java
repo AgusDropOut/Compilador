@@ -7,7 +7,8 @@ import java.nio.file.Paths;
 public class Main {
     public static void main(String[] args) throws IOException {
         MapaDeSimbolos mapa = new MapaDeSimbolos();
-        AnalizadorLexico analizadorLexico = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa));
+        TablaDeSimbolos tablaDeSimbolos = new TablaDeSimbolos();
+        AnalizadorLexico analizadorLexico = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa), tablaDeSimbolos);
         analizadorLexico.analizar();
     }
 }
