@@ -23,10 +23,12 @@ public class AnalizadorLexico {
     }
 
     public void analizar() throws IOException {
+        int siguienteEstado = 0;
+        char c = 'a';
 
         while (puntero.getPuntero() < content.length()) {
-            char c = content.charAt(puntero.getPuntero());
-            int siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
+            c = content.charAt(puntero.getPuntero());
+            siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
             System.out.println(lexema);
             if (siguienteEstado == MatrizDeTransicion.FINAL) {
                 System.out.println("FINAL");
@@ -39,13 +41,26 @@ public class AnalizadorLexico {
                 System.out.println("ERROR");
                 estadoActual = 0;
             } else {
-                estadoActual = siguienteEstado;
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
                         .realizar(content, puntero, lexema, tablaDeSimbolos);
+                estadoActual = siguienteEstado;
                 System.out.println(siguienteEstado);
             }
             puntero.avanzar();
         }
+
+        if (puntero.getPuntero() >= content.length()){
+            c = ' ';
+            siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
+            if (siguienteEstado == MatrizDeTransicion.FINAL) {
+                System.out.println("FINAL");
+                // Ejecutar la acción correspondiente al estado actual antes de reiniciar
+                tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
+                        .realizar(content, puntero, lexema, tablaDeSimbolos);
+                estadoActual = 0;
+            }
+        }
+
         System.out.println(palabrasReservadasEncontradas);
     }
 
