@@ -8,6 +8,5 @@ public class AccionSemantica1 implements AccionSemantica {
         char c = codigoFuente.charAt(puntero.getPuntero());
         lexema.setLength(0);
         lexema.append(c);
-        //System.out.println("AccionSemantica1 realizar");
     }
 }
