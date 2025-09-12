@@ -26,10 +26,16 @@ public class AnalizadorLexico {
         int siguienteEstado = 0;
         char c = 'a';
 
-        while (puntero.getPuntero() < content.length()) {
-            c = content.charAt(puntero.getPuntero());
+        while (puntero.getPuntero() <= content.length()) {
+            System.out.println(c);
+            if(puntero.getPuntero() < content.length()) {
+                c = content.charAt(puntero.getPuntero());
+            } else {
+                c = '$';
+            }
             siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
-            System.out.println(lexema);
+
+            System.out.println(estadoActual);
             if (siguienteEstado == MatrizDeTransicion.FINAL) {
                 System.out.println("FINAL");
                 // Ejecutar la acción correspondiente al estado actual antes de reiniciar
@@ -47,18 +53,6 @@ public class AnalizadorLexico {
                 System.out.println(siguienteEstado);
             }
             puntero.avanzar();
-        }
-
-        if (puntero.getPuntero() >= content.length()){
-            c = ' ';
-            siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
-            if (siguienteEstado == MatrizDeTransicion.FINAL) {
-                System.out.println("FINAL");
-                // Ejecutar la acción correspondiente al estado actual antes de reiniciar
-                tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
-                        .realizar(content, puntero, lexema, tablaDeSimbolos);
-                estadoActual = 0;
-            }
         }
 
         System.out.println(palabrasReservadasEncontradas);

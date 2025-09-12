@@ -192,6 +192,17 @@ public class TablaAccionesSemanticas {
                 TABLE[15][j] = new AccionSemantica11();
             }
         }
+
+        //Columna 19 (final de archivo)
+        TABLE[0][19] = new AccionSemantica7();
+        TABLE[1][19] = new AccionSemantica4();
+        TABLE[4][19] = new AccionSemantica10();
+        TABLE[5][19] = new AccionSemantica10();
+        TABLE[6][19] = new AccionSemantica10();
+        TABLE[8][19] = new AccionSemantica3();
+        TABLE[10][19] = new AccionSemantica6();
+        TABLE[12][19] = new AccionSemantica6();
+
     }
 
 
