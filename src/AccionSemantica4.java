@@ -7,6 +7,13 @@ public class AccionSemantica4 implements AccionSemantica{
         System.out.println(this.getClass().getSimpleName());
         puntero.retroceder();
 
+        if(lexema.toString().length() > 20) {
+            StringBuilder lexemaTruncado = new StringBuilder(lexema.toString().substring(0, 20));
+            System.out.println("WARNING : el identificador " + lexema.toString() + " supera los 20 caracteres maximos, sera truncado a " + lexemaTruncado);
+            lexema = lexemaTruncado;
+        }
+
+
         if (tablaDeSimbolos.estaSimbolo(lexema.toString())){
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
             System.out.println("Identificador leido: " + lexema.toString());

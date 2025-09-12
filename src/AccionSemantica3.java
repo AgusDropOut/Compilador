@@ -14,6 +14,6 @@ public class AccionSemantica3 implements AccionSemantica {
             System.out.println("No se encontro la palabra reservada");
             lexema.setLength(0);
         }
-        //System.out.println("AccionSemantica3 realizar");
+
     }
 }

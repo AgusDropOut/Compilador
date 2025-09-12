@@ -7,6 +7,6 @@ public class AccionSemantica2 implements AccionSemantica {
         System.out.println(this.getClass().getSimpleName());
         char c = codigoFuente.charAt(puntero.getPuntero());
         lexema.append(c);
-        //System.out.println("AccionSemantica2 realizar");
+
     }
 }
