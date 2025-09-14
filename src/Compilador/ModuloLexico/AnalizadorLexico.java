@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public class AnalizadorLexico {
     private MatrizDeTransicion matrizDeTransicion;
+    private static int linea = 0;
     private TablaAccionesSemanticas tablaAccionesSemanticas;
     public static  ArrayList<String> palabrasReservadasEncontradas =  new ArrayList<>();
     Puntero puntero;
@@ -29,35 +30,43 @@ public class AnalizadorLexico {
         char c = 'a';
 
         while (puntero.getPuntero() <= content.length()) {
-            System.out.println(c);
+
             if(puntero.getPuntero() < content.length()) {
                 c = content.charAt(puntero.getPuntero());
             } else {
                 c = '$';
             }
-            siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
 
-            System.out.println(estadoActual);
+            if (c == '\n' || c == '\r') {
+                if (siguienteEstado != MatrizDeTransicion.FINAL) {
+                    linea++;
+                }
+            }
+
+
+            siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
+            System.out.println(siguienteEstado + ":" + c);
             if (siguienteEstado == MatrizDeTransicion.FINAL) {
-                System.out.println("FINAL");
                 // Ejecutar la acción correspondiente al estado actual antes de reiniciar
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
                         .realizar(content, puntero, lexema, tablaDeSimbolos);
                 estadoActual = 0; // reiniciar
             } else if (siguienteEstado == MatrizDeTransicion.ERROR) {
                 // Manejar error
-                System.out.println("ERROR");
                 estadoActual = 0;
             } else {
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
                         .realizar(content, puntero, lexema, tablaDeSimbolos);
                 estadoActual = siguienteEstado;
-                System.out.println(siguienteEstado);
             }
             puntero.avanzar();
         }
 
         System.out.println(palabrasReservadasEncontradas);
+    }
+
+    public static int getNumeroDeLinea(){
+        return linea;
     }
 
 }

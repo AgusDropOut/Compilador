@@ -18,7 +18,8 @@ public class MapaDeSimbolos {
         for (int n = 0; n <= 9; n++) {
             SYMBOL_MAP.put((char) ('0' + n), 0);
         }
-        SYMBOL_MAP.put('$', 19);
+        SYMBOL_MAP.put(':', 19);
+        SYMBOL_MAP.put('$', 20);
         SYMBOL_MAP.put('+', 7);
         SYMBOL_MAP.put('-', 8);
         SYMBOL_MAP.put('.', 9);
@@ -32,6 +33,7 @@ public class MapaDeSimbolos {
         SYMBOL_MAP.put('!', 17);
         SYMBOL_MAP.put('"', 18);
         SYMBOL_MAP.put('%', 6);
+
 
         SYMBOL_MAP.put('_', 10);
         SYMBOL_MAP.put('{', 10);

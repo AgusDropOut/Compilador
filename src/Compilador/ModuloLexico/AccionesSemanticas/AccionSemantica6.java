@@ -20,7 +20,7 @@ public class AccionSemantica6 implements AccionSemantica {
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
             //Añadir devolver CTE + puntero a TS
         } else {
-            System.out.println("Error: El numero " + lexema.toString() + " esta fuera del rango permitido para el sufijo double(D)" );
+            System.out.println("Error linea " + AnalizadorLexico.getNumeroDeLinea()  + ":" +" El numero " + lexema.toString() + " esta fuera del rango permitido para el sufijo double(D)" );
         }
 
 

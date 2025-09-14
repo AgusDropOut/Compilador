@@ -5,7 +5,7 @@ import Compilador.ModuloLexico.AccionesSemanticas.*;
 public class TablaAccionesSemanticas {
     private final MapaDeSimbolos SYMBOL_MAP;
 
-    public static final AccionSemantica[][] TABLE = new AccionSemantica[16][20];
+    public static final AccionSemantica[][] TABLE = new AccionSemantica[17][21];
 
     public TablaAccionesSemanticas(MapaDeSimbolos map) {
         this.SYMBOL_MAP= map;
@@ -94,7 +94,7 @@ public class TablaAccionesSemanticas {
         TABLE[3][18] = null;
 
         // Fila 4
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 13) {
                 TABLE[4][j] = new AccionSemantica9();
             } else {
@@ -103,7 +103,7 @@ public class TablaAccionesSemanticas {
         }
 
         // Fila 5
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 11 || j == 17) {
                 TABLE[5][j] = new AccionSemantica9();
             } else {
@@ -112,7 +112,7 @@ public class TablaAccionesSemanticas {
         }
 
         // Fila 6
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 11) {
                 TABLE[6][j] = new AccionSemantica9();
             } else {
@@ -121,7 +121,7 @@ public class TablaAccionesSemanticas {
         }
 
         // Fila 7
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 18) {
                 TABLE[7][j] = new AccionSemantica9();
             } else if (j == 16) {
@@ -134,20 +134,20 @@ public class TablaAccionesSemanticas {
         // Fila 8
         TABLE[8][0] = new AccionSemantica3();
         TABLE[8][1] = new AccionSemantica2();
-        for (int j = 2; j < 19; j++) {
+        for (int j = 2; j < 20; j++) {
             TABLE[8][j] = new AccionSemantica3();
         }
 
 
         // Fila 9
         TABLE[9][0] = new AccionSemantica2();
-        for (int j = 1; j < 19; j++) {
+        for (int j = 1; j < 20; j++) {
             TABLE[9][j] = null;
         }
 
         // Fila 10
         TABLE[10][0] = new AccionSemantica2();
-        for (int j = 1; j < 19; j++) {
+        for (int j = 1; j < 20; j++) {
             if (j == 4) {
                 TABLE[10][j] = new AccionSemantica2();
             } else {
@@ -156,7 +156,7 @@ public class TablaAccionesSemanticas {
         }
 
         // Fila 11
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 7 || j == 8) {
                 TABLE[11][j] = new AccionSemantica2();
             } else {
@@ -166,12 +166,12 @@ public class TablaAccionesSemanticas {
 
         // Fila 12
         TABLE[12][0] = new AccionSemantica2();
-        for (int j = 1; j < 19; j++) {
+        for (int j = 1; j < 20; j++) {
             TABLE[12][j] = new AccionSemantica6();
         }
 
         // Fila 13
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 14) {
                 TABLE[13][j] = new AccionSemantica2();
             } else {
@@ -180,7 +180,7 @@ public class TablaAccionesSemanticas {
         }
 
         // Fila 14
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 14) {
                 TABLE[14][j] = new AccionSemantica2();
             } else {
@@ -189,7 +189,7 @@ public class TablaAccionesSemanticas {
         }
 
         // Fila 15
-        for (int j = 0; j < 19; j++) {
+        for (int j = 0; j < 20; j++) {
             if (j == 14) {
                 TABLE[15][j] = new AccionSemantica9();
             } else {
@@ -197,15 +197,33 @@ public class TablaAccionesSemanticas {
             }
         }
 
-        //Columna 19 (final de archivo)
-        TABLE[0][19] = new AccionSemantica7();
-        TABLE[1][19] = new AccionSemantica4();
-        TABLE[4][19] = new AccionSemantica10();
-        TABLE[5][19] = new AccionSemantica10();
-        TABLE[6][19] = new AccionSemantica10();
-        TABLE[8][19] = new AccionSemantica3();
-        TABLE[10][19] = new AccionSemantica6();
-        TABLE[12][19] = new AccionSemantica6();
+        // Fila 16
+        for (int j = 0; j < 20; j++) {
+            if (j == 11) {
+                TABLE[16][j] = new AccionSemantica9();
+            } else {
+                TABLE[16][j] = null;
+            }
+        }
+
+        //Columna 19
+        for (int i = 0; i < 17; i++) {
+            if (i == 0){
+                TABLE[i][19] = new AccionSemantica1();
+            } else if (i == 1) {
+                TABLE[i][19] = new AccionSemantica4();
+            }
+        }
+
+        //Columna 20 (final de archivo)
+        TABLE[0][20] = new AccionSemantica7();
+        TABLE[1][20] = new AccionSemantica4();
+        TABLE[4][20] = new AccionSemantica10();
+        TABLE[5][20] = new AccionSemantica10();
+        TABLE[6][20] = new AccionSemantica10();
+        TABLE[8][20] = new AccionSemantica3();
+        TABLE[10][20] = new AccionSemantica6();
+        TABLE[12][20] = new AccionSemantica6();
 
     }
 
