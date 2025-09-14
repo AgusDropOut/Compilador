@@ -1,3 +1,9 @@
+package Compilador.ModuloLexico.AccionesSemanticas;
+
+import Compilador.ModuloLexico.AccionSemantica;
+import Compilador.ModuloLexico.Puntero;
+import Compilador.ModuloLexico.TablaDeSimbolos;
+
 import java.io.IOException;
 
 public class AccionSemantica7 implements AccionSemantica {

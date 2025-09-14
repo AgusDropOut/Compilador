@@ -1,3 +1,5 @@
+package Compilador.ModuloLexico;
+
 public class PalabrasReservadas {
     public static String[] palabrasReservadas = new String[]{"while","if", "else", "endif", "print", "return", "do", "ulong", "dfloat"};
 

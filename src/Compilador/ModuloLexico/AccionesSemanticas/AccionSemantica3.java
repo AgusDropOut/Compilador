@@ -1,3 +1,7 @@
+package Compilador.ModuloLexico.AccionesSemanticas;
+
+import Compilador.ModuloLexico.*;
+
 import java.io.IOException;
 
 public class AccionSemantica3 implements AccionSemantica {

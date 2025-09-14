@@ -1,3 +1,5 @@
+package Compilador.ModuloLexico;
+
 public class Puntero {
     private int puntero;
     public Puntero(int puntero) {

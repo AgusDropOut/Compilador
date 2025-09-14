@@ -1,3 +1,5 @@
+package Compilador.ModuloLexico;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,3 +1,7 @@
+package Compilador.ModuloLexico;
+
+import Compilador.ModuloLexico.AccionesSemanticas.*;
+
 public class TablaAccionesSemanticas {
     private final MapaDeSimbolos SYMBOL_MAP;
 

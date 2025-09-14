@@ -1,3 +1,5 @@
+package Compilador.ModuloLexico;
+
 import java.util.HashMap;
 import java.util.Map;
 

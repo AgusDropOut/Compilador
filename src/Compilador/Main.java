@@ -1,9 +1,8 @@
-import java.awt.*;
+package Compilador;
+
+import Compilador.ModuloLexico.*;
+
 import java.io.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) throws IOException {
