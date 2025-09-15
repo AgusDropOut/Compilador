@@ -10,10 +10,10 @@ public class AnalizadorLexico {
     private static int linea = 0;
     private TablaAccionesSemanticas tablaAccionesSemanticas;
     public static  ArrayList<String> palabrasReservadasEncontradas =  new ArrayList<>();
-    Puntero puntero;
+    private Puntero puntero;
     String content;
     StringBuilder lexema;
-    int estadoActual = 0;
+    private static int estadoActual = 0;
     private TablaDeSimbolos tablaDeSimbolos;
 
     public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos) throws IOException {
@@ -45,15 +45,15 @@ public class AnalizadorLexico {
 
 
             siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
-            System.out.println(siguienteEstado + ":" + c);
+
             if (siguienteEstado == MatrizDeTransicion.FINAL) {
                 // Ejecutar la acción correspondiente al estado actual antes de reiniciar
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
                         .realizar(content, puntero, lexema, tablaDeSimbolos);
                 estadoActual = 0; // reiniciar
             } else if (siguienteEstado == MatrizDeTransicion.ERROR) {
-                // Manejar error
-                estadoActual = 0;
+                tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
+                        .realizar(content, puntero, lexema, tablaDeSimbolos);
             } else {
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
                         .realizar(content, puntero, lexema, tablaDeSimbolos);
@@ -67,6 +67,9 @@ public class AnalizadorLexico {
 
     public static int getNumeroDeLinea(){
         return linea;
+    }
+    public static void setEstadoActual(int nuevoEstado){
+        estadoActual = nuevoEstado;
     }
 
 }

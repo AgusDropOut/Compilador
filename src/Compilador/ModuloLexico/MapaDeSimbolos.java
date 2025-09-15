@@ -46,6 +46,11 @@ public class MapaDeSimbolos {
     }
 
     public int get(char c) {
-        return SYMBOL_MAP.get(c);
+        if(SYMBOL_MAP.containsKey(c)) {
+            return SYMBOL_MAP.get(c);
+        } else {
+            //Error de compilacion, consideramos devolver columna correspondiente a caracter invalido
+            return 21;
+        }
     }
 }
