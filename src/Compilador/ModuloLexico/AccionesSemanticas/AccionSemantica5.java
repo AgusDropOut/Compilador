@@ -15,7 +15,10 @@ public class AccionSemantica5 implements AccionSemantica {
         long lexemaLong = Long.parseLong(numero);
 
         if((lexemaLong >= 0) && (lexemaLong < Math.pow(2,32))){
-            tablaDeSimbolos.addSimbolo(lexema.toString());
+            ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
+            elementoTablaDeSimbolos.setTipo("ulong");
+            elementoTablaDeSimbolos.setValor(numero);
+            tablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
             MapaDeTokensAID.tokenCTE = true;
         } else {

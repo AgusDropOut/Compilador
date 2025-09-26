@@ -1,17 +1,19 @@
 package Compilador.ModuloLexico.AccionesSemanticas;
 
-import Compilador.ModuloLexico.AccionSemantica;
-import Compilador.ModuloLexico.AnalizadorLexico;
-import Compilador.ModuloLexico.Puntero;
-import Compilador.ModuloLexico.TablaDeSimbolos;
+import Compilador.ModuloLexico.*;
 
 import java.io.IOException;
 
-public class AccionSemantica9 implements AccionSemantica {
+public class AccionSemantica12 implements AccionSemantica {
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
         System.out.println(this.getClass().getSimpleName());
         char c = codigoFuente.charAt(puntero.getPuntero());
         lexema.append(c);
+        MapaDeTokensAID.tokenCADENA = true;
+        ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
+        elementoTablaDeSimbolos.setTipo("dfloat");
+        tablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
+
     }
 }

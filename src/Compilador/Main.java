@@ -17,5 +17,6 @@ public class Main {
         AnalizadorLexico lexer = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa), tablaDeSimbolos, yylval);
         Parser parser = new Parser();
         parser.run();
+
     }
 }

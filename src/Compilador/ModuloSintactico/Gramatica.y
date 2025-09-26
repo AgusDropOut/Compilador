@@ -3,6 +3,7 @@ package Compilador.ModuloSintactico;
 
 import java.io.*;
 import Compilador.ModuloLexico.AnalizadorLexico;
+import Compilador.ModuloLexico.TablaDeSimbolos;
 %}
 
 
@@ -21,7 +22,7 @@ sentencia             : sentencia_declarativa
                       | sentencia_control
                       ;
 
-sentencia_declarativa : tipo list_vars ';' {System.out.println("Sentencia declarativa: " + $1.sval);}
+sentencia_declarativa : tipo list_vars ';'
                       | tipo ID '(' parametros_formales ')' '{' list_sentencia sentencia_return '}'
                       ;
 
@@ -118,8 +119,8 @@ termino               : termino '*' factor
                       | factor
                       ;
 
-factor                : ID {System.out.println("Factor ID: " + $1.sval);}
-                      | CTE
+factor                : ID   { System.out.println("Accion 12: ID -> " + ($1 != null && $1.sval != null ? $1.sval + " : " + TablaDeSimbolos.getSimbolo($1.sval) : "null") + ($2 != null && $2.sval != null ? " | " + $2.sval + " : " + TablaDeSimbolos.getSimbolo($2.sval) : "") + ($3 != null && $3.sval != null ? " | " + $3.sval + " : " + TablaDeSimbolos.getSimbolo($3.sval) : "")); }
+                      | CTE  { System.out.println("Accion 12: Constante -> " + ($1 != null && $1.sval != null ? $1.sval + " : " + TablaDeSimbolos.getSimbolo($1.sval) : "null") + ($2 != null && $2.sval != null ? " | " + $2.sval + " : " + TablaDeSimbolos.getSimbolo($2.sval) : "") + ($3 != null && $3.sval != null ? " | " + $3.sval + " : " + TablaDeSimbolos.getSimbolo($3.sval) : "")); }
                       | ID '.' ID
                       | '-' CTE
                       ;
@@ -134,6 +135,7 @@ public void yyerror(String s) {
 
 public int yylex() {
     try {
+        yylval = AnalizadorLexico.yylval;
         return AnalizadorLexico.yylex();
     } catch (IOException e) {
         throw new RuntimeException(e);

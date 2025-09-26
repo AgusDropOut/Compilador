@@ -1,6 +1,6 @@
 MAIN {
     ulong CONTADOR;
-    CONTADOR := CONTADOR + 1UL;
+    CONTADOR := CONTADOR + 5.4D-4;
     X,Y = 1UL, 2UL;
     while (CONTADOR < 1UL) do {
         CONTADOR := CONTADOR + 1UL;

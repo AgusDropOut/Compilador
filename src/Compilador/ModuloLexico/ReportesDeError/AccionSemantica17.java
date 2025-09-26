@@ -8,11 +8,12 @@ import Compilador.ModuloLexico.TablaDeSimbolos;
 import java.io.IOException;
 
 public class AccionSemantica17 implements AccionSemantica {
+
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
         char c = codigoFuente.charAt(puntero.getPuntero());
         lexema.append(c);
-        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + " el caracter " + lexema + " no es válido en la definición de una constante punto flotante. Se espera definición estilo <secuencia_digitos>.D <secuencia_digitos><signo_exponente> <exponente>");
+        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + " Salto de linea inesperado");
         lexema.setLength(0);
         AnalizadorLexico.setEstadoActual(0);
     }

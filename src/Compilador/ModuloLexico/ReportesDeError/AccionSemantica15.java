@@ -10,10 +10,6 @@ import java.io.IOException;
 public class AccionSemantica15 implements AccionSemantica {
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
-        char c = codigoFuente.charAt(puntero.getPuntero());
-        lexema.append(c);
-        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + "  Operador mal formado. Se esperaba completar '==', '!=', '->', ':=', '<=', '>=' pero se encontró el símbolo " + lexema);
-        lexema.setLength(0);
-        AnalizadorLexico.setEstadoActual(0);
+        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + " sufijo de constante inválido, las constantes de tipo ulong debe terminar con sufijo UL");
     }
 }

@@ -12,7 +12,7 @@ public class AccionSemantica13 implements AccionSemantica {
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
         char c = codigoFuente.charAt(puntero.getPuntero());
         lexema.append(c);
-        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + " El caracter "+ lexema +" constantes de tipo ulong solo se permiten dígitos o '.' antes de la UL");
+        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + " El caracter "+ lexema +" ingresado no es un caracter válido");
         lexema.setLength(0);
         AnalizadorLexico.setEstadoActual(0);
     }

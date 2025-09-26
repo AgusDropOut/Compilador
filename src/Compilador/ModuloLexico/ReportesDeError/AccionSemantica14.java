@@ -10,6 +10,10 @@ import java.io.IOException;
 public class AccionSemantica14 implements AccionSemantica {
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
-        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + " sufijo de constante inválido, las constantes de tipo ulong debe terminar con sufijo UL");
+        char c = codigoFuente.charAt(puntero.getPuntero());
+        lexema.append(c);
+        System.out.println("Error línea " + AnalizadorLexico.getNumeroDeLinea() + ":" + " El caracter "+ lexema +" constantes de tipo ulong solo se permiten dígitos o '.' antes de la UL");
+        lexema.setLength(0);
+        AnalizadorLexico.setEstadoActual(0);
     }
 }

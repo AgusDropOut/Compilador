@@ -9,6 +9,7 @@ public class MapaDeTokensAID {
     private static final HashMap<String, Short> mapa = new HashMap<>();
     public static boolean tokenID = false;
     public static boolean tokenCTE = false;
+    public static boolean tokenCADENA = false;
 
     static {
         // Palabras reservadas
@@ -56,15 +57,17 @@ public class MapaDeTokensAID {
             return mapa.get(lexema);
         } else {
             if(tokenID) {
-                //AnalizadorLexico.yyval.sval = lexema;
                 AnalizadorLexico.yylval = new ParserVal(lexema);
                 tokenID = false;
                 return Parser.ID;
-            } else  {
-                //AnalizadorLexico.yyval.sval = lexema;
+            } else if (tokenCTE)  {
                 AnalizadorLexico.yylval = new ParserVal(lexema);
                 tokenCTE = false;
                 return Parser.CTE;
+            } else {
+                AnalizadorLexico.yylval = new ParserVal(lexema);
+                tokenCADENA = false;
+                return Parser.CADENA;
             }
         }
     }
