@@ -43,6 +43,7 @@ public class MapaDeSimbolos {
         SYMBOL_MAP.put('/', 10);
         SYMBOL_MAP.put('(', 10);
         SYMBOL_MAP.put(')', 10);
+        SYMBOL_MAP.put(',', 10);
     }
 
     public int get(char c) {

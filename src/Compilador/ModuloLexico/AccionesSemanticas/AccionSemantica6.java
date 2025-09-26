@@ -1,9 +1,6 @@
 package Compilador.ModuloLexico.AccionesSemanticas;
 
-import Compilador.ModuloLexico.AccionSemantica;
-import Compilador.ModuloLexico.AnalizadorLexico;
-import Compilador.ModuloLexico.Puntero;
-import Compilador.ModuloLexico.TablaDeSimbolos;
+import Compilador.ModuloLexico.*;
 
 import java.io.IOException;
 
@@ -18,7 +15,7 @@ public class AccionSemantica6 implements AccionSemantica {
         if ((valor > Double.MIN_NORMAL && valor < Double.MAX_VALUE) || (valor < -Double.MIN_NORMAL && valor > -Double.MAX_VALUE)){
             tablaDeSimbolos.addSimbolo(lexema.toString());
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
-            //Añadir devolver CTE + puntero a TS
+            MapaDeTokensAID.tokenCTE = true;
         } else {
             System.out.println("Error linea " + AnalizadorLexico.getNumeroDeLinea()  + ":" +" El numero " + lexema.toString() + " esta fuera del rango permitido para el sufijo double(D)" );
         }

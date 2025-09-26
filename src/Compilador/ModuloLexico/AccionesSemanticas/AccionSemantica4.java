@@ -1,9 +1,6 @@
 package Compilador.ModuloLexico.AccionesSemanticas;
 
-import Compilador.ModuloLexico.AccionSemantica;
-import Compilador.ModuloLexico.AnalizadorLexico;
-import Compilador.ModuloLexico.Puntero;
-import Compilador.ModuloLexico.TablaDeSimbolos;
+import Compilador.ModuloLexico.*;
 
 import java.io.IOException;
 
@@ -23,11 +20,10 @@ public class AccionSemantica4 implements AccionSemantica {
 
         if (tablaDeSimbolos.estaSimbolo(lexema.toString())){
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
-            lexema.setLength(0);
         } else {
             tablaDeSimbolos.addSimbolo(lexema.toString());
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
-            lexema.setLength(0);
         }
+        MapaDeTokensAID.tokenID = true;
     }
 }

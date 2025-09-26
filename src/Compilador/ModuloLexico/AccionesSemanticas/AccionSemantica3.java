@@ -12,10 +12,8 @@ public class AccionSemantica3 implements AccionSemantica {
         puntero.retroceder();
         if (PalabrasReservadas.existe(lexema.toString())){
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
-            lexema.setLength(0);
         } else {
             System.out.println("Error linea "+ AnalizadorLexico.getNumeroDeLinea()  + ":" +" La palabra reservada " + lexema.toString() + " no existe");
-            lexema.setLength(0);
         }
 
     }

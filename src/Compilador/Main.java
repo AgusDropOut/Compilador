@@ -1,14 +1,21 @@
 package Compilador;
 
 import Compilador.ModuloLexico.*;
+import Compilador.ModuloSintactico.Parser;
+import Compilador.ModuloSintactico.ParserVal;
 
 import java.io.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+        ///////////////////////////////////////FALTA PASAR EL CODIGO FUENTE POR ARGS////////////////////////////////////////////
+
+
         MapaDeSimbolos mapa = new MapaDeSimbolos();
         TablaDeSimbolos tablaDeSimbolos = new TablaDeSimbolos();
-        AnalizadorLexico analizadorLexico = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa), tablaDeSimbolos);
-        analizadorLexico.analizar();
+        ParserVal yyval = new ParserVal();
+        AnalizadorLexico lexer = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa), tablaDeSimbolos, yyval);
+        Parser parser = new Parser();
+        parser.run();
     }
 }

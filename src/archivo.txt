@@ -1,6 +1,12 @@
-ulong NUMERO = 126790UL;
-if (NUMERO >= 0UL){
-    print("Hola mundo")
+MAIN {
+    ulong CONTADOR;
+    CONTADOR := CONTADOR + 1UL;
+    X,Y = 1UL, 2UL;
+    while (CONTADOR < 1UL) do {
+        CONTADOR := CONTADOR + 1UL;
+    };
+    print(CONTADOR);
+    X := X + 1UL;
+    print(X);
+    print(Y);
 }
-^ 2.0D+34 HOLASOYCARLITOSYJUEGOALTENIS
-:= = =:
