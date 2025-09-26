@@ -18,7 +18,7 @@ public class AnalizadorLexico {
     private static StringBuilder lexema;
     private static int estadoActual = 0;
     private static TablaDeSimbolos tablaDeSimbolos;
-    public static ParserVal yyval;
+    public static ParserVal yylval;
 
     public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos, ParserVal yyval) throws IOException {
         this.matrizDeTransicion = matrizDeTransicion;
@@ -27,7 +27,7 @@ public class AnalizadorLexico {
         this.lexema = new StringBuilder();
         this.tablaAccionesSemanticas = accionesSemanticas;
         this.tablaDeSimbolos = tablaDeSimbolos;
-        this.yyval = yyval;
+        this.yylval = yyval;
     }
 
     public static int yylex() throws IOException {

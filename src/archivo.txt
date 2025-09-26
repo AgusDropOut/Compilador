@@ -9,4 +9,7 @@ MAIN {
     X := X + 1UL;
     print(X);
     print(Y);
+    ulong F (ulong X, ulong M) {
+        
+    }
 }

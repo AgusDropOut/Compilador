@@ -5,6 +5,7 @@ import java.io.*;
 import Compilador.ModuloLexico.AnalizadorLexico;
 %}
 
+
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  COMP  CADENA
 
 %%
@@ -20,8 +21,8 @@ sentencia             : sentencia_declarativa
                       | sentencia_control
                       ;
 
-sentencia_declarativa : tipo list_vars';'
-                      | tipo ID '{' parametros_formales '}' '{' list_sentencia sentencia_return'}'
+sentencia_declarativa : tipo list_vars ';' {System.out.println("Sentencia declarativa: " + $1.sval);}
+                      | tipo ID '(' parametros_formales ')' '{' list_sentencia sentencia_return '}'
                       ;
 
 parametros_formales   : parametro_formal
@@ -35,7 +36,7 @@ parametro_formal      : semantica tipo ID
 semantica             : CR
                       ;
 
-sentencia_return      : RETURN expresion';'
+sentencia_return      : RETURN expresion ';'
                       | /* empty */
                       ;
 
@@ -48,13 +49,13 @@ list_ctes             : CTE
 
 list_vars             : ID
                       | list_vars ',' ID
-                      ;
-
-list_var_mix          : ID
                       | ID '.' ID
-                      | list_var_mix ',' ID
-                      | list_var_mix ',' ID '.' ID
+                      | list_vars ',' ID '.' ID
                       ;
+/*
+list_var_mix          : ID '.' ID
+                      | list_var_mix ',' ID '.' ID
+                      ; */
 
 sentencia_ejecutable  : invocacion_funcion
                       | IF '(' condicion ')' '{' bloque_ejecutable '}' ELSE '{' bloque_ejecutable '}' ENDIF ';'
@@ -67,6 +68,7 @@ sentencia_ejecutable  : invocacion_funcion
                       | PRINT '(' expresion ')' ';'
                       | asignacion_simple
                       | asignacion_multiple
+                      | expresion_lambda
                       ;
 
 invocacion_funcion    : ID '(' parametros_reales ')'
@@ -78,7 +80,7 @@ bloque_ejecutable     : sentencia_ejecutable
 
 
 parametros_reales     : parametro_real
-                      : parametros_reales ',' parametro_real
+                      | parametros_reales ',' parametro_real
                       ;
 
 parametro_real        : expresion '->' ID
@@ -95,7 +97,7 @@ asignacion_simple     : ID ASIG expresion ';'
                       ;
 
 asignacion_multiple   : list_vars '=' list_ctes ';'
-                      | list_var_mix '=' list_ctes ';'
+                    /*  | list_var_mix '=' list_ctes ';' */
                       ;
 
 sentencia_control     : WHILE '(' condicion ')' DO '{' bloque_ejecutable '}' ';'
@@ -116,9 +118,10 @@ termino               : termino '*' factor
                       | factor
                       ;
 
-factor                : ID
+factor                : ID {System.out.println("Factor ID: " + $1.sval);}
                       | CTE
                       | ID '.' ID
+                      | '-' CTE
                       ;
 
 

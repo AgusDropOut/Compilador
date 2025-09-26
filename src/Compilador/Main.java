@@ -13,8 +13,8 @@ public class Main {
 
         MapaDeSimbolos mapa = new MapaDeSimbolos();
         TablaDeSimbolos tablaDeSimbolos = new TablaDeSimbolos();
-        ParserVal yyval = new ParserVal();
-        AnalizadorLexico lexer = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa), tablaDeSimbolos, yyval);
+        ParserVal yylval = new ParserVal();
+        AnalizadorLexico lexer = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa), tablaDeSimbolos, yylval);
         Parser parser = new Parser();
         parser.run();
     }
