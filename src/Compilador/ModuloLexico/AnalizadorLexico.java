@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class AnalizadorLexico {
     private static MatrizDeTransicion matrizDeTransicion;
-    private static int linea = 0;
+    private static int linea = 1;
     private static TablaAccionesSemanticas tablaAccionesSemanticas;
     public static  ArrayList<String> palabrasReservadasEncontradas =  new ArrayList<>();
     private static Puntero puntero;
@@ -19,6 +19,7 @@ public class AnalizadorLexico {
     private static int estadoActual = 0;
     private static TablaDeSimbolos tablaDeSimbolos;
     public static ParserVal yylval;
+    public static boolean flag =true;
 
     public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos, ParserVal yyval) throws IOException {
         this.matrizDeTransicion = matrizDeTransicion;
@@ -30,7 +31,7 @@ public class AnalizadorLexico {
         this.yylval = yyval;
     }
 
-    public static int yylex() throws IOException {
+    public static short yylex() throws IOException {
         int siguienteEstado = 0;
         char c = 'a';
         boolean tokenLeido = false;
@@ -45,22 +46,25 @@ public class AnalizadorLexico {
                 c = '$';
                 return 0;
             }
+            siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
             //Manejo de saltos de linea
             if (c == '\n' || c == '\r') {
-                if (siguienteEstado != MatrizDeTransicion.FINAL) {
+                if (!flag) {
                     linea++;
+                    flag = true;
+                } else {
+                    flag = false;
                 }
             }
 
 
-            siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
+
 
             if (siguienteEstado == MatrizDeTransicion.FINAL) {
                 // Ejecutar la acción correspondiente al estado actual antes de reiniciar
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
                         .realizar(content, puntero, lexema, tablaDeSimbolos);
                 estadoActual = 0; // reiniciar
-                System.out.println("Lexema: " + lexema.toString());
                 tokenLeido = true;
             } else if (siguienteEstado == MatrizDeTransicion.ERROR) {
                 tablaAccionesSemanticas.getAccionSemantica(estadoActual, c)
@@ -73,7 +77,8 @@ public class AnalizadorLexico {
             puntero.avanzar();
         }
 
-
+        System.out.println("Lexema: " + lexema.toString()) ;
+        System.out.println("Linea: " + linea);
         return MapaDeTokensAID.getToken(lexema.toString());
     }
 

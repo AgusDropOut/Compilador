@@ -52,7 +52,7 @@ public class MapaDeTokensAID {
     }
 
 
-    public static int getToken(String lexema) {
+    public static short getToken(String lexema) {
         if(existe(lexema)) {
             return mapa.get(lexema);
         } else {

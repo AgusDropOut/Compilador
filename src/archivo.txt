@@ -1,9 +1,9 @@
 MAIN {
     ulong CONTADOR;
-    CONTADOR := CONTADOR + 5.4D-4;
+    CONTADOR := - 2UL;
     X,Y = 1UL, 2UL;
-    while (CONTADOR < 1UL) do {
-        CONTADOR := CONTADOR + 1UL;
+    while (CONTADOR ++++ 1UL) do {
+        CONTADOR := 4UL;
     };
     print(CONTADOR);
     X := X + 1UL;

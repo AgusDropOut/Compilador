@@ -6,6 +6,9 @@ import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 %}
 
+%left '+' '-'
+%left '*' '/'
+
 
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  COMP  CADENA
 
@@ -20,6 +23,7 @@ list_sentencia        : /* empty */
 sentencia             : sentencia_declarativa
                       | sentencia_ejecutable
                       | sentencia_control
+                      | error ';'   { yyerror("Sentencia no reconocida, se esperaba ';'"); }
                       ;
 
 sentencia_declarativa : tipo list_vars ';'
@@ -91,11 +95,13 @@ condicion             : expresion COMP expresion
                       | invocacion_funcion COMP expresion
                       | expresion COMP invocacion_funcion
                       | invocacion_funcion COMP invocacion_funcion
+                      | expresion error expresion { yyerror("Error, comparador invalido en la condición, línea: " + AnalizadorLexico.getNumeroDeLinea()); }
                       ;
 
-asignacion_simple     : ID ASIG expresion ';'
-                      | ID '.' ID ASIG expresion ';'
-                      ;
+asignacion_simple
+                        : ID ASIG expresion ';'
+                        | ID '.' ID ASIG expresion ';'
+                        ;
 
 asignacion_multiple   : list_vars '=' list_ctes ';'
                     /*  | list_var_mix '=' list_ctes ';' */
@@ -103,6 +109,8 @@ asignacion_multiple   : list_vars '=' list_ctes ';'
 
 sentencia_control     : WHILE '(' condicion ')' DO '{' bloque_ejecutable '}' ';'
                       | WHILE '(' condicion ')' DO sentencia_ejecutable ';'
+                      | WHILE '(' error ')' DO sentencia_ejecutable ';'{ yyerror("Error en la condición del WHILE, línea " + AnalizadorLexico.getNumeroDeLinea()); }
+                      | WHILE '(' condicion ')' DO error ';'{ yyerror("Error en el cuerpo del WHILE, línea " + AnalizadorLexico.getNumeroDeLinea());  }
                       ;
 
 expresion_lambda      : '(' tipo ID ')' '{' bloque_ejecutable '}' '(' factor ')'
@@ -119,10 +127,10 @@ termino               : termino '*' factor
                       | factor
                       ;
 
-factor                : ID   { System.out.println("Accion 12: ID -> " + ($1 != null && $1.sval != null ? $1.sval + " : " + TablaDeSimbolos.getSimbolo($1.sval) : "null") + ($2 != null && $2.sval != null ? " | " + $2.sval + " : " + TablaDeSimbolos.getSimbolo($2.sval) : "") + ($3 != null && $3.sval != null ? " | " + $3.sval + " : " + TablaDeSimbolos.getSimbolo($3.sval) : "")); }
-                      | CTE  { System.out.println("Accion 12: Constante -> " + ($1 != null && $1.sval != null ? $1.sval + " : " + TablaDeSimbolos.getSimbolo($1.sval) : "null") + ($2 != null && $2.sval != null ? " | " + $2.sval + " : " + TablaDeSimbolos.getSimbolo($2.sval) : "") + ($3 != null && $3.sval != null ? " | " + $3.sval + " : " + TablaDeSimbolos.getSimbolo($3.sval) : "")); }
+factor                : ID {System.out.println("DEBUG factor: se detectó ID -> " + $1.sval);}
+                      | CTE {System.out.println("DEBUG factor: se detectó CTE -> " + $1.sval);}
                       | ID '.' ID
-                      | '-' CTE
+                      | '-' CTE {System.out.println("DEBUG factor: se detectó -CTE -> " + $2.sval);}
                       ;
 
 
@@ -135,8 +143,9 @@ public void yyerror(String s) {
 
 public int yylex() {
     try {
+        short returnval = AnalizadorLexico.yylex();
         yylval = AnalizadorLexico.yylval;
-        return AnalizadorLexico.yylex();
+        return returnval;
     } catch (IOException e) {
         throw new RuntimeException(e);
     }
