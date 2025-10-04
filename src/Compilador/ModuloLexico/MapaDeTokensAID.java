@@ -24,6 +24,7 @@ public class MapaDeTokensAID {
         mapa.put("trunc", Parser.TRUNC);
         mapa.put(":=", Parser.ASIG);
         mapa.put("->", Parser.FLECHA);
+        mapa.put("cr",Parser.CR);
 
         mapa.put("<=", Parser.COMP);
         mapa.put(">=", Parser.COMP);

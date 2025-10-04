@@ -1,16 +1,18 @@
 MAIN {
     ulong CONTADOR;
     CONTADOR := - 2UL;
-    X,Y = 1UL, 2UL;
-    while (2UL > 1UL) do {
-        CONTADOR := 4UL;
-        CONTADOR := A(2UL -> X) + 5UL;
-    };
+    X , Y = 1UL , 2UL;
+    if (X < Y) {
+        print(Y);
+    } else {
+        print(Y);
+    } endif ;
+    CONTADOR := + 5UL;
     print(CONTADOR);
     X := X + 1UL;
     print(X);
     print(Y);
-    ulong F (ulong X, ulong M) {
-        
+    ulong F (cr ulong X, ulong M) {
+
     }
 }
