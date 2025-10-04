@@ -101,9 +101,6 @@ parametro_real        : expresion FLECHA ID
                       ;
 
 condicion             : expresion COMP expresion
-                     /* | invocacion_funcion COMP expresion
-                      | expresion COMP invocacion_funcion
-                      | invocacion_funcion COMP invocacion_funcion */
                       | expresion error expresion { yyerror("Error, comparador invalido en la condición, línea: " + AnalizadorLexico.getNumeroDeLinea()); }
                       ;
 
