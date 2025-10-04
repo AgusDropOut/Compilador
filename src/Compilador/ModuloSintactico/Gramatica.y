@@ -88,8 +88,8 @@ sentencia_ejecutable  : invocacion_funcion
 invocacion_funcion    : ID '(' parametros_reales ')'
                       ;
 
-bloque_ejecutable     : sentencia_ejecutable
-                      | bloque_ejecutable  sentencia_ejecutable
+bloque_ejecutable     : sentencia_ejecutable ';'
+                      | bloque_ejecutable  sentencia_ejecutable ';'
                       ;
 
 
