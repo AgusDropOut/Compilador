@@ -1,7 +1,7 @@
 package Compilador.ModuloLexico;
 
 public class ElementoTablaDeSimbolos {
-    private String valor;
+    private double valor;
     private String tipo;
     private String ambito;
     private String uso;
@@ -22,10 +22,10 @@ public class ElementoTablaDeSimbolos {
     public String getTipo() {
         return tipo;
     }
-    public void setValor(String valor) {
+    public void setValor(Double valor) {
         this.valor = valor;
     }
-    public String getValor() {
+    public double getValor() {
         return valor;
     }
     public void setUso(String uso) {

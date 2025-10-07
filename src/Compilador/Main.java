@@ -8,15 +8,27 @@ import java.io.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        ///////////////////////////////////////FALTA PASAR EL CODIGO FUENTE POR ARGS////////////////////////////////////////////
+        if (args.length == 0) {
+            System.out.println("Por favor, indica el archivo fuente como parámetro.");
+            System.exit(1);
+        }
 
+        String nombreArchivo = args[0];
 
         MapaDeSimbolos mapa = new MapaDeSimbolos();
         TablaDeSimbolos tablaDeSimbolos = new TablaDeSimbolos();
         ParserVal yylval = new ParserVal();
-        AnalizadorLexico lexer = new AnalizadorLexico(new MatrizDeTransicion(mapa), "src/archivo.txt", new TablaAccionesSemanticas(mapa), tablaDeSimbolos, yylval);
+
+        AnalizadorLexico lexer = new AnalizadorLexico(
+                new MatrizDeTransicion(mapa),
+                nombreArchivo,
+                new TablaAccionesSemanticas(mapa),
+                tablaDeSimbolos,
+                yylval
+        );
+
         Parser parser = new Parser();
         parser.run();
-
+        TablaDeSimbolos.imprimirTabla();
     }
 }

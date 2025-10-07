@@ -8,7 +8,6 @@ public class AccionSemantica4 implements AccionSemantica {
 
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
-        System.out.println(this.getClass().getSimpleName());
         puntero.retroceder();
 
         if(lexema.toString().length() > 20) {

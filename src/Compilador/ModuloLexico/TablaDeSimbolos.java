@@ -13,7 +13,7 @@ public class TablaDeSimbolos {
         return tablaSimbolos.containsKey(key);
     }
 
-    public void addSimbolo(String key, ElementoTablaDeSimbolos elemento) {
+    public static void addSimbolo(String key, ElementoTablaDeSimbolos elemento) {
         tablaSimbolos.put(key, elemento);
     }
     public static ElementoTablaDeSimbolos getSimbolo(String key) {
@@ -22,6 +22,11 @@ public class TablaDeSimbolos {
     }
     public static int getSize() {
         return tablaSimbolos.size();
+    }
+    public static void imprimirTabla() {
+        for (Map.Entry<String, ElementoTablaDeSimbolos> entrada : tablaSimbolos.entrySet()) {
+            System.out.println("Lexema: " + entrada.getKey() + " | " + entrada.getValue().toString());
+        }
     }
 
 

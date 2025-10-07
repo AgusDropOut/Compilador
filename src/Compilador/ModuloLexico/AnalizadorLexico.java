@@ -76,9 +76,6 @@ public class AnalizadorLexico {
             }
             puntero.avanzar();
         }
-
-        System.out.println("Lexema: " + lexema.toString()) ;
-        System.out.println("Linea: " + linea);
         return MapaDeTokensAID.getToken(lexema.toString());
     }
 

@@ -8,7 +8,6 @@ import java.io.IOException;
 public class AccionSemantica5 implements AccionSemantica {
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
-        System.out.println(this.getClass().getSimpleName());
         char c = codigoFuente.charAt(puntero.getPuntero());
         lexema.append(c);
         String numero = lexema.toString().replace("UL", "");
@@ -17,7 +16,7 @@ public class AccionSemantica5 implements AccionSemantica {
         if((lexemaLong >= 0) && (lexemaLong < Math.pow(2,32))){
             ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
             elementoTablaDeSimbolos.setTipo("ulong");
-            elementoTablaDeSimbolos.setValor(numero);
+            elementoTablaDeSimbolos.setValor(Double.parseDouble(numero));
             tablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
             AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
             MapaDeTokensAID.tokenCTE = true;

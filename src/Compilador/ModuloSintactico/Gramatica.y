@@ -4,6 +4,7 @@ package Compilador.ModuloSintactico;
 import java.io.*;
 import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.TablaDeSimbolos;
+import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 %}
 
 %left '+' '-'
@@ -98,6 +99,9 @@ sentencia_ejecutable  : ID '(' parametros_reales ')'
                       | WHILE condicion_if_while DO '{'  '}' { yyerror("Error: falta cuerpo del WHILE");  }
                       | PRINT '('  ')' { yyerror("Error: falta argumento dentro del print"); }
                       /* */
+                      | WHILE condicion_if_while '{' bloque_ejecutable '}'  { yyerror("Error: falta palabra reservada DO");  }
+                      | WHILE condicion_if_while sentencia_ejecutable { yyerror("Error: falta palabra reservada DO");  }
+                      /* */
                       | /*1*/IF condicion_if_while '{'  '}' ELSE '{' bloque_ejecutable '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
                       | /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE '{'  '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
                       | /*1*/IF condicion_if_while '{'  '}' ELSE '{'  '}' end_if                  {yyerror("Error: Falta contenido en bloque then/else");}
@@ -159,20 +163,25 @@ asignacion_multiple   : list_vars '=' list_ctes
 
 
 expresion_lambda      : '(' tipo ID ')' '{' bloque_ejecutable '}' '(' factor ')'
+                      | '(' tipo ID ')'  bloque_ejecutable '}' '(' factor ')' { yyerror("Error: falta '{' en la expresion lambda"); }
+                      | '(' tipo ID ')' '{' bloque_ejecutable  '(' factor ')' { yyerror("Error: falta '}' en la expresion lambda"); }
+                      | '(' tipo ID ')'  bloque_ejecutable '('  factor ')'  { yyerror("Error: falta '{' y '}' en la expresion lambda"); }
                       ;
 
 expresion             : expresion '+' termino
                       | expresion '-' termino
-                      | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
+                     /* | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '+' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '-' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '-' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '+' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '-' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | error termino { yyerror("Error: operador inválido entre expresiones, se esperaba '+' o '-'"); }
+                      | error termino { yyerror("Error: operador inválido entre expresiones, se esperaba '+' o '-'"); } */
                       | termino
                       | TRUNC '(' expresion ')'
-                      |'-' CTE
+                      | TRUNC '(' expresion error { yyerror("Error: falta ')' en la expresion TRUNC"); }
+                      | TRUNC error  expresion ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
+                      | TRUNC error expresion error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
                       ;
 
                       /* NO SABEMOS MANEJAR FALTA DE OPERANDO Y OPERADORES, TRAE CONFLICTOS SHIFT/REDUCE */
@@ -180,20 +189,21 @@ expresion             : expresion '+' termino
 
 termino               : termino '*' factor
                       | termino '/' factor
-                      | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
+                     /* | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '*' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '/' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '/' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '*' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '/' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | error factor { yyerror("Error: operador inválido entre expresiones, se esperaba '+' o '-'"); }
+                      | error factor { yyerror("Error: operador inválido entre expresiones, se esperaba '+' o '-'"); } */
                       | factor
                       ;
 
-factor                : ID {System.out.println("DEBUG factor: se detectó ID -> " + $1.sval);}
-                      | CTE {System.out.println("DEBUG factor: se detectó CTE -> " + $1.sval);}
+factor                : ID
+                      | CTE
                       | ID '.' ID
                       | ID '(' parametros_reales ')'
+                      |'-' CTE { $$ = constanteNegativa($2); }
                       ;
 
 
@@ -211,5 +221,48 @@ public int yylex() {
         return returnval;
     } catch (IOException e) {
         throw new RuntimeException(e);
+    }
+}
+
+public ParserVal constanteNegativa(ParserVal clave) {
+    ElementoTablaDeSimbolos original = TablaDeSimbolos.getSimbolo(clave.sval);
+
+    if (original == null) {
+        yyerror("Constante no encontrada en la tabla de símbolos: " + clave.sval);
+        return clave;
+    }
+
+    double valorNegado = -original.getValor();
+    String tipo = original.getTipo();
+
+    if (!estaDentroDeRango(valorNegado, tipo)) {
+       yyerror("El número -" + original.getValor() +
+                           " está fuera del rango permitido para el tipo " + tipo + ".");
+        return clave;
+    }
+
+    ElementoTablaDeSimbolos nuevo = new ElementoTablaDeSimbolos();
+    nuevo.setValor(valorNegado);
+    nuevo.setTipo(tipo);
+    nuevo.setUso("cte_negada");
+
+    String nombreNuevo = "-" + clave.sval;
+    TablaDeSimbolos.addSimbolo(nombreNuevo, nuevo);
+
+    ParserVal val = new ParserVal();
+    val.sval = nombreNuevo;
+    return val;
+}
+
+public boolean estaDentroDeRango(double valor, String tipo) {
+    switch (tipo.toLowerCase()) {
+        case "dfloat":
+            return (valor >= 2.2250738585072014e-308 && valor <= 1.7976931348623157e308) ||
+                   (valor <= -2.2250738585072014e-308 && valor >= -1.7976931348623157e308) ||
+                   valor == 0.0;
+        case "ulong":
+            return false;
+        default:
+            return true;
     }
 }
