@@ -18,11 +18,9 @@ public class AccionSemantica4 implements AccionSemantica {
 
 
         if (tablaDeSimbolos.estaSimbolo(lexema.toString())){
-            AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
         } else {
             ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
             tablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
-            AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
         }
         MapaDeTokensAID.tokenID = true;
     }

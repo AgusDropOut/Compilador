@@ -24,6 +24,8 @@ public class TablaDeSimbolos {
         return tablaSimbolos.size();
     }
     public static void imprimirTabla() {
+        System.out.println(" ");
+        System.out.println("Tabla de simbolos: ");
         for (Map.Entry<String, ElementoTablaDeSimbolos> entrada : tablaSimbolos.entrySet()) {
             System.out.println("Lexema: " + entrada.getKey() + " | " + entrada.getValue().toString());
         }

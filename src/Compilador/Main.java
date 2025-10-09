@@ -29,6 +29,7 @@ public class Main {
 
         Parser parser = new Parser();
         parser.run();
+        lexer.imprimirTokens();
         TablaDeSimbolos.imprimirTabla();
     }
 }

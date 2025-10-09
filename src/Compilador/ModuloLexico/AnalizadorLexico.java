@@ -12,7 +12,7 @@ public class AnalizadorLexico {
     private static MatrizDeTransicion matrizDeTransicion;
     private static int linea = 1;
     private static TablaAccionesSemanticas tablaAccionesSemanticas;
-    public static  ArrayList<String> palabrasReservadasEncontradas =  new ArrayList<>();
+    public static  ArrayList<String> TokensEncontrados =  new ArrayList<>();
     private static Puntero puntero;
     private static String content;
     private static StringBuilder lexema;
@@ -76,6 +76,7 @@ public class AnalizadorLexico {
             }
             puntero.avanzar();
         }
+        TokensEncontrados.add(lexema.toString());
         return MapaDeTokensAID.getToken(lexema.toString());
     }
 
@@ -85,5 +86,13 @@ public class AnalizadorLexico {
     public static void setEstadoActual(int nuevoEstado){
         estadoActual = nuevoEstado;
     }
+
+    public void imprimirTokens(){
+        System.out.println("Tokens encontrados: ");
+        for (String tocken: TokensEncontrados) {
+            System.out.print(tocken + "  ");
+        }
+    }
+
 
 }

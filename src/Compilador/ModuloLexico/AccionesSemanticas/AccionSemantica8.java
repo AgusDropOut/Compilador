@@ -13,6 +13,5 @@ public class AccionSemantica8 implements AccionSemantica {
         char c = codigoFuente.charAt(puntero.getPuntero());
         lexema.setLength(0);
         lexema.append(c);
-        AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
     }
 }

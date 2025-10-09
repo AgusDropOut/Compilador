@@ -17,8 +17,7 @@ public class AccionSemantica5 implements AccionSemantica {
             ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
             elementoTablaDeSimbolos.setTipo("ulong");
             elementoTablaDeSimbolos.setValor(Double.parseDouble(numero));
-            tablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
-            AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
+            TablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
             MapaDeTokensAID.tokenCTE = true;
         } else {
             System.out.println("Error linea " + AnalizadorLexico.getNumeroDeLinea()  + ":" + " El numero " + lexema.toString() + " esta fuera del rango permitido para el sufijo ulong" );

@@ -18,25 +18,25 @@ import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 
 %%
 programa              : ID '{' list_sentencia '}'
-                      | error '{' list_sentencia '}' { yyerror("Error: Falta definir un nombre al programa"); }
-                      | ID error list_sentencia '}' { yyerror("Error: Falta delimitador del programa '{' al inicio"); }
-                      | ID error list_sentencia error { yyerror("Error: Falta delimitadores del programa '{' al inicio y '}' al final"); }
-                      |ID '{' error '}' { yyerror("Error: Cuerpo del programa invalido"); }
+                      |  '{' list_sentencia '}' { yyerror("Error: Falta definir un nombre al programa"); }
+                      | ID  list_sentencia '}' { yyerror("Error: Falta delimitador del programa '{' al inicio"); }
+                      | ID  list_sentencia  { yyerror("Error: Falta delimitadores del programa '{' al inicio y '}' al final"); }
                       ;
 
 list_sentencia        : /* empty */
                       | list_sentencia sentencia
                       ;
 
-declaracion_funcion   : tipo ID '(' parametros_formales ')' '{' list_sentencia sentencia_return '}'
-                      | tipo error '(' parametros_formales ')' '{' list_sentencia sentencia_return '}' { yyerror("Error: Falta definir un nombre a la función"); }
+declaracion_funcion   : tipo ID '(' parametros_formales ')' '{' list_sentencia '}'
+                      | tipo error '(' parametros_formales ')' '{' list_sentencia '}' { yyerror("Error: Falta definir un nombre a la función"); }
                       ;
 
 sentencia             : sentencia_declarativa ';'
                       | sentencia_ejecutable ';'
                       | declaracion_funcion
-                      | sentencia_declarativa error { yyerror("Sentencia no reconocida, se esperaba ';'"); }
-                      | sentencia_ejecutable error { yyerror("Sentencia no reconocida, se esperaba ';'"); }
+                      | sentencia_declarativa error { yyerror("Error: Sentencia no reconocida, se esperaba ';'"); }
+                      | sentencia_ejecutable error { yyerror("Error: Sentencia no reconocida, se esperaba ';'"); }
+                      | error ';' {yyerror("Error: Sentencia invalida");}
                       ;
 
 sentencia_declarativa : tipo list_vars
@@ -59,7 +59,6 @@ semantica             : CR
 
 sentencia_return      : RETURN expresion ';'
                       | RETURN expresion error { yyerror("Sentencia no reconocida, se esperaba ';'"); }
-                      | /* empty */
                       ;
 
 tipo                  : ULONG
@@ -81,8 +80,7 @@ list_vars             : ID
 
 
 
-sentencia_ejecutable  : ID '(' parametros_reales ')'
-                      | /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE '{' bloque_ejecutable '}' end_if
+sentencia_ejecutable  : /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE '{' bloque_ejecutable '}' end_if
                       | /*2*/IF condicion_if_while '{' bloque_ejecutable '}' end_if
                       | /*3*/IF condicion_if_while sentencia_ejecutable ';' ELSE sentencia_ejecutable ';' end_if
                       | /*4*/IF condicion_if_while sentencia_ejecutable ';' end_if
@@ -93,6 +91,7 @@ sentencia_ejecutable  : ID '(' parametros_reales ')'
                       | asignacion_simple
                       | asignacion_multiple
                       | expresion_lambda
+                      | sentencia_return
                       | WHILE condicion_if_while DO '{' bloque_ejecutable '}'
                       | WHILE condicion_if_while DO sentencia_ejecutable
                       | WHILE condicion_if_while DO  { yyerror("Error: falta cuerpo del WHILE");  }
@@ -170,32 +169,30 @@ expresion_lambda      : '(' tipo ID ')' '{' bloque_ejecutable '}' '(' factor ')'
 
 expresion             : expresion '+' termino
                       | expresion '-' termino
-                     /* | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
+                      | termino
+                      | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '+' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '-' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '-' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '+' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '-' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | error termino { yyerror("Error: operador inválido entre expresiones, se esperaba '+' o '-'"); } */
-                      | termino
                       | TRUNC '(' expresion ')'
                       | TRUNC '(' expresion error { yyerror("Error: falta ')' en la expresion TRUNC"); }
                       | TRUNC error  expresion ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
                       | TRUNC error expresion error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
                       ;
 
-                      /* NO SABEMOS MANEJAR FALTA DE OPERANDO Y OPERADORES, TRAE CONFLICTOS SHIFT/REDUCE */
+
 
 
 termino               : termino '*' factor
                       | termino '/' factor
-                     /* | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
+                      | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '*' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '/' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '/' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '*' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '/' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | error factor { yyerror("Error: operador inválido entre expresiones, se esperaba '+' o '-'"); } */
                       | factor
                       ;
 

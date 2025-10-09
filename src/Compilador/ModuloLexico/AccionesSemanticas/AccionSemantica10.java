@@ -11,6 +11,5 @@ public class AccionSemantica10 implements AccionSemantica {
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
         puntero.retroceder();
-        AnalizadorLexico.palabrasReservadasEncontradas.add(lexema.toString());
     }
 }
