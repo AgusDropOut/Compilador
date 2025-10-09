@@ -674,6 +674,11 @@ public int yylex() {
     }
 }
 
+public void reportarEstructura(String estructura) {
+    System.out.println("Estructura " + estructura + " reconocida en línea "
+        + AnalizadorLexico.getNumeroDeLinea());
+}
+
 public ParserVal constanteNegativa(ParserVal clave) {
     ElementoTablaDeSimbolos original = TablaDeSimbolos.getSimbolo(clave.sval);
 
@@ -716,7 +721,7 @@ public boolean estaDentroDeRango(double valor, String tipo) {
             return true;
     }
 }
-//#line 648 "Parser.java"
+//#line 653 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -882,6 +887,10 @@ case 4:
 //#line 23 "Gramatica.y"
 { yyerror("Error: Falta delimitadores del programa '{' al inicio y '}' al final"); }
 break;
+case 7:
+//#line 30 "Gramatica.y"
+{ reportarEstructura("declaracion de funcion"); }
+break;
 case 8:
 //#line 31 "Gramatica.y"
 { yyerror("Error: Falta definir un nombre a la función"); }
@@ -897,6 +906,10 @@ break;
 case 14:
 //#line 39 "Gramatica.y"
 {yyerror("Error: Sentencia invalida");}
+break;
+case 15:
+//#line 42 "Gramatica.y"
+{ reportarEstructura("declaracion de variable(s)"); }
 break;
 case 20:
 //#line 51 "Gramatica.y"
@@ -929,6 +942,46 @@ break;
 case 36:
 //#line 78 "Gramatica.y"
 { yyerror("Error: se esperaba ',' entre variables"); }
+break;
+case 37:
+//#line 83 "Gramatica.y"
+{ reportarEstructura("IF"); }
+break;
+case 38:
+//#line 84 "Gramatica.y"
+{ reportarEstructura("IF"); }
+break;
+case 39:
+//#line 85 "Gramatica.y"
+{ reportarEstructura("IF"); }
+break;
+case 40:
+//#line 86 "Gramatica.y"
+{ reportarEstructura("IF"); }
+break;
+case 41:
+//#line 87 "Gramatica.y"
+{ reportarEstructura("IF"); }
+break;
+case 42:
+//#line 88 "Gramatica.y"
+{ reportarEstructura("IF"); }
+break;
+case 43:
+//#line 89 "Gramatica.y"
+{ reportarEstructura("PRINT"); }
+break;
+case 44:
+//#line 90 "Gramatica.y"
+{ reportarEstructura("PRINT"); }
+break;
+case 49:
+//#line 95 "Gramatica.y"
+{ reportarEstructura("WHILE"); }
+break;
+case 50:
+//#line 96 "Gramatica.y"
+{ reportarEstructura("WHILE"); }
 break;
 case 51:
 //#line 97 "Gramatica.y"
@@ -1042,6 +1095,22 @@ case 86:
 //#line 150 "Gramatica.y"
 { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
 break;
+case 88:
+//#line 156 "Gramatica.y"
+{ reportarEstructura("asignacion simple"); }
+break;
+case 89:
+//#line 157 "Gramatica.y"
+{ reportarEstructura("asignacion simple"); }
+break;
+case 90:
+//#line 160 "Gramatica.y"
+{ reportarEstructura("asignacion multiple"); }
+break;
+case 91:
+//#line 164 "Gramatica.y"
+{ reportarEstructura("expresion lambda"); }
+break;
 case 92:
 //#line 165 "Gramatica.y"
 { yyerror("Error: falta '{' en la expresion lambda"); }
@@ -1118,7 +1187,7 @@ case 121:
 //#line 203 "Gramatica.y"
 { yyval = constanteNegativa(val_peek(0)); }
 break;
-//#line 1045 "Parser.java"
+//#line 1114 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

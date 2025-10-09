@@ -22,13 +22,13 @@ public class AnalizadorLexico {
     public static boolean flag =true;
 
     public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos, ParserVal yyval) throws IOException {
-        this.matrizDeTransicion = matrizDeTransicion;
-        this.puntero = new Puntero(0);
-        this.content = new String(Files.readAllBytes(Paths.get(codigoFuente)));
-        this.lexema = new StringBuilder();
-        this.tablaAccionesSemanticas = accionesSemanticas;
-        this.tablaDeSimbolos = tablaDeSimbolos;
-        this.yylval = yyval;
+        AnalizadorLexico.matrizDeTransicion = matrizDeTransicion;
+        puntero = new Puntero(0);
+        content = new String(Files.readAllBytes(Paths.get(codigoFuente)));
+        lexema = new StringBuilder();
+        tablaAccionesSemanticas = accionesSemanticas;
+        AnalizadorLexico.tablaDeSimbolos = tablaDeSimbolos;
+        yylval = yyval;
     }
 
     public static short yylex() throws IOException {

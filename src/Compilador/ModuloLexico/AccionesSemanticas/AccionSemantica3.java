@@ -10,7 +10,7 @@ public class AccionSemantica3 implements AccionSemantica {
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
         puntero.retroceder();
         if (PalabrasReservadas.existe(lexema.toString())){
-           // lexema.setLength(0);
+
         } else {
             System.out.println("Error linea "+ AnalizadorLexico.getNumeroDeLinea()  + ":" +" La palabra reservada " + lexema.toString() + " no existe");
         }

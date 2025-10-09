@@ -27,7 +27,7 @@ list_sentencia        : /* empty */
                       | list_sentencia sentencia
                       ;
 
-declaracion_funcion   : tipo ID '(' parametros_formales ')' '{' list_sentencia '}'
+declaracion_funcion   : tipo ID '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion"); }
                       | tipo error '(' parametros_formales ')' '{' list_sentencia '}' { yyerror("Error: Falta definir un nombre a la función"); }
                       ;
 
@@ -39,7 +39,7 @@ sentencia             : sentencia_declarativa ';'
                       | error ';' {yyerror("Error: Sentencia invalida");}
                       ;
 
-sentencia_declarativa : tipo list_vars
+sentencia_declarativa : tipo list_vars { reportarEstructura("declaracion de variable(s)"); }
                       ;
 
 parametros_formales   : parametro_formal
@@ -80,20 +80,20 @@ list_vars             : ID
 
 
 
-sentencia_ejecutable  : /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE '{' bloque_ejecutable '}' end_if
-                      | /*2*/IF condicion_if_while '{' bloque_ejecutable '}' end_if
-                      | /*3*/IF condicion_if_while sentencia_ejecutable ';' ELSE sentencia_ejecutable ';' end_if
-                      | /*4*/IF condicion_if_while sentencia_ejecutable ';' end_if
-                      | /*5*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE sentencia_ejecutable ';' end_if
-                      | /*6*/IF condicion_if_while sentencia_ejecutable ';' ELSE '{' bloque_ejecutable '}' end_if
-                      | PRINT '(' CADENA ')'
-                      | PRINT '(' expresion ')'
+sentencia_ejecutable  : /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
+                      | /*2*/IF condicion_if_while '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
+                      | /*3*/IF condicion_if_while sentencia_ejecutable ';' ELSE sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
+                      | /*4*/IF condicion_if_while sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
+                      | /*5*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
+                      | /*6*/IF condicion_if_while sentencia_ejecutable ';' ELSE '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
+                      | PRINT '(' CADENA ')' { reportarEstructura("PRINT"); }
+                      | PRINT '(' expresion ')' { reportarEstructura("PRINT"); }
                       | asignacion_simple
                       | asignacion_multiple
                       | expresion_lambda
                       | sentencia_return
-                      | WHILE condicion_if_while DO '{' bloque_ejecutable '}'
-                      | WHILE condicion_if_while DO sentencia_ejecutable
+                      | WHILE condicion_if_while DO '{' bloque_ejecutable '}' { reportarEstructura("WHILE"); }
+                      | WHILE condicion_if_while DO sentencia_ejecutable { reportarEstructura("WHILE"); }
                       | WHILE condicion_if_while DO  { yyerror("Error: falta cuerpo del WHILE");  }
                       | WHILE condicion_if_while DO '{'  '}' { yyerror("Error: falta cuerpo del WHILE");  }
                       | PRINT '('  ')' { yyerror("Error: falta argumento dentro del print"); }
@@ -153,15 +153,15 @@ parametro_real        : expresion FLECHA ID
 condicion             : expresion COMP expresion
                       ;
 
-asignacion_simple     : ID ASIG expresion
-                      | ID '.' ID ASIG expresion
+asignacion_simple     : ID ASIG expresion { reportarEstructura("asignacion simple"); }
+                      | ID '.' ID ASIG expresion { reportarEstructura("asignacion simple"); }
                       ;
 
-asignacion_multiple   : list_vars '=' list_ctes
+asignacion_multiple   : list_vars '=' list_ctes { reportarEstructura("asignacion multiple"); }
                       ;
 
 
-expresion_lambda      : '(' tipo ID ')' '{' bloque_ejecutable '}' '(' factor ')'
+expresion_lambda      : '(' tipo ID ')' '{' bloque_ejecutable '}' '(' factor ')' { reportarEstructura("expresion lambda"); }
                       | '(' tipo ID ')'  bloque_ejecutable '}' '(' factor ')' { yyerror("Error: falta '{' en la expresion lambda"); }
                       | '(' tipo ID ')' '{' bloque_ejecutable  '(' factor ')' { yyerror("Error: falta '}' en la expresion lambda"); }
                       | '(' tipo ID ')'  bloque_ejecutable '('  factor ')'  { yyerror("Error: falta '{' y '}' en la expresion lambda"); }
@@ -219,6 +219,11 @@ public int yylex() {
     } catch (IOException e) {
         throw new RuntimeException(e);
     }
+}
+
+public void reportarEstructura(String estructura) {
+    System.out.println("Estructura " + estructura + " reconocida en línea "
+        + AnalizadorLexico.getNumeroDeLinea());
 }
 
 public ParserVal constanteNegativa(ParserVal clave) {
