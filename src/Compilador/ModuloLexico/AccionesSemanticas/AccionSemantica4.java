@@ -20,7 +20,7 @@ public class AccionSemantica4 implements AccionSemantica {
         if (tablaDeSimbolos.estaSimbolo(lexema.toString())){
         } else {
             ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
-            tablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
+            TablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
         }
         MapaDeTokensAID.tokenID = true;
     }

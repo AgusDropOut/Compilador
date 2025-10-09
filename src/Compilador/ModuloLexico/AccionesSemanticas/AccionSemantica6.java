@@ -18,7 +18,7 @@ public class AccionSemantica6 implements AccionSemantica {
             ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
             elementoTablaDeSimbolos.setTipo("dfloat");
             elementoTablaDeSimbolos.setValor(valor);
-            tablaDeSimbolos.addSimbolo(String.valueOf(lexema), elementoTablaDeSimbolos);
+            TablaDeSimbolos.addSimbolo(String.valueOf(lexema), elementoTablaDeSimbolos);
             MapaDeTokensAID.tokenCTE = true;
         } else {
             System.out.println("Error linea " + AnalizadorLexico.getNumeroDeLinea() +
