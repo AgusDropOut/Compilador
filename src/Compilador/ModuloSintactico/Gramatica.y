@@ -10,8 +10,6 @@ import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 %left '+' '-'
 %left '*' '/'
 
-%nonassoc ID
-%left '('
 
 
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  COMP  CADENA FLECHA
@@ -90,7 +88,6 @@ sentencia_ejecutable  : /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELS
                       | PRINT '(' expresion ')' { reportarEstructura("PRINT"); }
                       | asignacion_simple
                       | asignacion_multiple
-                      | expresion_lambda
                       | sentencia_return
                       | WHILE condicion_if_while DO '{' bloque_ejecutable '}' { reportarEstructura("WHILE"); }
                       | WHILE condicion_if_while DO sentencia_ejecutable { reportarEstructura("WHILE"); }
@@ -180,6 +177,7 @@ expresion             : expresion '+' termino
                       | TRUNC '(' expresion error { yyerror("Error: falta ')' en la expresion TRUNC"); }
                       | TRUNC error  expresion ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
                       | TRUNC error expresion error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
+                      | expresion_lambda
                       ;
 
 

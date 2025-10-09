@@ -2,10 +2,9 @@ MAIN {
     ulong CONTADOR;
     CONTADOR := -5.4D-4 + 4UL;
     X,Y = 1UL, 5UL;
-    while (3UL > 1UL) do {
+    if (3UL <  1UL)  {
         CONTADOR := 4UL;
-        CONTADOR := A(10UL -> X) + 6UL;
-    };
+    } endif ;
     print(CONTADOR);
     X := X + 24UL;
     print(X);
