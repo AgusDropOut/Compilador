@@ -182,11 +182,7 @@ public class TablaAccionesSemanticas {
 
         // Fila 14
         for (int j = 0; j < 20; j++) {
-            if (j == 14) {
-                TABLE[14][j] = new AccionSemantica2();
-            } else {
-                TABLE[14][j] = new AccionSemantica11();
-            }
+            TABLE[14][j] = new AccionSemantica2();
         }
 
         // Fila 15
@@ -194,7 +190,7 @@ public class TablaAccionesSemanticas {
             if (j == 14) {
                 TABLE[15][j] = new AccionSemantica9();
             } else {
-                TABLE[15][j] = new AccionSemantica11();
+                TABLE[15][j] = new AccionSemantica2();
             }
         }
 
