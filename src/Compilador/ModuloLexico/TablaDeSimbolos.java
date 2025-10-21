@@ -9,7 +9,7 @@ public class TablaDeSimbolos {
 
     }
 
-    public boolean estaSimbolo(String key) {
+    public static boolean estaSimbolo(String key) {
         return tablaSimbolos.containsKey(key);
     }
 

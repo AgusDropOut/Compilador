@@ -145,6 +145,10 @@ public class TablaAccionesSemanticas {
         for (int j = 1; j < 20; j++) {
             TABLE[9][j] = new AccionSemantica19();
         }
+        TABLE[9][2] = new AccionSemantica10();
+        TABLE[9][3] = new AccionSemantica10();
+        TABLE[9][4] = new AccionSemantica10();
+        TABLE[9][5] = new AccionSemantica10();
 
         // Fila 10
         TABLE[10][0] = new AccionSemantica2();

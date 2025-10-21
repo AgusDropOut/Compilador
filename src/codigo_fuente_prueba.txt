@@ -9,7 +9,16 @@ MAIN {
     X := X + 24UL;
     print(X);
     print(Y);
+
     ulong F (ulong X, ulong M) {
-        
+       ulong CONTADOR;
+       ulong A (ulong X, ulong M) {
+            CONTADOR := 5UL;
+       }
+       ulong B (ulong X, ulong M) {
+            ulong C (ulong X, ulong M) {
+
+            }
+       }
     }
 }

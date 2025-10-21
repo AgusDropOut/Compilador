@@ -17,11 +17,11 @@ public class AccionSemantica4 implements AccionSemantica {
         }
 
 
-        if (tablaDeSimbolos.estaSimbolo(lexema.toString())){
-        } else {
-            ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
-            TablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
-        }
+       //if (tablaDeSimbolos.estaSimbolo(lexema.toString())){
+       //} else {
+       //    ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
+       //    TablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
+       //}
         MapaDeTokensAID.tokenID = true;
     }
 }

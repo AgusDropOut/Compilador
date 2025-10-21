@@ -41,6 +41,7 @@ public class ElementoTablaDeSimbolos {
                 "valor='" + valor + '\'' +
                 ", tipo=" + tipo +
                 ", uso=" + uso +
+                ", ambito=" + ambito +
                 '}';
     }
 }

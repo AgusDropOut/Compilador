@@ -15,7 +15,7 @@ import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  COMP  CADENA FLECHA
 
 %%
-programa              : ID '{' list_sentencia '}'
+programa              : ID '{' list_sentencia '}' { }
                       |  '{' list_sentencia '}' { yyerror("Error: Falta definir un nombre al programa"); }
                       | ID  list_sentencia '}' { yyerror("Error: Falta delimitador del programa '{' al inicio"); }
                       | ID  list_sentencia  { yyerror("Error: Falta delimitadores del programa '{' al inicio y '}' al final"); }
@@ -25,9 +25,14 @@ list_sentencia        : /* empty */
                       | list_sentencia sentencia
                       ;
 
-declaracion_funcion   : tipo ID '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion"); }
-                      | tipo error '(' parametros_formales ')' '{' list_sentencia '}' { yyerror("Error: Falta definir un nombre a la función"); }
+declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
+                                                                                            salirAmbito();}
                       ;
+
+header_funcion        : tipo ID {entrarAmbito($2.sval); System.out.println(ambito);}
+                      | tipo error { yyerror("Error: Falta definir un nombre a la función"); }
+                      ;
+
 
 sentencia             : sentencia_declarativa ';'
                       | sentencia_ejecutable ';'
@@ -59,18 +64,17 @@ sentencia_return      : RETURN expresion ';'
                       | RETURN expresion error { yyerror("Sentencia no reconocida, se esperaba ';'"); }
                       ;
 
-tipo                  : ULONG
+tipo                  : ULONG {tipo = "ulong";}
                       ;
 
 list_ctes             : CTE
                       | list_ctes ',' CTE
                       | list_ctes CTE { yyerror("Error: se esperaba ',' entre constantes"); }
-
                       ;
 
-list_vars             : ID
-                      | list_vars ',' ID
-                      | ID '.' ID
+list_vars             : ID {$$ = declaracionDeVariable($1.sval, tipo, ambito, "Variable");}
+                      | list_vars ',' ID {$$ = declaracionDeVariable($3.sval, tipo, ambito, "Variable");}
+                      | ID '.' ID {}
                       | list_vars ',' ID '.' ID
                       | list_vars ID { yyerror("Error: se esperaba ',' entre variables"); }
                       | list_vars ID '.' ID { yyerror("Error: se esperaba ',' entre variables"); }
@@ -151,7 +155,8 @@ condicion             : expresion COMP expresion
                       ;
 
 asignacion_simple     : ID ASIG expresion { reportarEstructura("asignacion simple"); }
-                      | ID '.' ID ASIG expresion { reportarEstructura("asignacion simple"); }
+                      | ID '.' ID ASIG expresion { reportarEstructura("asignacion simple");
+                                                   $$ = chequearAmbito($1.sval, ambito, $3.sval); }
                       ;
 
 asignacion_multiple   : list_vars '=' list_ctes { reportarEstructura("asignacion multiple"); }
@@ -265,4 +270,78 @@ public boolean estaDentroDeRango(double valor, String tipo) {
         default:
             return true;
     }
+}
+
+public static String ambito = "PROGRAMA";
+public void entrarAmbito(String ambitoNuevo){
+    ambito = ambito+":"+ambitoNuevo;
+}
+public void salirAmbito(){
+    int indiceUltimoDosPuntos = ambito.lastIndexOf(":");
+
+    if (indiceUltimoDosPuntos > 0) {
+        ambito = ambito.substring(0, indiceUltimoDosPuntos);
+    }
+
+}
+public static String tipo;
+public ParserVal declaracionDeVariable(String token, String tipo, String ambito, String uso){
+    String nombreNuevo = token + ":" + ambito;
+    ParserVal nuevoParserVal = new ParserVal();
+    if (!TablaDeSimbolos.estaSimbolo(nombreNuevo)) {
+        ElementoTablaDeSimbolos nuevoElem = new ElementoTablaDeSimbolos();
+        nuevoElem.setTipo(tipo);
+        nuevoElem.setAmbito(ambito);
+        nuevoElem.setUso(uso);
+        TablaDeSimbolos.addSimbolo(nombreNuevo, nuevoElem);
+        nuevoParserVal.sval = nombreNuevo;
+    } else {
+        yyerror("Error: Redeclaracion de variable " + token);
+        nuevoParserVal.sval = token;
+    }
+    return nuevoParserVal;
+}
+
+// ---- FUNCION PRINCIPAL ----
+public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombreIdentificador) {
+    ElementoTablaSimbolos elem = null;
+    String claveBuscada = null;
+
+    // 1️⃣ Si hay prefijo explícito (p. ej. objeto.campo)
+    if (prefijo != null && !prefijo.isEmpty()) {
+        claveBuscada = prefijo + ":" + nombreIdentificador;
+        elem = tablaSimbolos.get(claveBuscada);
+
+        if (elem == null) {
+            yyerror("El símbolo '" + nombreIdentificador +
+                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
+            return null;
+        }
+    }
+    else {
+        // 2️⃣ Sin prefijo → buscamos en la jerarquía PROG:FUNC:BLOCK:...
+        String[] niveles = ambitoReal.split(":");
+
+        for (int i = niveles.length; i > 0 && elem == null; i--) {
+            String ambitoParcial = String.join(":", Arrays.copyOfRange(niveles, 0, i));
+            claveBuscada = ambitoParcial + ":" + nombreIdentificador;
+            elem = tablaSimbolos.get(claveBuscada);
+        }
+
+        // 3️⃣ Intentar ámbito global si no se encontró en ninguno
+        if (elem == null)
+            elem = tablaSimbolos.get(nombreIdentificador);
+
+        if (elem == null) {
+            yyerror("El símbolo '" + nombreIdentificador +
+                    "' no fue declarado en ningún ámbito visible (actual: " + ambitoReal + ").");
+            return null;
+        }
+    }
+
+    // 4️⃣ Construir un ParserVal asociado al símbolo encontrado
+    ParserVal val = new ParserVal();
+    val.sval = claveBuscada;      // Nombre mangleado completo
+    val.obj  = elem;              // Referencia al elemento de la tabla
+    return val;
 }
