@@ -16,14 +16,15 @@
 
 
 
-//#line 2 ".\Gramatica.y"
+//#line 2 "Gramatica.y"
 package Compilador.ModuloSintactico;
 
 import java.io.*;
 import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
-//#line 24 "Parser.java"
+import java.util.Stack;
+//#line 25 "Parser.java"
 
 
 
@@ -649,7 +650,7 @@ final static String yyrule[] = {
 "factor : '-' CTE",
 };
 
-//#line 217 ".\Gramatica.y"
+//#line 224 "Gramatica.y"
 
 public void yyerror(String s) {
     System.err.println("Error de sintaxis en línea "
@@ -799,7 +800,64 @@ public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombre
 
     return val;
 }
-//#line 731 "Parser.java"
+
+public void declaracionDeFuncion(String token, String tipoRetorno, String ambito, String uso) {
+   //Comprobamos si ya existe un token con ese nombre en la TS
+    ElementoTablaDeSimbolos original = TablaDeSimbolos.getSimbolo(token);
+
+    if (original != null) {
+        String usoOriginal = original.getUso();
+        // Si ya existe y su uso es "Funcion" => redeclaración
+        if ("Función".equals(usoOriginal)) {
+            yyerror("Error: Redeclaracion de función " + token);
+            return;
+        } else {
+            // Existe otro símbolo con el mismo nombre (variable/otro) => lo tratamos como redeclaración
+            yyerror("Error: Nombre ya utilizado por otro símbolo: " + token);
+            return;
+        }
+    }
+
+    // No existe, se añade como función
+    ElementoTablaDeSimbolos nuevoElem = new ElementoTablaDeSimbolos();
+    nuevoElem.setTipo(tipoRetorno);
+    nuevoElem.setAmbito(ambito);
+    nuevoElem.setUso("Función");
+    TablaDeSimbolos.addSimbolo(token, nuevoElem);
+}
+
+public static Stack<String> pilaReturns = new Stack<>();
+
+
+//Chequear que, al final de la función, se haya declarado los returns
+ public void chequearReturn() {
+        if (!pilaReturns.isEmpty()) {
+            String top = pilaReturns.pop();
+            String[] partes = top.split(":");
+            String nombreFunc = partes[0];
+            boolean tieneReturn = Boolean.parseBoolean(partes[1]);
+
+            if (!tieneReturn) {
+                yyerror("Error: la función " + nombreFunc + " no tiene sentencia return.");
+            }
+        }
+        else {
+          yyerror("Error: Pila de returns vacía. Declaración de múltiples return en mismo bloque de código.");
+        }
+ }
+
+//Cuando se encuentra con un return, modificar su estado a true
+public void registrarReturn() {
+        if (!pilaReturns.isEmpty()) {
+            String top = pilaReturns.pop();
+            String[] partes = top.split(":");
+            String nombreFunc = partes[0];
+            pilaReturns.push(nombreFunc + ":true");
+        } else {
+            yyerror("Error: Sentencia return declarada fuera de función");
+        }
+}
+//#line 789 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -954,369 +1012,379 @@ boolean doaction;
       {
 //########## USER-SUPPLIED ACTIONS ##########
 case 1:
-//#line 18 ".\Gramatica.y"
+//#line 19 "Gramatica.y"
 { }
 break;
 case 2:
-//#line 19 ".\Gramatica.y"
+//#line 20 "Gramatica.y"
 { yyerror("Error: Falta definir un nombre al programa"); }
 break;
 case 3:
-//#line 20 ".\Gramatica.y"
+//#line 21 "Gramatica.y"
 { yyerror("Error: Falta delimitador del programa '{' al inicio"); }
 break;
 case 4:
-//#line 21 ".\Gramatica.y"
+//#line 22 "Gramatica.y"
 { yyerror("Error: Falta delimitadores del programa '{' al inicio y '}' al final"); }
 break;
 case 7:
-//#line 28 ".\Gramatica.y"
+//#line 29 "Gramatica.y"
 { reportarEstructura("declaracion de funcion");
-                                                                                            salirAmbito();}
+                                                                                            salirAmbito();
+                                                                                            chequearReturn();
+                                                                                          }
 break;
 case 8:
-//#line 32 ".\Gramatica.y"
-{entrarAmbito(val_peek(0).sval); System.out.println(ambito);}
+//#line 35 "Gramatica.y"
+{entrarAmbito(val_peek(0).sval);
+                                 System.out.println(ambito);
+                                 declaracionDeFuncion(val_peek(0).sval, val_peek(1).sval, ambito, "Función");
+                                 pilaReturns.push(val_peek(0).sval + ":" + "false");
+                                }
 break;
 case 9:
-//#line 33 ".\Gramatica.y"
+//#line 40 "Gramatica.y"
 { yyerror("Error: Falta definir un nombre a la función"); }
 break;
 case 13:
-//#line 40 ".\Gramatica.y"
+//#line 47 "Gramatica.y"
 { yyerror("Error: Sentencia no reconocida, se esperaba ';'"); }
 break;
 case 14:
-//#line 41 ".\Gramatica.y"
+//#line 48 "Gramatica.y"
 { yyerror("Error: Sentencia no reconocida, se esperaba ';'"); }
 break;
 case 15:
-//#line 42 ".\Gramatica.y"
+//#line 49 "Gramatica.y"
 {yyerror("Error: Sentencia invalida");}
 break;
 case 16:
-//#line 45 ".\Gramatica.y"
+//#line 52 "Gramatica.y"
 { reportarEstructura("declaracion de variable(s)"); }
 break;
 case 21:
-//#line 54 ".\Gramatica.y"
+//#line 61 "Gramatica.y"
 { yyerror("Error: Falta definir el nombre del parametro formal"); }
 break;
 case 22:
-//#line 55 ".\Gramatica.y"
+//#line 62 "Gramatica.y"
 { yyerror("Error: Falta definir el nombre del parametro formal"); }
 break;
 case 23:
-//#line 56 ".\Gramatica.y"
+//#line 63 "Gramatica.y"
 { yyerror("Error: Falta definir el tipo del parametro formal"); }
 break;
 case 24:
-//#line 57 ".\Gramatica.y"
+//#line 64 "Gramatica.y"
 { yyerror("Error: Falta definir el tipo del parametro formal"); }
 break;
+case 26:
+//#line 70 "Gramatica.y"
+{registrarReturn();}
+break;
 case 27:
-//#line 64 ".\Gramatica.y"
+//#line 71 "Gramatica.y"
 { yyerror("Sentencia no reconocida, se esperaba ';'"); }
 break;
 case 28:
-//#line 67 ".\Gramatica.y"
+//#line 74 "Gramatica.y"
 {tipo = "ulong";}
 break;
 case 31:
-//#line 72 ".\Gramatica.y"
+//#line 79 "Gramatica.y"
 { yyerror("Error: se esperaba ',' entre constantes"); }
 break;
 case 32:
-//#line 75 ".\Gramatica.y"
+//#line 82 "Gramatica.y"
 {yyval = chequearAmbito("", ambito, val_peek(0).sval);}
 break;
 case 33:
-//#line 76 ".\Gramatica.y"
+//#line 83 "Gramatica.y"
 {yyval = chequearAmbito("", ambito, val_peek(0).sval);}
 break;
 case 34:
-//#line 77 ".\Gramatica.y"
+//#line 84 "Gramatica.y"
 { yyval = chequearAmbito(val_peek(2).sval, ambito, val_peek(0).sval); }
 break;
 case 35:
-//#line 78 ".\Gramatica.y"
+//#line 85 "Gramatica.y"
 { yyval = chequearAmbito(val_peek(2).sval, ambito, val_peek(0).sval); }
 break;
 case 36:
-//#line 79 ".\Gramatica.y"
+//#line 86 "Gramatica.y"
 { yyerror("Error: se esperaba ',' entre variables"); }
 break;
 case 37:
-//#line 80 ".\Gramatica.y"
+//#line 87 "Gramatica.y"
 { yyerror("Error: se esperaba ',' entre variables"); }
 break;
 case 38:
-//#line 83 ".\Gramatica.y"
+//#line 90 "Gramatica.y"
 {yyval = declaracionDeVariable(val_peek(0).sval, tipo, ambito, "Variable");}
 break;
 case 39:
-//#line 84 ".\Gramatica.y"
+//#line 91 "Gramatica.y"
 {yyval = declaracionDeVariable(val_peek(0).sval, tipo, ambito, "Variable");}
 break;
 case 40:
-//#line 85 ".\Gramatica.y"
+//#line 92 "Gramatica.y"
 { yyerror("Error: se esperaba ',' entre variables"); }
 break;
 case 41:
-//#line 90 ".\Gramatica.y"
+//#line 97 "Gramatica.y"
 { reportarEstructura("IF"); }
 break;
 case 42:
-//#line 91 ".\Gramatica.y"
+//#line 98 "Gramatica.y"
 { reportarEstructura("IF"); }
 break;
 case 43:
-//#line 92 ".\Gramatica.y"
+//#line 99 "Gramatica.y"
 { reportarEstructura("IF"); }
 break;
 case 44:
-//#line 93 ".\Gramatica.y"
+//#line 100 "Gramatica.y"
 { reportarEstructura("IF"); }
 break;
 case 45:
-//#line 94 ".\Gramatica.y"
+//#line 101 "Gramatica.y"
 { reportarEstructura("IF"); }
 break;
 case 46:
-//#line 95 ".\Gramatica.y"
+//#line 102 "Gramatica.y"
 { reportarEstructura("IF"); }
 break;
 case 47:
-//#line 96 ".\Gramatica.y"
+//#line 103 "Gramatica.y"
 { reportarEstructura("PRINT"); }
 break;
 case 48:
-//#line 97 ".\Gramatica.y"
+//#line 104 "Gramatica.y"
 { reportarEstructura("PRINT"); }
 break;
 case 52:
-//#line 101 ".\Gramatica.y"
+//#line 108 "Gramatica.y"
 { reportarEstructura("WHILE"); }
 break;
 case 53:
-//#line 102 ".\Gramatica.y"
+//#line 109 "Gramatica.y"
 { reportarEstructura("WHILE"); }
 break;
 case 54:
-//#line 103 ".\Gramatica.y"
+//#line 110 "Gramatica.y"
 { yyerror("Error: falta cuerpo del WHILE");  }
 break;
 case 55:
-//#line 104 ".\Gramatica.y"
+//#line 111 "Gramatica.y"
 { yyerror("Error: falta cuerpo del WHILE");  }
 break;
 case 56:
-//#line 105 ".\Gramatica.y"
+//#line 112 "Gramatica.y"
 { yyerror("Error: falta argumento dentro del print"); }
 break;
 case 57:
-//#line 107 ".\Gramatica.y"
+//#line 114 "Gramatica.y"
 { yyerror("Error: falta palabra reservada DO");  }
 break;
 case 58:
-//#line 108 ".\Gramatica.y"
+//#line 115 "Gramatica.y"
 { yyerror("Error: falta palabra reservada DO");  }
 break;
 case 59:
-//#line 110 ".\Gramatica.y"
+//#line 117 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 60:
-//#line 111 ".\Gramatica.y"
+//#line 118 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 61:
-//#line 112 ".\Gramatica.y"
+//#line 119 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 62:
-//#line 113 ".\Gramatica.y"
+//#line 120 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 63:
-//#line 114 ".\Gramatica.y"
+//#line 121 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 64:
-//#line 115 ".\Gramatica.y"
+//#line 122 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 65:
-//#line 116 ".\Gramatica.y"
+//#line 123 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 66:
-//#line 117 ".\Gramatica.y"
+//#line 124 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 67:
-//#line 118 ".\Gramatica.y"
+//#line 125 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 68:
-//#line 119 ".\Gramatica.y"
+//#line 126 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 69:
-//#line 120 ".\Gramatica.y"
+//#line 127 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 70:
-//#line 121 ".\Gramatica.y"
+//#line 128 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 71:
-//#line 122 ".\Gramatica.y"
+//#line 129 "Gramatica.y"
 {yyerror("Error: Falta contenido en bloque then/else");}
 break;
 case 74:
-//#line 129 ".\Gramatica.y"
+//#line 136 "Gramatica.y"
 {yyerror("Error: falta palabra reservada 'endif'");}
 break;
 case 76:
-//#line 133 ".\Gramatica.y"
+//#line 140 "Gramatica.y"
 {yyerror("Error: falta parentesis de apertura '(' en condicion");}
 break;
 case 77:
-//#line 134 ".\Gramatica.y"
+//#line 141 "Gramatica.y"
 {yyerror("Error: falta parentesis de cierre ')' en condicion");}
 break;
 case 78:
-//#line 135 ".\Gramatica.y"
+//#line 142 "Gramatica.y"
 {yyerror("Error: faltan parentesis de apertura '(' y cierre ')' en condicion");}
 break;
 case 81:
-//#line 143 ".\Gramatica.y"
+//#line 150 "Gramatica.y"
 { yyerror("Sentencia no reconocida, se esperaba ';'"); }
 break;
 case 82:
-//#line 144 ".\Gramatica.y"
+//#line 151 "Gramatica.y"
 { yyerror("Sentencia no reconocida, se esperaba ';'"); }
 break;
 case 83:
-//#line 145 ".\Gramatica.y"
+//#line 152 "Gramatica.y"
 { yyerror("Sentencia no reconocida, se esperaba ';'"); }
 break;
 case 86:
-//#line 151 ".\Gramatica.y"
+//#line 158 "Gramatica.y"
 { yyerror("Error: Declaracion de parametro real invalida"); }
 break;
 case 88:
-//#line 155 ".\Gramatica.y"
+//#line 162 "Gramatica.y"
 { yyerror("Error: Falta definir el nombre del parametro formal"); }
 break;
 case 89:
-//#line 156 ".\Gramatica.y"
+//#line 163 "Gramatica.y"
 { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
 break;
 case 91:
-//#line 162 ".\Gramatica.y"
+//#line 169 "Gramatica.y"
 { reportarEstructura("asignacion simple");
                                             yyval = chequearAmbito("", ambito, val_peek(2).sval);}
 break;
 case 92:
-//#line 164 ".\Gramatica.y"
+//#line 171 "Gramatica.y"
 { reportarEstructura("asignacion simple");
                                                    yyval = chequearAmbito(val_peek(4).sval, ambito, val_peek(2).sval); }
 break;
 case 93:
-//#line 168 ".\Gramatica.y"
+//#line 175 "Gramatica.y"
 { reportarEstructura("asignacion multiple"); }
 break;
 case 94:
-//#line 172 ".\Gramatica.y"
+//#line 179 "Gramatica.y"
 { reportarEstructura("expresion lambda"); }
 break;
 case 95:
-//#line 173 ".\Gramatica.y"
+//#line 180 "Gramatica.y"
 { yyerror("Error: falta '{' en la expresion lambda"); }
 break;
 case 96:
-//#line 174 ".\Gramatica.y"
+//#line 181 "Gramatica.y"
 { yyerror("Error: falta '}' en la expresion lambda"); }
 break;
 case 97:
-//#line 175 ".\Gramatica.y"
+//#line 182 "Gramatica.y"
 { yyerror("Error: falta '{' y '}' en la expresion lambda"); }
 break;
 case 101:
-//#line 181 ".\Gramatica.y"
+//#line 188 "Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 102:
-//#line 182 ".\Gramatica.y"
+//#line 189 "Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 103:
-//#line 183 ".\Gramatica.y"
+//#line 190 "Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 104:
-//#line 184 ".\Gramatica.y"
+//#line 191 "Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 105:
-//#line 185 ".\Gramatica.y"
+//#line 192 "Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
 case 106:
-//#line 186 ".\Gramatica.y"
+//#line 193 "Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
 case 108:
-//#line 188 ".\Gramatica.y"
+//#line 195 "Gramatica.y"
 { yyerror("Error: falta ')' en la expresion TRUNC"); }
 break;
 case 109:
-//#line 189 ".\Gramatica.y"
+//#line 196 "Gramatica.y"
 { yyerror("Error: falta '(' en la expresion TRUNC"); }
 break;
 case 110:
-//#line 190 ".\Gramatica.y"
+//#line 197 "Gramatica.y"
 { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
 break;
 case 114:
-//#line 199 ".\Gramatica.y"
+//#line 206 "Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 115:
-//#line 200 ".\Gramatica.y"
+//#line 207 "Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 116:
-//#line 201 ".\Gramatica.y"
+//#line 208 "Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 117:
-//#line 202 ".\Gramatica.y"
+//#line 209 "Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 118:
-//#line 203 ".\Gramatica.y"
+//#line 210 "Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
 case 119:
-//#line 204 ".\Gramatica.y"
+//#line 211 "Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
 case 121:
-//#line 208 ".\Gramatica.y"
+//#line 215 "Gramatica.y"
 {yyval = chequearAmbito("", ambito, val_peek(0).sval); }
 break;
 case 123:
-//#line 210 ".\Gramatica.y"
+//#line 217 "Gramatica.y"
 { yyval = chequearAmbito(val_peek(2).sval, ambito, val_peek(0).sval); }
 break;
 case 125:
-//#line 212 ".\Gramatica.y"
+//#line 219 "Gramatica.y"
 { yyval = constanteNegativa(val_peek(0)); }
 break;
-//#line 1243 "Parser.java"
+//#line 1311 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
