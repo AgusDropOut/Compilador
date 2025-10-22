@@ -72,12 +72,17 @@ list_ctes             : CTE
                       | list_ctes CTE { yyerror("Error: se esperaba ',' entre constantes"); }
                       ;
 
+list_vars_mix         : ID {$$ = chequearAmbito("", ambito, $1.sval);}
+                      | list_vars_mix ',' ID {$$ = chequearAmbito("", ambito, $3.sval);}
+                      | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); }
+                      | list_vars_mix ',' ID '.' ID { $$ = chequearAmbito($3.sval, ambito, $5.sval); }
+                      | list_vars_mix ID { yyerror("Error: se esperaba ',' entre variables"); }
+                      | list_vars_mix ID '.' ID { yyerror("Error: se esperaba ',' entre variables"); }
+                      ;
+
 list_vars             : ID {$$ = declaracionDeVariable($1.sval, tipo, ambito, "Variable");}
                       | list_vars ',' ID {$$ = declaracionDeVariable($3.sval, tipo, ambito, "Variable");}
-                      | ID '.' ID {}
-                      | list_vars ',' ID '.' ID
                       | list_vars ID { yyerror("Error: se esperaba ',' entre variables"); }
-                      | list_vars ID '.' ID { yyerror("Error: se esperaba ',' entre variables"); }
                       ;
 
 
@@ -160,7 +165,7 @@ asignacion_simple     : ID ASIG expresion { reportarEstructura("asignacion simpl
                                                    $$ = chequearAmbito($1.sval, ambito, $3.sval); }
                       ;
 
-asignacion_multiple   : list_vars '=' list_ctes { reportarEstructura("asignacion multiple"); }
+asignacion_multiple   : list_vars_mix '=' list_ctes { reportarEstructura("asignacion multiple"); }
                       ;
 
 
@@ -200,9 +205,9 @@ termino               : termino '*' factor
                       | factor
                       ;
 
-factor                : ID
+factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); }
                       | CTE
-                      | ID '.' ID
+                      | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); }
                       | ID '(' parametros_reales ')'
                       |'-' CTE { $$ = constanteNegativa($2); }
                       ;
@@ -297,7 +302,7 @@ public ParserVal declaracionDeVariable(String token, String tipo, String ambito,
         TablaDeSimbolos.addSimbolo(nombreNuevo, nuevoElem);
         nuevoParserVal.sval = nombreNuevo;
     } else {
-        yyerror("Error: Redeclaracion de variable " + token);
+        yyerror("Error: Redeclaracion de variable " + token + " en el ambito " + ambito);
         nuevoParserVal.sval = token;
     }
     return nuevoParserVal;
@@ -306,34 +311,46 @@ public ParserVal declaracionDeVariable(String token, String tipo, String ambito,
 public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombreIdentificador) {
     ElementoTablaDeSimbolos elem = null;
     String claveBuscada = null;
-    String ambitoDeBusqueda =  ambito; //copia de la variable global ambito
+    String ambitoDeBusqueda = ambito; // copia de la variable global ambito
     boolean simboloEncontrado = false;
     String ambitoActual = "";
     ParserVal val = new ParserVal();
-    val.sval = nombreIdentificador; //Si todo sale mal el parsel val se queda con un valor mal pero por lo menos no se rompe la compilacion
-  if(!prefijo.isEmpty()){
-    while (!simboloEncontrado && !ambitoDeBusqueda.isEmpty()){
-         int pos = ambitoDeBusqueda.lastIndexOf(":");
-         System.out.println("ambito: " + ambitoDeBusqueda);
-           if (pos == -1) {
-              ambitoActual = ambitoDeBusqueda;
-          } else {
-              ambitoActual = ambitoDeBusqueda.substring(pos + 1);
-          }
-         if(ambitoActual.equals(prefijo)){
-             claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
-             elem = TablaDeSimbolos.getSimbolo(claveBuscada);
-             simboloEncontrado = true;
-             if(elem == null){
-                 yyerror("El símbolo '" + nombreIdentificador +
-                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
-             } else {
-                 val.sval = claveBuscada;
-             }
-         }
-        ambitoDeBusqueda = ambitoDeBusqueda.substring(0, pos);
-    }
-  }else {
+    val.sval = nombreIdentificador; // Valor por defecto si no se encuentra
+
+    if (!prefijo.isEmpty()) {
+        while (!simboloEncontrado && !ambitoDeBusqueda.isEmpty()) {
+            int pos = ambitoDeBusqueda.lastIndexOf(":");
+            System.out.println("ambito: " + ambitoDeBusqueda);
+
+            if (pos == -1) {
+                ambitoActual = ambitoDeBusqueda;
+            } else {
+                ambitoActual = ambitoDeBusqueda.substring(pos + 1);
+            }
+
+            if (ambitoActual.equals(prefijo)) {
+                claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
+                elem = TablaDeSimbolos.getSimbolo(claveBuscada);
+                simboloEncontrado = true;
+
+                if (elem == null) {
+                    yyerror("El símbolo '" + nombreIdentificador +
+                        "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
+                } else {
+                    val.sval = claveBuscada;
+                }
+            }
+
+            // Evita StringIndexOutOfBoundsException
+            if (pos == -1) {
+            yyerror("El símbolo '" + nombreIdentificador +
+                                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
+                ambitoDeBusqueda = ""; // ya no hay más niveles
+            } else {
+                ambitoDeBusqueda = ambitoDeBusqueda.substring(0, pos);
+            }
+        }
+    } else {
         claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
         elem = TablaDeSimbolos.getSimbolo(claveBuscada);
         if (elem == null) {
@@ -342,7 +359,7 @@ public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombre
         } else {
             val.sval = claveBuscada;
         }
-  }
+    }
 
     return val;
 }

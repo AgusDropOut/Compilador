@@ -1,5 +1,5 @@
 MAIN {
-    ulong CONTADOR;
+    ulong CONTADOR,X,Y;
     CONTADOR := -5.4D-4 + 4UL;
     X,Y = 1UL, 5UL;
     if (3UL <  1UL)  {
@@ -13,8 +13,7 @@ MAIN {
     ulong F (ulong X, ulong M) {
        ulong CONTADOR;
        ulong A (ulong X, ulong M) {
-            ulong CONTADOR;
-            CONTADOR := 5UL;
+            G.CONTADOR := 5UL;
        }
        ulong B (ulong X, ulong M) {
             ulong C (ulong X, ulong M) {
