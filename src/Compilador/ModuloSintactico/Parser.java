@@ -20,8 +20,6 @@
 package Compilador.ModuloSintactico;
 
 import java.io.*;
-import java.util.Arrays;
-
 import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
@@ -644,7 +642,7 @@ final static String yyrule[] = {
 "factor : '-' CTE",
 };
 
-//#line 211 ".\Gramatica.y"
+//#line 212 ".\Gramatica.y"
 
 public void yyerror(String s) {
     System.err.println("Error de sintaxis en línea "
@@ -739,47 +737,47 @@ public ParserVal declaracionDeVariable(String token, String tipo, String ambito,
     return nuevoParserVal;
 }
 
-// ---- FUNCION PRINCIPAL ----
 public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombreIdentificador) {
     ElementoTablaDeSimbolos elem = null;
     String claveBuscada = null;
-
-    // 1️⃣ Si hay prefijo explícito (p. ej. objeto.campo)
-    if (prefijo != null && !prefijo.isEmpty()) {
-        claveBuscada = prefijo + ":" + nombreIdentificador;
-        elem = TablaDeSimbolos.getSimbolo(claveBuscada);
-
-        if (elem == null) {
-            yyerror("El símbolo '" + nombreIdentificador +
-                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
-            return null;
-        }
-    }
-    else {
-        // 2️⃣ Sin prefijo → buscamos en la jerarquía PROG:FUNC:BLOCK:...
-        String[] niveles = ambitoReal.split(":");
-
-        for (int i = niveles.length; i > 0 && elem == null; i--) {
-            String ambitoParcial = String.join(":", Arrays.copyOfRange(niveles, 0, i));
-            claveBuscada = ambitoParcial + ":" + nombreIdentificador;
-            elem = TablaDeSimbolos.getSimbolo(claveBuscada);
-        }
-
-        // 3️⃣ Intentar ámbito global si no se encontró en ninguno
-        if (elem == null)
-            elem = TablaDeSimbolos.getSimbolo(nombreIdentificador);
-
-        if (elem == null) {
-            yyerror("El símbolo '" + nombreIdentificador +
-                    "' no fue declarado en ningún ámbito visible (actual: " + ambitoReal + ").");
-            return null;
-        }
-    }
-
-    // 4️⃣ Construir un ParserVal asociado al símbolo encontrado
+    String ambitoDeBusqueda =  ambito; //copia de la variable global ambito
+    boolean simboloEncontrado = false;
+    String ambitoActual = "";
     ParserVal val = new ParserVal();
-    val.sval = claveBuscada;      // Nombre mangleado completo
-    val.obj  = elem;              // Referencia al elemento de la tabla
+    val.sval = nombreIdentificador; //Si todo sale mal el parsel val se queda con un valor mal pero por lo menos no se rompe la compilacion
+  if(!prefijo.isEmpty()){
+    while (!simboloEncontrado && !ambitoDeBusqueda.isEmpty()){
+         int pos = ambitoDeBusqueda.lastIndexOf(":");
+         System.out.println("ambito: " + ambitoDeBusqueda);
+           if (pos == -1) {
+              ambitoActual = ambitoDeBusqueda;
+          } else {
+              ambitoActual = ambitoDeBusqueda.substring(pos + 1);
+          }
+         if(ambitoActual.equals(prefijo)){
+             claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
+             elem = TablaDeSimbolos.getSimbolo(claveBuscada);
+             simboloEncontrado = true;
+             if(elem == null){
+                 yyerror("El símbolo '" + nombreIdentificador +
+                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
+             } else {
+                 val.sval = claveBuscada;
+             }
+         }
+        ambitoDeBusqueda = ambitoDeBusqueda.substring(0, pos);
+    }
+  }else {
+        claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
+        elem = TablaDeSimbolos.getSimbolo(claveBuscada);
+        if (elem == null) {
+            yyerror("El símbolo '" + nombreIdentificador +
+                "' no se encuentra en el ámbito actual '" + ambito + "'.");
+        } else {
+            val.sval = claveBuscada;
+        }
+  }
+
     return val;
 }
 //#line 712 "Parser.java"
@@ -1183,98 +1181,99 @@ case 86:
 break;
 case 88:
 //#line 157 ".\Gramatica.y"
-{ reportarEstructura("asignacion simple"); }
+{ reportarEstructura("asignacion simple");
+                                            yyval = chequearAmbito("", ambito, val_peek(2).sval);}
 break;
 case 89:
-//#line 158 ".\Gramatica.y"
+//#line 159 ".\Gramatica.y"
 { reportarEstructura("asignacion simple");
                                                    yyval = chequearAmbito(val_peek(4).sval, ambito, val_peek(2).sval); }
 break;
 case 90:
-//#line 162 ".\Gramatica.y"
+//#line 163 ".\Gramatica.y"
 { reportarEstructura("asignacion multiple"); }
 break;
 case 91:
-//#line 166 ".\Gramatica.y"
+//#line 167 ".\Gramatica.y"
 { reportarEstructura("expresion lambda"); }
 break;
 case 92:
-//#line 167 ".\Gramatica.y"
+//#line 168 ".\Gramatica.y"
 { yyerror("Error: falta '{' en la expresion lambda"); }
 break;
 case 93:
-//#line 168 ".\Gramatica.y"
+//#line 169 ".\Gramatica.y"
 { yyerror("Error: falta '}' en la expresion lambda"); }
 break;
 case 94:
-//#line 169 ".\Gramatica.y"
+//#line 170 ".\Gramatica.y"
 { yyerror("Error: falta '{' y '}' en la expresion lambda"); }
 break;
 case 98:
-//#line 175 ".\Gramatica.y"
+//#line 176 ".\Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 99:
-//#line 176 ".\Gramatica.y"
+//#line 177 ".\Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 100:
-//#line 177 ".\Gramatica.y"
+//#line 178 ".\Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 101:
-//#line 178 ".\Gramatica.y"
+//#line 179 ".\Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 102:
-//#line 179 ".\Gramatica.y"
-{ yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-break;
-case 103:
 //#line 180 ".\Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
+case 103:
+//#line 181 ".\Gramatica.y"
+{ yyerror("Error: operandos a la izquierda y derecha invalidos"); }
+break;
 case 105:
-//#line 182 ".\Gramatica.y"
+//#line 183 ".\Gramatica.y"
 { yyerror("Error: falta ')' en la expresion TRUNC"); }
 break;
 case 106:
-//#line 183 ".\Gramatica.y"
+//#line 184 ".\Gramatica.y"
 { yyerror("Error: falta '(' en la expresion TRUNC"); }
 break;
 case 107:
-//#line 184 ".\Gramatica.y"
+//#line 185 ".\Gramatica.y"
 { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
 break;
 case 111:
-//#line 193 ".\Gramatica.y"
+//#line 194 ".\Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 112:
-//#line 194 ".\Gramatica.y"
+//#line 195 ".\Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 113:
-//#line 195 ".\Gramatica.y"
+//#line 196 ".\Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 114:
-//#line 196 ".\Gramatica.y"
+//#line 197 ".\Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 115:
-//#line 197 ".\Gramatica.y"
-{ yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-break;
-case 116:
 //#line 198 ".\Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
+case 116:
+//#line 199 ".\Gramatica.y"
+{ yyerror("Error: operandos a la izquierda y derecha invalidos"); }
+break;
 case 122:
-//#line 206 ".\Gramatica.y"
+//#line 207 ".\Gramatica.y"
 { yyval = constanteNegativa(val_peek(0)); }
 break;
-//#line 1199 "Parser.java"
+//#line 1200 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
