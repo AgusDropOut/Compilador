@@ -154,7 +154,8 @@ parametro_real        : expresion FLECHA ID
 condicion             : expresion COMP expresion
                       ;
 
-asignacion_simple     : ID ASIG expresion { reportarEstructura("asignacion simple"); }
+asignacion_simple     : ID ASIG expresion { reportarEstructura("asignacion simple");
+                                            $$ = chequearAmbito("", ambito, $1.sval);}
                       | ID '.' ID ASIG expresion { reportarEstructura("asignacion simple");
                                                    $$ = chequearAmbito($1.sval, ambito, $3.sval); }
                       ;
@@ -302,46 +303,46 @@ public ParserVal declaracionDeVariable(String token, String tipo, String ambito,
     return nuevoParserVal;
 }
 
-// ---- FUNCION PRINCIPAL ----
 public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombreIdentificador) {
-    ElementoTablaSimbolos elem = null;
+    ElementoTablaDeSimbolos elem = null;
     String claveBuscada = null;
-
-    // 1️⃣ Si hay prefijo explícito (p. ej. objeto.campo)
-    if (prefijo != null && !prefijo.isEmpty()) {
-        claveBuscada = prefijo + ":" + nombreIdentificador;
-        elem = tablaSimbolos.get(claveBuscada);
-
-        if (elem == null) {
-            yyerror("El símbolo '" + nombreIdentificador +
-                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
-            return null;
-        }
-    }
-    else {
-        // 2️⃣ Sin prefijo → buscamos en la jerarquía PROG:FUNC:BLOCK:...
-        String[] niveles = ambitoReal.split(":");
-
-        for (int i = niveles.length; i > 0 && elem == null; i--) {
-            String ambitoParcial = String.join(":", Arrays.copyOfRange(niveles, 0, i));
-            claveBuscada = ambitoParcial + ":" + nombreIdentificador;
-            elem = tablaSimbolos.get(claveBuscada);
-        }
-
-        // 3️⃣ Intentar ámbito global si no se encontró en ninguno
-        if (elem == null)
-            elem = tablaSimbolos.get(nombreIdentificador);
-
-        if (elem == null) {
-            yyerror("El símbolo '" + nombreIdentificador +
-                    "' no fue declarado en ningún ámbito visible (actual: " + ambitoReal + ").");
-            return null;
-        }
-    }
-
-    // 4️⃣ Construir un ParserVal asociado al símbolo encontrado
+    String ambitoDeBusqueda =  ambito; //copia de la variable global ambito
+    boolean simboloEncontrado = false;
+    String ambitoActual = "";
     ParserVal val = new ParserVal();
-    val.sval = claveBuscada;      // Nombre mangleado completo
-    val.obj  = elem;              // Referencia al elemento de la tabla
+    val.sval = nombreIdentificador; //Si todo sale mal el parsel val se queda con un valor mal pero por lo menos no se rompe la compilacion
+  if(!prefijo.isEmpty()){
+    while (!simboloEncontrado && !ambitoDeBusqueda.isEmpty()){
+         int pos = ambitoDeBusqueda.lastIndexOf(":");
+         System.out.println("ambito: " + ambitoDeBusqueda);
+           if (pos == -1) {
+              ambitoActual = ambitoDeBusqueda;
+          } else {
+              ambitoActual = ambitoDeBusqueda.substring(pos + 1);
+          }
+         if(ambitoActual.equals(prefijo)){
+             claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
+             elem = TablaDeSimbolos.getSimbolo(claveBuscada);
+             simboloEncontrado = true;
+             if(elem == null){
+                 yyerror("El símbolo '" + nombreIdentificador +
+                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
+             } else {
+                 val.sval = claveBuscada;
+             }
+         }
+        ambitoDeBusqueda = ambitoDeBusqueda.substring(0, pos);
+    }
+  }else {
+        claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
+        elem = TablaDeSimbolos.getSimbolo(claveBuscada);
+        if (elem == null) {
+            yyerror("El símbolo '" + nombreIdentificador +
+                "' no se encuentra en el ámbito actual '" + ambito + "'.");
+        } else {
+            val.sval = claveBuscada;
+        }
+  }
+
     return val;
 }

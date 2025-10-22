@@ -13,6 +13,7 @@ MAIN {
     ulong F (ulong X, ulong M) {
        ulong CONTADOR;
        ulong A (ulong X, ulong M) {
+            ulong CONTADOR;
             CONTADOR := 5UL;
        }
        ulong B (ulong X, ulong M) {
