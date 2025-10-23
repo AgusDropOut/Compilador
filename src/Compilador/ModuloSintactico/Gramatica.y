@@ -68,8 +68,7 @@ parametro_formal      : semantica tipo ID
 semantica             : CR
                       ;
 
-sentencia_return      : RETURN expresion ';' {registrarReturn();}
-                      | RETURN expresion error { yyerror("Sentencia no reconocida, se esperaba ';'"); }
+sentencia_return      : RETURN expresion  {registrarReturn();}
                       ;
 
 tipo                  : ULONG {tipo = "ulong";}
@@ -95,49 +94,59 @@ list_vars             : ID {$$ = declaracionDeVariable($1.sval, tipo, ambito, "V
 
 
 
-sentencia_ejecutable  : /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
-                      | /*2*/IF condicion_if_while '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
-                      | /*3*/IF condicion_if_while sentencia_ejecutable ';' ELSE sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
-                      | /*4*/IF condicion_if_while sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
-                      | /*5*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
-                      | /*6*/IF condicion_if_while sentencia_ejecutable ';' ELSE '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
+sentencia_ejecutable  : /*1*/IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
+                      | /*2*/IF condicion_if '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
+                      | /*3*/IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
+                      | /*4*/IF condicion_if sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
+                      | /*5*/IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if { reportarEstructura("IF"); }
+                      | /*6*/IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if { reportarEstructura("IF"); }
                       | PRINT '(' CADENA ')' { reportarEstructura("PRINT"); }
                       | PRINT '(' expresion ')' { reportarEstructura("PRINT"); }
                       | asignacion_simple
                       | asignacion_multiple
                       | sentencia_return
-                      | WHILE condicion_if_while DO '{' bloque_ejecutable '}' { reportarEstructura("WHILE"); }
-                      | WHILE condicion_if_while DO sentencia_ejecutable { reportarEstructura("WHILE"); }
-                      | WHILE condicion_if_while DO  { yyerror("Error: falta cuerpo del WHILE");  }
-                      | WHILE condicion_if_while DO '{'  '}' { yyerror("Error: falta cuerpo del WHILE");  }
+                      | WHILE condicion_while DO '{' bloque_ejecutable '}' { reportarEstructura("WHILE"); }
+                      | WHILE condicion_while DO sentencia_ejecutable { reportarEstructura("WHILE"); }
+                      | WHILE condicion_while DO  { yyerror("Error: falta cuerpo del WHILE");  }
+                      | WHILE condicion_while DO '{'  '}' { yyerror("Error: falta cuerpo del WHILE");  }
                       | PRINT '('  ')' { yyerror("Error: falta argumento dentro del print"); }
                       /* */
-                      | WHILE condicion_if_while '{' bloque_ejecutable '}'  { yyerror("Error: falta palabra reservada DO");  }
-                      | WHILE condicion_if_while sentencia_ejecutable { yyerror("Error: falta palabra reservada DO");  }
+                      | WHILE condicion_while '{' bloque_ejecutable '}'  { yyerror("Error: falta palabra reservada DO");  }
+                      | WHILE condicion_while sentencia_ejecutable { yyerror("Error: falta palabra reservada DO");  }
                       /* */
-                      | /*1*/IF condicion_if_while '{'  '}' ELSE '{' bloque_ejecutable '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*1*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE '{'  '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*1*/IF condicion_if_while '{'  '}' ELSE '{'  '}' end_if                  {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*2*/IF condicion_if_while '{'  '}' end_if                                {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*3*/IF condicion_if_while  ELSE sentencia_ejecutable ';' end_if          {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*3*/IF condicion_if_while sentencia_ejecutable ';' ELSE   end_if         {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*3*/IF condicion_if_while   ELSE   end_if                                {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*4*/IF condicion_if_while  end_if                                        {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*5*/IF condicion_if_while '{'  '}' ELSE sentencia_ejecutable ';' end_if  {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*5*/IF condicion_if_while '{' bloque_ejecutable '}' ELSE  end_if         {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*5*/IF condicion_if_while '{'  '}' ELSE  end_if                          {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*6*/IF condicion_if_while  ELSE '{' bloque_ejecutable '}' end_if         {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*6*/IF condicion_if_while sentencia_ejecutable ';' ELSE '{'  '}' end_if  {yyerror("Error: Falta contenido en bloque then/else");}
-                      | /*6*/IF condicion_if_while  ELSE '{'  '}' end_if
+                      | /*1*/IF condicion_if '{'  '}' else '{' bloque_ejecutable '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*1*/IF condicion_if '{' bloque_ejecutable '}' else '{'  '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*1*/IF condicion_if '{'  '}' else '{'  '}' end_if                  {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*2*/IF condicion_if '{'  '}' end_if                                {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*3*/IF condicion_if  else sentencia_ejecutable ';' end_if          {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*3*/IF condicion_if sentencia_ejecutable ';' else   end_if         {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*3*/IF condicion_if   else   end_if                                {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*4*/IF condicion_if  end_if                                        {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*5*/IF condicion_if '{'  '}' else sentencia_ejecutable ';' end_if  {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*5*/IF condicion_if '{' bloque_ejecutable '}' else  end_if         {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*5*/IF condicion_if '{'  '}' else  end_if                          {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*6*/IF condicion_if  else '{' bloque_ejecutable '}' end_if         {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*6*/IF condicion_if sentencia_ejecutable ';' else '{'  '}' end_if  {yyerror("Error: Falta contenido en bloque then/else");}
+                      | /*6*/IF condicion_if  else '{'  '}' end_if
+                      ;
+
+else                  : ELSE {ArregloTercetos.crearTercetoBackPatchingIFDesapilaryCompletar("bl", null,null);}
                       ;
 
 
 
-end_if                : ENDIF
+
+end_if                : ENDIF {ArregloTercetos.completarTercetoBackPatchingIF();}
                       | /* empty */ {yyerror("Error: falta palabra reservada 'endif'");}
                       ;
 
-condicion_if_while    : '(' condicion ')'
+condicion_if          : '(' condicion ')' {ArregloTercetos.crearTercetoBackPatchingIF("bf", $2.sval,null);}
+                      | condicion ')' {yyerror("Error: falta parentesis de apertura '(' en condicion");}
+                      | '(' condicion {yyerror("Error: falta parentesis de cierre ')' en condicion");}
+                      | condicion {yyerror("Error: faltan parentesis de apertura '(' y cierre ')' en condicion");}
+                      ;
+
+condicion_while       : '(' condicion ')'
                       | condicion ')' {yyerror("Error: falta parentesis de apertura '(' en condicion");}
                       | '(' condicion {yyerror("Error: falta parentesis de cierre ')' en condicion");}
                       | condicion {yyerror("Error: faltan parentesis de apertura '(' y cierre ')' en condicion");}
@@ -164,11 +173,11 @@ parametro_real        : expresion FLECHA ID
                       | expresion ID { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
                       ;
 
-condicion             : expresion COMP expresion
+condicion             : expresion COMP expresion {$$ = ArregloTercetos.crearTerceto("COMP", $1.sval, $3.sval);}
                       ;
 
 asignacion_simple     : var_asignacion_simple ASIG expresion { reportarEstructura("asignacion simple");
-                                                               $$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval);}
+                                                               $$ = ArregloTercetos.crearTerceto(":=", $1.sval, $3.sval);}
                       ;
 
 var_asignacion_simple : ID {$$ = chequearAmbito("", ambito, $1.sval);}

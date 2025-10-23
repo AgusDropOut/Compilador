@@ -1,6 +1,7 @@
 package Compilador;
 
 import Compilador.ModuloLexico.*;
+import Compilador.ModuloSemantico.ArregloTercetos;
 import Compilador.ModuloSintactico.Parser;
 import Compilador.ModuloSintactico.ParserVal;
 
@@ -31,5 +32,6 @@ public class Main {
         parser.run();
         lexer.imprimirTokens();
         TablaDeSimbolos.imprimirTabla();
+        ArregloTercetos.imprimirTercetos();
     }
 }

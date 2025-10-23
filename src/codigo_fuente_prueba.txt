@@ -4,21 +4,19 @@ MAIN {
     X,Y = 1UL, 5UL;
     if (3UL <  1UL)  {
         CONTADOR := 4UL;
-    } endif ;
-    print(CONTADOR);
-    X := X + 24UL;
-    print(X);
-    print(Y);
+        X := 3UL;
+        Y := X;
+        if (X > Y) {
+            CONTADOR := CONTADOR + 1UL;
+            X := X + 2UL;
+        } else {
+            CONTADOR := CONTADOR - 1UL;
+            Y := Y + 2UL;
+        }endif;
+    }  else {
+        CONTADOR := 4UL;
+        X := 3UL;
+        Y := X;
+    }endif;
 
-    ulong F (ulong X, ulong M) {
-       ulong CONTADOR;
-       ulong A (ulong X, ulong M) {
-            G.CONTADOR := 5UL;
-       }
-       ulong B (ulong X, ulong M) {
-            ulong C (ulong X, ulong M) {
-
-            }
-       }
-    }
 }
