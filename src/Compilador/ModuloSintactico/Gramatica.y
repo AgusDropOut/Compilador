@@ -5,6 +5,7 @@ import java.io.*;
 import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
+import Compilador.ModuloSemantico.ArregloTercetos;
 %}
 
 %left '+' '-'
@@ -159,10 +160,12 @@ parametro_real        : expresion FLECHA ID
 condicion             : expresion COMP expresion
                       ;
 
-asignacion_simple     : ID ASIG expresion { reportarEstructura("asignacion simple");
-                                            $$ = chequearAmbito("", ambito, $1.sval);}
-                      | ID '.' ID ASIG expresion { reportarEstructura("asignacion simple");
-                                                   $$ = chequearAmbito($1.sval, ambito, $3.sval); }
+asignacion_simple     : var_asignacion_simple ASIG expresion { reportarEstructura("asignacion simple");
+                                                               $$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval);}
+                      ;
+
+var_asignacion_simple : ID {$$ = chequearAmbito("", ambito, $1.sval);}
+                      | ID '.' ID {$$ = chequearAmbito($1.sval, ambito, $1.sval);}
                       ;
 
 asignacion_multiple   : list_vars_mix '=' list_ctes { reportarEstructura("asignacion multiple"); }
@@ -175,9 +178,9 @@ expresion_lambda      : '(' tipo ID ')' '{' bloque_ejecutable '}' '(' factor ')'
                       | '(' tipo ID ')'  bloque_ejecutable '('  factor ')'  { yyerror("Error: falta '{' y '}' en la expresion lambda"); }
                       ;
 
-expresion             : expresion '+' termino
-                      | expresion '-' termino
-                      | termino
+expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto("+", $1.sval, $3.sval);}
+                      | expresion '-' termino {$$ = ArregloTercetos.crearTerceto("-", $1.sval, $3.sval);}
+                      | termino {$$ = $1;}
                       | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '+' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '-' termino { yyerror("Error: operando a la izquierda invalido"); }
@@ -194,15 +197,15 @@ expresion             : expresion '+' termino
 
 
 
-termino               : termino '*' factor
-                      | termino '/' factor
+termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*", $1.sval, $3.sval); }
+                      | termino '/' factor {$$ = ArregloTercetos.crearTerceto("/", $1.sval, $3.sval);}
                       | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '*' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '/' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '/' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '*' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '/' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | factor
+                      | factor {$$ = $1;}
                       ;
 
 factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); }
@@ -363,3 +366,4 @@ public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombre
 
     return val;
 }
+
