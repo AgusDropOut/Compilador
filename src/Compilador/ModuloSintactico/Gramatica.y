@@ -6,6 +6,7 @@ import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 import Compilador.ModuloSemantico.ArregloTercetos;
+import java.util.Stack;
 %}
 
 %left '+' '-'
@@ -27,10 +28,16 @@ list_sentencia        : /* empty */
                       ;
 
 declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
-                                                                                            salirAmbito();}
+                                                                                            salirAmbito();
+                                                                                            chequearReturn();
+                                                                                          }
                       ;
 
-header_funcion        : tipo ID {entrarAmbito($2.sval); System.out.println(ambito);}
+header_funcion        : tipo ID {entrarAmbito($2.sval);
+                                 System.out.println(ambito);
+                                 declaracionDeFuncion($2.sval, $1.sval, ambito, "Función");
+                                 pilaReturns.push($2.sval + ":" + "false");
+                                }
                       | tipo error { yyerror("Error: Falta definir un nombre a la función"); }
                       ;
 
@@ -61,7 +68,7 @@ parametro_formal      : semantica tipo ID
 semantica             : CR
                       ;
 
-sentencia_return      : RETURN expresion ';'
+sentencia_return      : RETURN expresion ';' {registrarReturn();}
                       | RETURN expresion error { yyerror("Sentencia no reconocida, se esperaba ';'"); }
                       ;
 
@@ -367,3 +374,59 @@ public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombre
     return val;
 }
 
+public void declaracionDeFuncion(String token, String tipoRetorno, String ambito, String uso) {
+   //Comprobamos si ya existe un token con ese nombre en la TS
+    ElementoTablaDeSimbolos original = TablaDeSimbolos.getSimbolo(token);
+
+    if (original != null) {
+        String usoOriginal = original.getUso();
+        // Si ya existe y su uso es "Funcion" => redeclaración
+        if ("Función".equals(usoOriginal)) {
+            yyerror("Error: Redeclaracion de función " + token);
+            return;
+        } else {
+            // Existe otro símbolo con el mismo nombre (variable/otro) => lo tratamos como redeclaración
+            yyerror("Error: Nombre ya utilizado por otro símbolo: " + token);
+            return;
+        }
+    }
+
+    // No existe, se añade como función
+    ElementoTablaDeSimbolos nuevoElem = new ElementoTablaDeSimbolos();
+    nuevoElem.setTipo(tipoRetorno);
+    nuevoElem.setAmbito(ambito);
+    nuevoElem.setUso("Función");
+    TablaDeSimbolos.addSimbolo(token, nuevoElem);
+}
+
+public static Stack<String> pilaReturns = new Stack<>();
+
+
+//Chequear que, al final de la función, se haya declarado los returns
+ public void chequearReturn() {
+        if (!pilaReturns.isEmpty()) {
+            String top = pilaReturns.pop();
+            String[] partes = top.split(":");
+            String nombreFunc = partes[0];
+            boolean tieneReturn = Boolean.parseBoolean(partes[1]);
+
+            if (!tieneReturn) {
+                yyerror("Error: la función " + nombreFunc + " no tiene sentencia return.");
+            }
+        }
+        else {
+          yyerror("Error: Pila de returns vacía. Declaración de múltiples return en mismo bloque de código.");
+        }
+ }
+
+//Cuando se encuentra con un return, modificar su estado a true
+public void registrarReturn() {
+        if (!pilaReturns.isEmpty()) {
+            String top = pilaReturns.pop();
+            String[] partes = top.split(":");
+            String nombreFunc = partes[0];
+            pilaReturns.push(nombreFunc + ":true");
+        } else {
+            yyerror("Error: Sentencia return declarada fuera de función");
+        }
+}
