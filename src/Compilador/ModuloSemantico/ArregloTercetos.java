@@ -54,6 +54,39 @@ public class ArregloTercetos {
         int tercetoBI = pilaIf.pop();
         tercetos.get(tercetoBI).setOp2(String.valueOf(tercetos.size()));
     }
+
+
+
+
+    public static void apilarTercetoInicialWHILE() {
+        pilaWhile.push(tercetos.size());
+    }
+
+    public static ParserVal crearTercetoBackPatchingWHILE(String operador, String op1,String op2){
+        Terceto nuevo = new Terceto(operador, op1, op2);
+        tercetos.add(nuevo);
+        pilaIf.push(tercetos.size() - 1);
+        ParserVal val = new ParserVal();
+        val.sval = String.valueOf(tercetos.size() - 1);
+        return val;
+    }
+
+    public static ParserVal completarBackPatchingWHILE(){
+        int tercetoBF = pilaIf.pop(); // posición del BF
+        int inicioWhile = pilaWhile.pop(); // posición inicial del WHILE
+        tercetos.get(tercetoBF).setOp2(String.valueOf(tercetos.size()+1)); // El BF salta al siguiente terceto (después del WHILE)
+        // Creamos el BI (salto incondicional al inicio del WHILE)
+        Terceto nuevo = new Terceto("bl", String.valueOf(inicioWhile), null);
+        tercetos.add(nuevo);
+        ParserVal val = new ParserVal();
+        val.sval = String.valueOf(tercetos.size() - 1);
+        return val;
+
+    }
+
+
+
+
     public static void imprimirTercetos() {
         System.out.println("===== LISTA DE TERCETOS =====");
         for (int i = 0; i < tercetos.size(); i++) {

@@ -2,21 +2,18 @@ MAIN {
     ulong CONTADOR,X,Y;
     CONTADOR := -5.4D-4 + 4UL;
     X,Y = 1UL, 5UL;
-    if (3UL <  1UL)  {
-        CONTADOR := 4UL;
-        X := 3UL;
-        Y := X;
-        if (X > Y) {
-            CONTADOR := CONTADOR + 1UL;
-            X := X + 2UL;
+    while (CONTADOR < 10UL) do {
+        if (X < 5UL) {
+            while (Y < 3UL) do {
+                if (X > Y) {
+                    X := X + 1UL;
+                } else {
+                    Y := Y + 1UL;
+                } endif;
+            };
         } else {
-            CONTADOR := CONTADOR - 1UL;
-            Y := Y + 2UL;
-        }endif;
-    }  else {
-        CONTADOR := 4UL;
-        X := 3UL;
-        Y := X;
-    }endif;
+            CONTADOR := CONTADOR + 1UL;
+        } endif;
+    };
 
 }

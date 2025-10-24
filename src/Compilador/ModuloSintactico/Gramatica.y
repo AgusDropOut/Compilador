@@ -105,14 +105,14 @@ sentencia_ejecutable  : /*1*/IF condicion_if '{' bloque_ejecutable '}' else '{' 
                       | asignacion_simple
                       | asignacion_multiple
                       | sentencia_return
-                      | WHILE condicion_while DO '{' bloque_ejecutable '}' { reportarEstructura("WHILE"); }
-                      | WHILE condicion_while DO sentencia_ejecutable { reportarEstructura("WHILE"); }
-                      | WHILE condicion_while DO  { yyerror("Error: falta cuerpo del WHILE");  }
-                      | WHILE condicion_while DO '{'  '}' { yyerror("Error: falta cuerpo del WHILE");  }
+                      | while condicion_while DO '{' bloque_ejecutable '}' { reportarEstructura("WHILE"); $$ = ArregloTercetos.completarBackPatchingWHILE(); }
+                      | while condicion_while DO sentencia_ejecutable { reportarEstructura("WHILE"); $$ = ArregloTercetos.completarBackPatchingWHILE(); }
+                      | while condicion_while DO  { yyerror("Error: falta cuerpo del WHILE");   }
+                      | while condicion_while DO '{'  '}' { yyerror("Error: falta cuerpo del WHILE");  }
                       | PRINT '('  ')' { yyerror("Error: falta argumento dentro del print"); }
                       /* */
-                      | WHILE condicion_while '{' bloque_ejecutable '}'  { yyerror("Error: falta palabra reservada DO");  }
-                      | WHILE condicion_while sentencia_ejecutable { yyerror("Error: falta palabra reservada DO");  }
+                      | while condicion_while '{' bloque_ejecutable '}'  { yyerror("Error: falta palabra reservada DO");  }
+                      | while condicion_while sentencia_ejecutable { yyerror("Error: falta palabra reservada DO");  }
                       /* */
                       | /*1*/IF condicion_if '{'  '}' else '{' bloque_ejecutable '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
                       | /*1*/IF condicion_if '{' bloque_ejecutable '}' else '{'  '}' end_if {yyerror("Error: Falta contenido en bloque then/else");}
@@ -133,6 +133,9 @@ sentencia_ejecutable  : /*1*/IF condicion_if '{' bloque_ejecutable '}' else '{' 
 else                  : ELSE {ArregloTercetos.crearTercetoBackPatchingIFDesapilaryCompletar("bl", null,null);}
                       ;
 
+while                 : WHILE { ArregloTercetos.apilarTercetoInicialWHILE(); }
+                      ;
+
 
 
 
@@ -146,7 +149,7 @@ condicion_if          : '(' condicion ')' {ArregloTercetos.crearTercetoBackPatch
                       | condicion {yyerror("Error: faltan parentesis de apertura '(' y cierre ')' en condicion");}
                       ;
 
-condicion_while       : '(' condicion ')'
+condicion_while       : '(' condicion ')' {ArregloTercetos.crearTercetoBackPatchingWHILE("bf", $2.sval,null);}
                       | condicion ')' {yyerror("Error: falta parentesis de apertura '(' en condicion");}
                       | '(' condicion {yyerror("Error: falta parentesis de cierre ')' en condicion");}
                       | condicion {yyerror("Error: faltan parentesis de apertura '(' y cierre ')' en condicion");}
