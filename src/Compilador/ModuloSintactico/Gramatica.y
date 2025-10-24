@@ -1,12 +1,14 @@
 %{
-package Compilador.ModuloSintactico;
 
+package Compilador.ModuloSintactico;
 import java.io.*;
 import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 import Compilador.ModuloSemantico.ArregloTercetos;
+import Compilador.ModuloSemantico.ControlAsigMultiple;
 import java.util.Stack;
+
 %}
 
 %left '+' '-'
@@ -33,9 +35,9 @@ declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sent
                                                                                           }
                       ;
 
-header_funcion        : tipo ID {entrarAmbito($2.sval);
-                                 System.out.println(ambito);
-                                 declaracionDeFuncion($2.sval, $1.sval, ambito, "Función");
+header_funcion        : tipo ID {
+                                 declaracionDeFuncion($2.sval, ambito, "Función");
+                                 entrarAmbito($2.sval);
                                  pilaReturns.push($2.sval + ":" + "false");
                                 }
                       | tipo error { yyerror("Error: Falta definir un nombre a la función"); }
@@ -74,15 +76,15 @@ sentencia_return      : RETURN expresion  {registrarReturn();}
 tipo                  : ULONG {tipo = "ulong";}
                       ;
 
-list_ctes             : CTE
-                      | list_ctes ',' CTE
+list_ctes             : CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); ControlAsigMultiple.pushTipoDer($$.tipo);}
+                      | list_ctes ',' CTE { $$.tipo = $1.tipo; ControlAsigMultiple.pushTipoDer(obtenerTipoDeSimbolo($3.sval)); }
                       | list_ctes CTE { yyerror("Error: se esperaba ',' entre constantes"); }
                       ;
 
-list_vars_mix         : ID {$$ = chequearAmbito("", ambito, $1.sval);}
-                      | list_vars_mix ',' ID {$$ = chequearAmbito("", ambito, $3.sval);}
-                      | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); }
-                      | list_vars_mix ',' ID '.' ID { $$ = chequearAmbito($3.sval, ambito, $5.sval); }
+list_vars_mix         : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); ControlAsigMultiple.pushTipoIzq($$.tipo); }
+                      | list_vars_mix ',' ID {$$ = chequearAmbito("", ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); ControlAsigMultiple.pushTipoIzq($$.tipo);}
+                      | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval);  $$.tipo = obtenerTipoDeSimbolo($$.sval); ControlAsigMultiple.pushTipoIzq($$.tipo);}
+                      | list_vars_mix ',' ID '.' ID { $$ = chequearAmbito($3.sval, ambito, $5.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); ControlAsigMultiple.pushTipoIzq($$.tipo);}
                       | list_vars_mix ID { yyerror("Error: se esperaba ',' entre variables"); }
                       | list_vars_mix ID '.' ID { yyerror("Error: se esperaba ',' entre variables"); }
                       ;
@@ -176,18 +178,20 @@ parametro_real        : expresion FLECHA ID
                       | expresion ID { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
                       ;
 
-condicion             : expresion COMP expresion {$$ = ArregloTercetos.crearTerceto("COMP", $1.sval, $3.sval);}
+condicion             : expresion COMP expresion {$$ = ArregloTercetos.crearTerceto("COMP", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo); }
                       ;
 
 asignacion_simple     : var_asignacion_simple ASIG expresion { reportarEstructura("asignacion simple");
-                                                               $$ = ArregloTercetos.crearTerceto(":=", $1.sval, $3.sval);}
+                                                               $$ = ArregloTercetos.crearTerceto(":=", $1.sval, $3.sval);
+                                                               $$.tipo = chequearTipos($1.tipo, $3.tipo);
+                                                               }
                       ;
 
-var_asignacion_simple : ID {$$ = chequearAmbito("", ambito, $1.sval);}
-                      | ID '.' ID {$$ = chequearAmbito($1.sval, ambito, $1.sval);}
+var_asignacion_simple : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+                      | ID '.' ID {$$ = chequearAmbito($1.sval, ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       ;
 
-asignacion_multiple   : list_vars_mix '=' list_ctes { reportarEstructura("asignacion multiple"); }
+asignacion_multiple   : list_vars_mix '=' list_ctes { reportarEstructura("asignacion multiple"); ControlAsigMultiple.compararTipos();}
                       ;
 
 
@@ -197,16 +201,16 @@ expresion_lambda      : '(' tipo ID ')' '{' bloque_ejecutable '}' '(' factor ')'
                       | '(' tipo ID ')'  bloque_ejecutable '('  factor ')'  { yyerror("Error: falta '{' y '}' en la expresion lambda"); }
                       ;
 
-expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto("+", $1.sval, $3.sval);}
-                      | expresion '-' termino {$$ = ArregloTercetos.crearTerceto("-", $1.sval, $3.sval);}
-                      | termino {$$ = $1;}
+expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto("+", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo); }
+                      | expresion '-' termino {$$ = ArregloTercetos.crearTerceto("-", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo);}
+                      | termino {$$ = $1; $$.tipo = $1.tipo;}
                       | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '+' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '-' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '-' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '+' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '-' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | TRUNC '(' expresion ')'
+                      | TRUNC '(' expresion ')' {$$.tipo = "ulong";}
                       | TRUNC '(' expresion error { yyerror("Error: falta ')' en la expresion TRUNC"); }
                       | TRUNC error  expresion ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
                       | TRUNC error expresion error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
@@ -216,22 +220,22 @@ expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto
 
 
 
-termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*", $1.sval, $3.sval); }
-                      | termino '/' factor {$$ = ArregloTercetos.crearTerceto("/", $1.sval, $3.sval);}
+termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo); }
+                      | termino '/' factor {$$ = ArregloTercetos.crearTerceto("/", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo);}
                       | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '*' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '/' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '/' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '*' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '/' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | factor {$$ = $1;}
+                      | factor {$$ = $1; $$.tipo = $1.tipo;}
                       ;
 
-factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); }
-                      | CTE
-                      | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); }
-                      | ID '(' parametros_reales ')'
-                      |'-' CTE { $$ = constanteNegativa($2); }
+factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+                      | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
+                      | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+                      | ID '(' parametros_reales ')' {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
+                      |'-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
                       ;
 
 
@@ -257,7 +261,7 @@ public void reportarEstructura(String estructura) {
         + AnalizadorLexico.getNumeroDeLinea());
 }
 
-public ParserVal constanteNegativa(ParserVal clave) {
+public ParserValExt constanteNegativa(ParserValExt clave) {
     ElementoTablaDeSimbolos original = TablaDeSimbolos.getSimbolo(clave.sval);
 
     if (original == null) {
@@ -282,7 +286,7 @@ public ParserVal constanteNegativa(ParserVal clave) {
     String nombreNuevo = "-" + clave.sval;
     TablaDeSimbolos.addSimbolo(nombreNuevo, nuevo);
 
-    ParserVal val = new ParserVal();
+    ParserValExt val = new ParserValExt();
     val.sval = nombreNuevo;
     return val;
 }
@@ -313,30 +317,30 @@ public void salirAmbito(){
 
 }
 public static String tipo;
-public ParserVal declaracionDeVariable(String token, String tipo, String ambito, String uso){
+public ParserValExt declaracionDeVariable(String token, String tipo, String ambito, String uso){
     String nombreNuevo = token + ":" + ambito;
-    ParserVal nuevoParserVal = new ParserVal();
+    ParserValExt nuevoParserValExt = new ParserValExt();
     if (!TablaDeSimbolos.estaSimbolo(nombreNuevo)) {
         ElementoTablaDeSimbolos nuevoElem = new ElementoTablaDeSimbolos();
         nuevoElem.setTipo(tipo);
         nuevoElem.setAmbito(ambito);
         nuevoElem.setUso(uso);
         TablaDeSimbolos.addSimbolo(nombreNuevo, nuevoElem);
-        nuevoParserVal.sval = nombreNuevo;
+        nuevoParserValExt.sval = nombreNuevo;
     } else {
         yyerror("Error: Redeclaracion de variable " + token + " en el ambito " + ambito);
-        nuevoParserVal.sval = token;
+        nuevoParserValExt.sval = token;
     }
-    return nuevoParserVal;
+    return nuevoParserValExt;
 }
 
-public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombreIdentificador) {
+public ParserValExt chequearAmbito(String prefijo, String ambitoReal, String nombreIdentificador) {
     ElementoTablaDeSimbolos elem = null;
     String claveBuscada = null;
     String ambitoDeBusqueda = ambito; // copia de la variable global ambito
     boolean simboloEncontrado = false;
     String ambitoActual = "";
-    ParserVal val = new ParserVal();
+    ParserValExt val = new ParserValExt();
     val.sval = nombreIdentificador; // Valor por defecto si no se encuentra
 
     if (!prefijo.isEmpty()) {
@@ -386,7 +390,7 @@ public ParserVal chequearAmbito(String prefijo, String ambitoReal, String nombre
     return val;
 }
 
-public void declaracionDeFuncion(String token, String tipoRetorno, String ambito, String uso) {
+public void declaracionDeFuncion(String token, String ambito, String uso) {
    //Comprobamos si ya existe un token con ese nombre en la TS
     ElementoTablaDeSimbolos original = TablaDeSimbolos.getSimbolo(token);
 
@@ -405,14 +409,13 @@ public void declaracionDeFuncion(String token, String tipoRetorno, String ambito
 
     // No existe, se añade como función
     ElementoTablaDeSimbolos nuevoElem = new ElementoTablaDeSimbolos();
-    nuevoElem.setTipo(tipoRetorno);
+    nuevoElem.setTipo(tipo);
     nuevoElem.setAmbito(ambito);
     nuevoElem.setUso("Función");
-    TablaDeSimbolos.addSimbolo(token, nuevoElem);
+    TablaDeSimbolos.addSimbolo(token + ":" + ambito, nuevoElem);
 }
 
 public static Stack<String> pilaReturns = new Stack<>();
-
 
 //Chequear que, al final de la función, se haya declarado los returns
  public void chequearReturn() {
@@ -441,4 +444,28 @@ public void registrarReturn() {
         } else {
             yyerror("Error: Sentencia return declarada fuera de función");
         }
+}
+
+//Función para el chequeo de tipos de variables y constantes
+public String chequearTipos(String tipo1, String tipo2){
+    if (!tipo1.equals(tipo2)){
+        yyerror("Error: Tipos incompatibles para la operación (" + tipo1 + " y " + tipo2 +").");
+        return "error";
+    }
+    else{
+        return tipo1;
+    }
+}
+
+//Función para obtener el tipo de una variable o constante
+
+public String obtenerTipoDeSimbolo(String claveTS) {
+    ElementoTablaDeSimbolos elemento = TablaDeSimbolos.getSimbolo(claveTS);
+    if (elemento != null) {
+        return elemento.getTipo();
+    }
+    else{
+        yyerror("Error: El elemento no existe");
+        return "error";
+    }
 }

@@ -4,11 +4,9 @@ import Compilador.ModuloSintactico.Parser;
 
 import java.util.HashMap;
 
-import java.util.HashMap;
-
 public class PalabrasReservadas {
     public static final String[] palabrasReservadas = {
-            "while","if","else","endif","print","return","do","ulong",
+            "while","if","else","endif","print","return","do","ulong", "trunc"
     };
 
     private static final HashMap<String, Short> mapaPalabrasReservadas = new HashMap<>();
@@ -23,6 +21,7 @@ public class PalabrasReservadas {
         mapaPalabrasReservadas.put("return", Parser.RETURN);
         mapaPalabrasReservadas.put("do", Parser.DO);
         mapaPalabrasReservadas.put("ulong", Parser.ULONG);
+        mapaPalabrasReservadas.put("trunc", Parser.TRUNC);
     }
 
     public static boolean existe(String palabra) {

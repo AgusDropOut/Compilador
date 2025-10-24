@@ -1,7 +1,7 @@
 package Compilador.ModuloLexico;
 
 import Compilador.ModuloSintactico.Parser;
-import Compilador.ModuloSintactico.ParserVal;
+import Compilador.ModuloSintactico.ParserValExt;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,10 +18,10 @@ public class AnalizadorLexico {
     private static StringBuilder lexema;
     private static int estadoActual = 0;
     private static TablaDeSimbolos tablaDeSimbolos;
-    public static ParserVal yylval;
+    public static ParserValExt yylval;
     public static boolean flag =true;
 
-    public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos, ParserVal yyval) throws IOException {
+    public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos, ParserValExt yyval) throws IOException {
         AnalizadorLexico.matrizDeTransicion = matrizDeTransicion;
         puntero = new Puntero(0);
         content = new String(Files.readAllBytes(Paths.get(codigoFuente)));

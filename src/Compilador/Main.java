@@ -3,7 +3,7 @@ package Compilador;
 import Compilador.ModuloLexico.*;
 import Compilador.ModuloSemantico.ArregloTercetos;
 import Compilador.ModuloSintactico.Parser;
-import Compilador.ModuloSintactico.ParserVal;
+import Compilador.ModuloSintactico.ParserValExt;
 
 import java.io.*;
 
@@ -18,7 +18,7 @@ public class Main {
 
         MapaDeSimbolos mapa = new MapaDeSimbolos();
         TablaDeSimbolos tablaDeSimbolos = new TablaDeSimbolos();
-        ParserVal yylval = new ParserVal();
+        ParserValExt yylval = new ParserValExt();
 
         AnalizadorLexico lexer = new AnalizadorLexico(
                 new MatrizDeTransicion(mapa),

@@ -1,7 +1,7 @@
 package Compilador.ModuloLexico;
 
 import Compilador.ModuloSintactico.Parser;
-import Compilador.ModuloSintactico.ParserVal;
+import Compilador.ModuloSintactico.ParserValExt;
 
 import java.util.HashMap;
 
@@ -59,15 +59,15 @@ public class MapaDeTokensAID {
             return mapa.get(lexema);
         } else {
             if(tokenID) {
-                AnalizadorLexico.yylval = new ParserVal(lexema);
+                AnalizadorLexico.yylval = new ParserValExt(lexema);
                 tokenID = false;
                 return Parser.ID;
             } else if (tokenCTE)  {
-                AnalizadorLexico.yylval = new ParserVal(lexema);
+                AnalizadorLexico.yylval = new ParserValExt(lexema);
                 tokenCTE = false;
                 return Parser.CTE;
             } else {
-                AnalizadorLexico.yylval = new ParserVal(lexema);
+                AnalizadorLexico.yylval = new ParserValExt(lexema);
                 tokenCADENA = false;
                 return Parser.CADENA;
             }
