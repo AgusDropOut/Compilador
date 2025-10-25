@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class PalabrasReservadas {
     public static final String[] palabrasReservadas = {
-            "while","if","else","endif","print","return","do","ulong", "trunc"
+            "while","if","else","endif","print","return","do","ulong", "trunc", "cr"
     };
 
     private static final HashMap<String, Short> mapaPalabrasReservadas = new HashMap<>();
@@ -22,6 +22,7 @@ public class PalabrasReservadas {
         mapaPalabrasReservadas.put("do", Parser.DO);
         mapaPalabrasReservadas.put("ulong", Parser.ULONG);
         mapaPalabrasReservadas.put("trunc", Parser.TRUNC);
+        mapaPalabrasReservadas.put("cr", Parser.CR);
     }
 
     public static boolean existe(String palabra) {

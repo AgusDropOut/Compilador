@@ -8,6 +8,9 @@ import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 import Compilador.ModuloSemantico.ArregloTercetos;
 import Compilador.ModuloSemantico.ControlAsigMultiple;
 import java.util.Stack;
+import Compilador.ModuloSemantico.PilaDeFuncionesLlamadas;
+import java.util.HashMap;
+import java.util.Map;
 
 %}
 
@@ -59,8 +62,8 @@ parametros_formales   : parametro_formal
                       | parametros_formales ',' parametro_formal
                       ;
 
-parametro_formal      : semantica tipo ID
-                      | tipo ID
+parametro_formal      : semantica tipo ID {registrarParametroFuncion($3.sval,"cr");}
+                      | tipo ID {registrarParametroFuncion($2.sval,"cv");}
                       | semantica tipo error { yyerror("Error: Falta definir el nombre del parametro formal"); }
                       | tipo error { yyerror("Error: Falta definir el nombre del parametro formal"); }
                       | semantica error ID { yyerror("Error: Falta definir el tipo del parametro formal"); }
@@ -70,7 +73,18 @@ parametro_formal      : semantica tipo ID
 semantica             : CR
                       ;
 
-sentencia_return      : RETURN expresion  {registrarReturn();}
+sentencia_return      : RETURN expresion  {registrarReturn();
+
+                                                          // Crear nombre para la variable de retorno (puede ser _ret_funcion:ambito)
+                                                          String varRetorno = "_ret_" + ambito;
+
+                                                          // Generar terceto para asignar el valor de retorno
+                                                          ArregloTercetos.crearTerceto(":=", varRetorno, $2.sval);
+
+                                                          // Generar terceto de salto al final de la función
+                                                          ArregloTercetos.crearTerceto("JMP", "fin_" + ambito, null);
+
+                                             }
                       ;
 
 tipo                  : ULONG {tipo = "ulong";}
@@ -173,7 +187,18 @@ parametros_reales     : parametro_real
                       | error { yyerror("Error: Declaracion de parametro real invalida"); }
                       ;
 
-parametro_real        : expresion FLECHA ID
+parametro_real        : expresion FLECHA ID {
+                                                    String funcionActual = PilaDeFuncionesLlamadas.desapilarFuncion();
+                                                    String paramFormal = $3.sval + ":" + funcionActual;
+                                                    String tipoFormal = obtenerTipoDeSimbolo(paramFormal);
+                                                    $$.tipo = chequearTipos($1.tipo, tipoFormal);
+                                                    realizarPasajeCopiaValor(paramFormal, $1.sval);
+
+                                                    // ⚡ Nuevo: registrar vínculo si el parámetro es cr
+                                                    if (esParametroCR(paramFormal)) {
+                                                        registrarVinculoCR(paramFormal, $1.sval);
+                                                    }
+                                            }
                       | expresion FLECHA error { yyerror("Error: Falta definir el nombre del parametro formal"); }
                       | expresion ID { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
                       ;
@@ -234,9 +259,39 @@ termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*
 factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
                       | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
-                      | ID '(' parametros_reales ')' {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
+                      | inicio_llamado '(' parametros_reales ')' {
+
+                        // ⚡ Generar terceto CALL usando el ID que guardó inicio_llamado
+                        $$ = ArregloTercetos.crearTerceto("CALL", $1.sval, null);
+
+                        // ⚡ Guardar el tipo de retorno de la función
+                        $$.tipo = obtenerTipoDeSimbolo($1.sval);
+
+                        // ⚡ Crear una temporal para almacenar el valor de retorno
+                        String temp = "_t" + ArregloTercetos.declararTemporal($$.tipo,ambito); // nombre temporal único
+                        declaracionDeVariable(temp, $$.tipo, ambito, "temporal");
+
+                        // ⚡ Asignar el valor retornado (_ret_<funcion>) a la temporal
+                        String retName = "_ret_" + obtenerAmbito($1.sval);
+                        ArregloTercetos.crearTerceto(":=", temp, retName);
+
+                        // ⚡ Guardar temporal como valor semántico del factor
+                        $$.sval = temp;
+
+                        // ⚡ Finalizar la gestión de pila de funciones
+                        PilaDeFuncionesLlamadas.finalizarLlamada();
+
+                        // ⚡ Realizar pasajes de copia-resultado si hay CR
+                         realizarPasajesCopiaResultado();
+                      }
                       |'-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
                       ;
+
+
+inicio_llamado : ID
+      { $$ = chequearAmbito("", ambito, $1.sval);
+      PilaDeFuncionesLlamadas.iniciarLlamada(ambito+":"+$1.sval); }
+;
 
 
 %%
@@ -465,7 +520,80 @@ public String obtenerTipoDeSimbolo(String claveTS) {
         return elemento.getTipo();
     }
     else{
-        yyerror("Error: El elemento no existe");
+        yyerror("Error: El elemento "+ claveTS + " no existe");
         return "error";
     }
+}
+
+public ParserValExt registrarParametroFuncion(String parametro,String semantica) {
+    String nombreParametro = parametro + ":" + ambito;
+    ElementoTablaDeSimbolos elemento = new ElementoTablaDeSimbolos();
+    elemento.setSemanticaPasaje(semantica);
+    elemento.setTipo(tipo);
+    elemento.setAmbito(ambito);
+    elemento.setUso("parametro");
+    TablaDeSimbolos.addSimbolo(nombreParametro, elemento);
+
+    ParserValExt val = new ParserValExt();
+    val.sval = nombreParametro;
+    return val;
+}
+
+public void realizarPasajeCopiaValor(String parametro, String valor) {
+    ElementoTablaDeSimbolos elemento = TablaDeSimbolos.getSimbolo(parametro);
+    if (elemento != null) {
+        if(elemento.getSemanticaPasaje().equals("cv")) {
+            ArregloTercetos.crearTerceto(":=", parametro, valor);
+        }
+    } else {
+        yyerror("Error: El parámetro " + parametro + " no existe en la tabla de símbolos.");
+    }
+}
+
+
+static Map<String, String> vinculosCR = new HashMap<>();
+
+public void registrarVinculoCR(String formal, String real) {
+    // Chequeo: que 'real' exista en la tabla de símbolos
+    ElementoTablaDeSimbolos elem = TablaDeSimbolos.getSimbolo(real);
+    if (elem == null) {
+        yyerror("Error: la variable '" + real + "' no existe en el ámbito actual.");
+        return;
+    }
+
+    // Chequeo: que sea una variable, no una constante ni otra cosa
+    if (!"Variable".equals(elem.getUso())) {
+        yyerror("Error: el parámetro de copia-resultado debe ser una variable" );
+        return;
+    }
+
+    // Si pasa los chequeos, registramos el vínculo
+    vinculosCR.put(formal, real);
+}
+
+public boolean esParametroCR(String nombreParamFormal) {
+    ElementoTablaDeSimbolos e = TablaDeSimbolos.getSimbolo(nombreParamFormal);
+    return e != null && "cr".equalsIgnoreCase(e.getSemanticaPasaje());
+}
+
+public void realizarPasajesCopiaResultado() {
+    for (Map.Entry<String, String> entry : vinculosCR.entrySet()) {
+        String formal = entry.getKey();
+        String real = entry.getValue();
+        ArregloTercetos.crearTerceto(":=", real, formal);
+    }
+    vinculosCR.clear(); // Limpiamos para la próxima llamada
+}
+
+public String obtenerAmbito(String claveTS) {
+    ElementoTablaDeSimbolos elemento = TablaDeSimbolos.getSimbolo(claveTS);
+    if (elemento != null) {
+        int pos = claveTS.indexOf(":");  // busca el primer ':'
+        return ambito + ":" + claveTS.substring(0, pos); // devuelve solo la parte antes de ':'
+
+    } else {
+        yyerror("Error: El elemento " + claveTS + " no existe");
+        return "error";
+    }
+
 }

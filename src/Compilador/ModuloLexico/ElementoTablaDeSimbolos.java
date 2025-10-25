@@ -5,6 +5,7 @@ public class ElementoTablaDeSimbolos {
     private String tipo;
     private String ambito;
     private String uso;
+    private String semanticaPasaje;
 
     public ElementoTablaDeSimbolos() {
     }
@@ -34,6 +35,12 @@ public class ElementoTablaDeSimbolos {
     public String getUso() {
         return uso;
     }
+    public void setSemanticaPasaje(String semanticaPasaje) {
+        this.semanticaPasaje = semanticaPasaje;
+    }
+    public String getSemanticaPasaje() {
+        return semanticaPasaje;
+    }
 
     @Override
     public String toString() {
@@ -42,6 +49,7 @@ public class ElementoTablaDeSimbolos {
                 ", tipo=" + tipo +
                 ", uso=" + uso +
                 ", ambito=" + ambito +
+                ", semanticaPasaje=" + semanticaPasaje +
                 '}';
     }
 }

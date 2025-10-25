@@ -1,11 +1,11 @@
 MAIN {
 
-     ulong HOLA(ulong A, ulong B) {
+     ulong HOLA(cr ulong A, cr ulong B) {
              return 0UL;
      }
     ulong CONTADOR,X,Y, A;
-    CONTADOR := trunc(trunc(-5.4D-4) + 0UL) + HOLA(3UL -> A, 4UL -> B);
-    Y, X, A  = 1UL, 5.4D+10;
+    CONTADOR := HOLA(X -> A, Y -> B);
+    Y, X  = 1UL, 2UL;
     while (CONTADOR < 10UL) do {
         if (X < 5UL) {
             while (Y < 3UL) do {

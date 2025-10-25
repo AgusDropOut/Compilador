@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
+import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloSintactico.ParserValExt;
 
 public class ArregloTercetos {
@@ -99,6 +101,33 @@ public class ArregloTercetos {
                     t.getOp2() != null ? t.getOp2() : "_");
         }
         System.out.println("=============================");
+    }
+
+    private static int contadorTemporales = 0;
+
+    /**
+     * Genera un nombre único para una variable temporal.
+     * @return nombre de la variable temporal (ej: _t1, _t2, ...)
+     */
+    public static String nuevaTemporal() {
+        contadorTemporales++;
+        return "_t" + contadorTemporales;
+    }
+
+
+    public static String declararTemporal(String tipo, String ambitoActual) {
+        String nombreTemp = nuevaTemporal();
+        // Agregar ambito al nombre de la tabla de símbolos
+        String nombreCompleto = nombreTemp + ":" + ambitoActual;
+
+        // Crear elemento en la tabla de símbolos
+        ElementoTablaDeSimbolos elem = new ElementoTablaDeSimbolos();
+        elem.setTipo(tipo);
+        elem.setUso("temporal");
+        elem.setAmbito(ambitoActual);
+        TablaDeSimbolos.addSimbolo(nombreCompleto, elem);
+
+        return nombreCompleto;
     }
 
 }
