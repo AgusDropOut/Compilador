@@ -33,8 +33,12 @@ list_sentencia        : /* empty */
                       ;
 
 declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
+                                                                                            // Etiqueta de fin de función
+                                                                                            String etiquetaFin = "fin_" + ambito; // o derivar el nombre de la función de otra forma
+                                                                                            ArregloTercetos.crearTerceto(etiquetaFin, "_", "_");
                                                                                             salirAmbito();
                                                                                             chequearReturn();
+
                                                                                           }
                       ;
 
@@ -42,6 +46,10 @@ header_funcion        : tipo ID {
                                  declaracionDeFuncion($2.sval, ambito, "Función");
                                  entrarAmbito($2.sval);
                                  pilaReturns.push($2.sval + ":" + "false");
+
+                                 // Crear etiqueta de inicio de función para los tercetos
+                                 String etiquetaInicio = "ini_" + ambito ;
+                                 ArregloTercetos.crearTerceto(etiquetaInicio, "_", "_");
                                 }
                       | tipo error { yyerror("Error: Falta definir un nombre a la función"); }
                       ;

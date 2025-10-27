@@ -1,6 +1,6 @@
 MAIN {
 
-     ulong HOLA(cr ulong A, cr ulong B) {
+     ulong HOLA(ulong A, ulong B) {
              return 0UL;
      }
     ulong CONTADOR,X,Y, A;
