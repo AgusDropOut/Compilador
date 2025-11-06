@@ -1,24 +1,15 @@
 MAIN {
+    ulong CONTADOR, B;
+    CONTADOR := 34UL;
 
-     ulong HOLA(ulong A, ulong B) {
-             return 0UL;
-     }
-    ulong CONTADOR,X,Y, A;
-    CONTADOR := HOLA(X -> A, Y -> B);
-    Y, X  = 1UL, 2UL;
-    while (CONTADOR < 10UL) do {
-        if (X < 5UL) {
-            while (Y < 3UL) do {
-                if (X > Y) {
-                    X := X + 1UL;
-                } else {
-                    Y := Y + 1UL;
-                } endif;
-            };
-        } else {
-            CONTADOR := CONTADOR + 1UL;
-        } endif;
-    };
+    (ulong A) {
+        while (A <= 65UL) do {
+            print(A);
+            if (A > 32UL) {
+                print(CONTADOR);
+            } endif;
+        };
+        print(A + 3UL);
 
-
+    } (9UL + 14UL); ##Esto no se puede debido a que la gramática no permite que las expresiones sean factores lambda. No se si habría que implementarlo o no, para mi es solo complicar más la gramática, sino que se arregle el programador y fue jaja##
 }

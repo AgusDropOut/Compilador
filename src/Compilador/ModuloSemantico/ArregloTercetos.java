@@ -4,6 +4,8 @@ package Compilador.ModuloSemantico;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 import Compilador.ModuloLexico.TablaDeSimbolos;
@@ -129,5 +131,4 @@ public class ArregloTercetos {
 
         return nombreCompleto;
     }
-
 }

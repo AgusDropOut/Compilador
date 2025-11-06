@@ -72,12 +72,12 @@ public class ControlAsigMultiple {
             String tipoDer = listaTiposDer.get(i);
             System.out.println("Comparando tipos: " + tipoIzq + " con " + tipoDer);
             if (!tipoIzq.equals(tipoDer)) {
-                System.out.println("Error de tipo en asignación múltiple: no se puede asignar " + tipoDer + " a " + tipoIzq);
+                System.err.println("Error de tipo en asignación múltiple: no se puede asignar " + tipoDer + " a " + tipoIzq);
             }
         }
 
         if (cantElemsIzq > cantElemsDer) {
-            System.out.println("Error: número mayor de variables del lado izquierdo en asignación múltiple (cant_izq: " + cantElemsIzq + " cant_der: " + cantElemsDer + ")");
+            System.err.println("Error: número mayor de variables del lado izquierdo en asignación múltiple (cant_izq: " + cantElemsIzq + " cant_der: " + cantElemsDer + ")");
         }
 
         // limpiar listas
