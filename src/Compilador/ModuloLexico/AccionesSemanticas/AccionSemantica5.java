@@ -1,6 +1,7 @@
 package Compilador.ModuloLexico.AccionesSemanticas;
 
 import Compilador.ModuloLexico.*;
+import Compilador.Util.RecolectorDeErrores;
 
 import java.io.IOException;
 ;
@@ -17,10 +18,11 @@ public class AccionSemantica5 implements AccionSemantica {
             ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
             elementoTablaDeSimbolos.setTipo("ulong");
             elementoTablaDeSimbolos.setValor(Double.parseDouble(numero));
+            elementoTablaDeSimbolos.setUso("cte");
             TablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
             MapaDeTokensAID.tokenCTE = true;
         } else {
-            System.out.println("Error linea " + AnalizadorLexico.getNumeroDeLinea()  + ":" + " El numero " + lexema.toString() + " esta fuera del rango permitido para el sufijo ulong" );
+            RecolectorDeErrores.agregarError(" El numero " + lexema.toString() + " esta fuera del rango permitido para el sufijo ulong", AnalizadorLexico.getNumeroDeLinea());
         }
     }
 }

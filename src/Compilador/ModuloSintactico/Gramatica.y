@@ -9,6 +9,8 @@ import Compilador.ModuloSemantico.ArregloTercetos;
 import Compilador.ModuloSemantico.ControlAsigMultiple;
 import java.util.Stack;
 import Compilador.ModuloSemantico.PilaDeFuncionesLlamadas;
+import Compilador.Util.RegistroDeConstantes;
+import Compilador.Util.RecolectorDeErrores; // <-- 1. IMPORTACIÓN AÑADIDA
 import java.util.HashMap;
 import java.util.Map;
 import java.util.HashSet;
@@ -26,15 +28,17 @@ import java.util.ArrayList;
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  COMP  CADENA FLECHA
 
 %%
-programa              : ID '{' list_sentencia '}' { }
-                      |  '{' list_sentencia '}' { yyerror("Error: Falta definir un nombre al programa"); }
-                      | ID  list_sentencia '}' { yyerror("Error: Falta delimitador del programa '{' al inicio"); }
-                      | ID  list_sentencia  { yyerror("Error: Falta delimitadores del programa '{' al inicio y '}' al final"); }
+programa              : nombre_programa  '{' list_sentencia '}'{ reportarEstructura("Fin del programa");}
+                      | nombre_programa  '{' list_sentencia '}' '}'{ yyerror("Error: '}' de mas al final de programa");}
+                      | nombre_programa  list_sentencia '}' { yyerror("Error: Falta delimitador del programa '{' al inicio"); }
+                      | nombre_programa '{' list_sentencia  { yyerror("Error: Falta delimitador del programa '}' al final"); }
+                      | nombre_programa  list_sentencia  { yyerror("Error: Falta delimitadores del programa '{' al inicio y '}' al final"); }
+                      | '{' list_sentencia '}' { yyerror("Error: Falta definir el nombre del programa"); }
                       ;
 
-list_sentencia        : /* empty */
-                      | list_sentencia sentencia
+nombre_programa       : ID  {ambito = $1.sval;}
                       ;
+
 
 declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
                                                                                             // Etiqueta de fin de función
@@ -58,14 +62,25 @@ header_funcion        : tipo ID {
                       | tipo error { yyerror("Error: Falta definir un nombre a la función"); }
                       ;
 
-
-sentencia             : sentencia_declarativa ';'
-                      | sentencia_ejecutable ';'
-                      | declaracion_funcion
-                      | sentencia_declarativa error { yyerror("Error: Sentencia no reconocida, se esperaba ';'"); }
-                      | sentencia_ejecutable error { yyerror("Error: Sentencia no reconocida, se esperaba ';'"); }
-                      | error ';' {yyerror("Error: Sentencia invalida");}
+list_sentencia        : /* empty */
+                      | list_sentencia sentencia
+                      | list_sentencia error  {
+                            yyerror("Error: Sentencia inválida o mal terminada antes del cierre del bloque '}'");
+                        }
                       ;
+
+sentencia
+                      : sentencia_declarativa ';'
+                      | sentencia_ejecutable ';'
+                      | declaracion_funcion ';'
+                      /* Errores comunes */
+                      | sentencia_declarativa error { yyerror("Error: Falta ';' al final de la declaración"); }
+                      | declaracion_funcion error { yyerror("Error: Falta ';' al final de la declaración de funcion"); }
+                      | sentencia_ejecutable error { yyerror("Error: Falta ';' al final de la sentencia ejecutable"); }
+                      | error ';' { yyerror("Error: Sentencia inválida detectada — se descarta hasta ';', revisar ';' faltantes"); }
+                      ;
+
+
 
 sentencia_declarativa : tipo list_vars { reportarEstructura("declaracion de variable(s)"); }
                       ;
@@ -85,7 +100,7 @@ parametro_formal      : semantica tipo ID {registrarParametroFuncion($3.sval,"cr
 semantica             : CR
                       ;
 
-sentencia_return      : RETURN expresion  {registrarReturn();
+sentencia_return      : RETURN '(' expresion ')'  {registrarReturn();
 
                                                           // Crear nombre para la variable de retorno (puede ser _ret_funcion:ambito)
                                                           String varRetorno = "_ret_" + ambito;
@@ -354,10 +369,6 @@ expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto
                       | expresion '-' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '+' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       | error '-' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | TRUNC '(' expresion ')' {$$.tipo = "ulong";}
-                      | TRUNC '(' expresion error { yyerror("Error: falta ')' en la expresion TRUNC"); }
-                      | TRUNC error  expresion ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
-                      | TRUNC error expresion error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
                       ;
 
 
@@ -402,6 +413,18 @@ factor                : ID %prec LOWER_THAN_CALL {$$ = chequearAmbito("", ambito
                                                                    realizarPasajesCopiaResultado();
                                          }
                       |'-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
+                      | TRUNC '(' expresion ')' {
+                                                  // Esta es la acción semántica correcta:
+                                                  // 1. Crea un terceto para la operación TRUNC.
+                                                  // 2. El resultado (temporal) es el sval de este factor.
+                                                  // 3. El tipo es ulong.
+                                                  $$ = ArregloTercetos.crearTerceto("TRUNC", $3.sval, null);
+                                                  $$.tipo = "ulong";
+                      }
+                      | TRUNC '(' expresion error { yyerror("Error: falta ')' en la expresion TRUNC"); }
+                      | TRUNC error  expresion ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
+                      | TRUNC error expresion error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
+
                       ;
 
 inicio_llamado        : ID '(' {
@@ -417,6 +440,7 @@ public void resetErrores() {
     erroresEmitidos.clear();
 }
 
+
 public void yyerror(String s) {
      int linea = AnalizadorLexico.getNumeroDeLinea();
      if (linea != ultimaLineaError){ //En caso de cambiar de linea, reseteamos los errores que fuimos capturando
@@ -424,10 +448,9 @@ public void yyerror(String s) {
      }
      ultimaLineaError = linea;
      String clave = linea + "|" + s; // (línea, mensaje de error)
-        if (erroresEmitidos.add(clave)) { //Si todavía no se mostró el error en esa límea, lo mostramos
-           System.err.println("Error de sintaxis en línea " + linea + ": " + s);
+        if (erroresEmitidos.add(clave)) { //Si todavía no se mostró el error en esa línea, lo agregamos al recolector
+           RecolectorDeErrores.agregarError(s, linea); // <-- NUEVA LÍNEA
         }
-        //Caso contrario, no hacemos nada
 }
 
 public int yylex() {
@@ -465,10 +488,12 @@ public ParserValExt constanteNegativa(ParserValExt clave) {
     ElementoTablaDeSimbolos nuevo = new ElementoTablaDeSimbolos();
     nuevo.setValor(valorNegado);
     nuevo.setTipo(tipo);
-    nuevo.setUso("cte_negada");
+    nuevo.setUso("cte");
 
     String nombreNuevo = "-" + clave.sval;
     TablaDeSimbolos.addSimbolo(nombreNuevo, nuevo);
+    RegistroDeConstantes.registrarConstante(nombreNuevo);
+    RegistroDeConstantes.desregistrarConstante(clave.sval);
 
     ParserValExt val = new ParserValExt();
     val.sval = nombreNuevo;
@@ -488,7 +513,7 @@ public boolean estaDentroDeRango(double valor, String tipo) {
     }
 }
 
-public static String ambito = "PROGRAMA";
+public static String ambito = "";
 public void entrarAmbito(String ambitoNuevo){
     ambito = ambito+":"+ambitoNuevo;
 }
@@ -525,12 +550,13 @@ public ParserValExt chequearAmbito(String prefijo, String ambitoReal, String nom
     boolean simboloEncontrado = false;
     String ambitoActual = "";
     ParserValExt val = new ParserValExt();
-    val.sval = nombreIdentificador; // Valor por defecto si no se encuentra
+    val.sval = nombreIdentificador; // Valor por defecto
 
     if (!prefijo.isEmpty()) {
-        while (!simboloEncontrado && !ambitoDeBusqueda.isEmpty()) {
+
+        // Bucle para buscar el ámbito del prefijo
+        while (!ambitoDeBusqueda.isEmpty()) {
             int pos = ambitoDeBusqueda.lastIndexOf(":");
-            System.out.println("ambito: " + ambitoDeBusqueda);
 
             if (pos == -1) {
                 ambitoActual = ambitoDeBusqueda;
@@ -538,29 +564,35 @@ public ParserValExt chequearAmbito(String prefijo, String ambitoReal, String nom
                 ambitoActual = ambitoDeBusqueda.substring(pos + 1);
             }
 
+            // ¿Es este el ámbito que buscamos (por el prefijo)?
             if (ambitoActual.equals(prefijo)) {
                 claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
                 elem = TablaDeSimbolos.getSimbolo(claveBuscada);
-                simboloEncontrado = true;
 
-                if (elem == null) {
-                    yyerror("El símbolo '" + nombreIdentificador +
-                        "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
-                } else {
+                if (elem != null) {
+                    // ¡Encontrado!
                     val.sval = claveBuscada;
+                    simboloEncontrado = true;
+                    break; // <-- SALIR DEL LOOP
                 }
             }
 
-            // Evita StringIndexOutOfBoundsException
+            // Si no lo encontramos, subimos al ámbito padre
             if (pos == -1) {
-            yyerror("El símbolo '" + nombreIdentificador +
-                                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
-                ambitoDeBusqueda = ""; // ya no hay más niveles
+                ambitoDeBusqueda = "";
             } else {
                 ambitoDeBusqueda = ambitoDeBusqueda.substring(0, pos);
             }
         }
+
+
+        if (!simboloEncontrado) {
+            yyerror("El símbolo '" + nombreIdentificador +
+                    "' no se encuentra en el ámbito del prefijo '" + prefijo + "'.");
+        }
+
     } else {
+        // Lógica original para variables sin prefijo
         claveBuscada = nombreIdentificador + ":" + ambitoDeBusqueda;
         elem = TablaDeSimbolos.getSimbolo(claveBuscada);
         if (elem == null) {
@@ -686,7 +718,7 @@ public void registrarVinculoCR(String formal, String real) {
     // Chequeo: que 'real' exista en la tabla de símbolos
     ElementoTablaDeSimbolos elem = TablaDeSimbolos.getSimbolo(real);
     if (elem == null) {
-        yyerror("Error: la variable '" + real + "' no existe en el ámbito actual.");
+        yyerror("Error: la variable utilizada para el pasaje copia resultado no existe en el ámbito actual o se esta utilizando algo que no es una variable.");
         return;
     }
 
@@ -748,5 +780,3 @@ public static void crearTercetosAsigMultiple(String variables, String constantes
         ArregloTercetos.crearTerceto(":=", ladoIzquierdo.get(i), ladoDerecho.get(i));
       }
 }
-
-

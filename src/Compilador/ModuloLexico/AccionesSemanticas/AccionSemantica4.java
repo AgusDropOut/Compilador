@@ -1,6 +1,7 @@
 package Compilador.ModuloLexico.AccionesSemanticas;
 
 import Compilador.ModuloLexico.*;
+import Compilador.Util.RecolectorDeErrores;
 
 import java.io.IOException;
 
@@ -12,16 +13,10 @@ public class AccionSemantica4 implements AccionSemantica {
 
         if(lexema.toString().length() > 20) {
             StringBuilder lexemaTruncado = new StringBuilder(lexema.toString().substring(0, 20));
-            System.out.println("WARNING linea " + AnalizadorLexico.getNumeroDeLinea()  + ":" +" el identificador " + lexema.toString() + " supera los 20 caracteres maximos, sera truncado a " + lexemaTruncado);
-            lexema = lexemaTruncado;
+            RecolectorDeErrores.agregarWarning(" el identificador " + lexema.toString() + " supera los 20 caracteres maximos, sera truncado a " + lexemaTruncado, AnalizadorLexico.getNumeroDeLinea());
+            lexema.setLength(0);
+            lexema.append(lexemaTruncado);
         }
-
-
-       //if (tablaDeSimbolos.estaSimbolo(lexema.toString())){
-       //} else {
-       //    ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
-       //    TablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
-       //}
         MapaDeTokensAID.tokenID = true;
     }
 }

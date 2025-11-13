@@ -31,6 +31,10 @@ public class TablaDeSimbolos {
         }
     }
 
+    public static void eliminarSimbolo(String lexema) {
+        tablaSimbolos.remove(lexema);
+    }
+
 
 
 

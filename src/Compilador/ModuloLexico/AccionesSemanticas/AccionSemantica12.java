@@ -11,7 +11,7 @@ public class AccionSemantica12 implements AccionSemantica {
         lexema.append(c);
         MapaDeTokensAID.tokenCADENA = true;
         ElementoTablaDeSimbolos elementoTablaDeSimbolos = new ElementoTablaDeSimbolos();
-        elementoTablaDeSimbolos.setTipo("dfloat");
+        elementoTablaDeSimbolos.setTipo("cadena");
         TablaDeSimbolos.addSimbolo(lexema.toString(), elementoTablaDeSimbolos);
 
     }

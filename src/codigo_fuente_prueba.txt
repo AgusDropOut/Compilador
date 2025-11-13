@@ -1,37 +1,30 @@
-MAIN {
-
-     ulong HOLA(ulong A, ulong B) {
-             return 0UL;
-     }
-    ulong CONTADOR,X,Y, A;
-    CONTADOR := HOLA(X -> A, Y -> B);
-    Y, X  = 1UL, 2UL;
-    while (CONTADOR < 10UL) do {
-        if (X < 5UL) {
-            while (Y < 3UL) do {
-                if (X > Y) {
-                    X := X + 1UL;
-                } else {
-                    Y := Y + 1UL;
-                } endif;
-            };
-        } else {
-            CONTADOR := CONTADOR + 1UL;
-        } endif;
+PROGRAM {
+    ulong X1, X2;
+    ulong F(cr ulong A)
+    {
+        return (2UL);
     };
 
- ##Testeo para lambda##
-    ulong CONTADOR, B;
-    CONTADOR := 34UL;
+    X1 := X2 + X2 - X2 * F(X2->A) / X2;
+    print(X2+X2);
+     ulong X1, X2;
+     ulong F(cr ulong A)
+     {
+        return (2UL);
+     };
 
-    (ulong A) {
-        while (A <= 65UL) do {
-            print(A);
-            if (A > 32UL) {
-                print(CONTADOR);
-            } endif;
-        };
-        print(A + 3UL);
-    } (9UL + 14UL); ##Esto no se puede debido a que la gramática no permite que las expresiones sean factores lambda. No se si habría que implementarlo o no, para mi es solo complicar más la gramática, sino que se arregle el programador y fue jaja##
+     X2 := X1 +A + X1 * A+ X1 / A/ X1 + X1 + A+0UL -1UL -  - 3UL;
 
+     print(X1);
+
+     X2 := X1 - - 1UL / - -2.1 * * (ulong X) { return (X); } (PROGRAMA.X1) - X1 - - + + + F(X1->A);
+     X2 := -F(X1->A);
+     X2 := - - 2.1;
+     X2 := + 2.1;
+     X2 := * 2.1;
+     X2 := / 2.1;
+
+     X2 := 2.1 3UL 4UL F(X1->A);
+
+  ##   X2 := 2UL (ulong X) { return (2UL); } (X1);##
 }

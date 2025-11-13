@@ -28,8 +28,10 @@ public class MapaDeSimbolos {
         SYMBOL_MAP.put('>', 13);
         SYMBOL_MAP.put('#', 14);
         SYMBOL_MAP.put(' ', 15);
+        SYMBOL_MAP.put('\t', 15);
         SYMBOL_MAP.put('\n', 16);
         SYMBOL_MAP.put('\r', 16);
+
         SYMBOL_MAP.put('!', 17);
         SYMBOL_MAP.put('"', 18);
         SYMBOL_MAP.put('%', 6);

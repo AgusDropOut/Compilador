@@ -8,12 +8,10 @@ import Compilador.Util.RecolectorDeErrores;
 
 import java.io.IOException;
 
-public class AccionSemantica14 implements AccionSemantica {
+public class AccionSemantica21 implements AccionSemantica {
     @Override
     public void realizar(String codigoFuente, Puntero puntero, StringBuilder lexema, TablaDeSimbolos tablaDeSimbolos) throws IOException {
-        char c = codigoFuente.charAt(puntero.getPuntero());
-        lexema.append(c);
-        RecolectorDeErrores.agregarError(" El caracter "+ lexema +" constantes de tipo ulong solo se permiten dígitos antes de la UL", AnalizadorLexico.getNumeroDeLinea());
+        RecolectorDeErrores.agregarError("Comentario iniciado con `##` no fue cerrado antes del fin de archivo", AnalizadorLexico.getNumeroDeLinea());
         lexema.setLength(0);
         AnalizadorLexico.setEstadoActual(0);
     }

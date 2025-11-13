@@ -4,6 +4,7 @@ import Compilador.ModuloLexico.*;
 import Compilador.ModuloSemantico.ArregloTercetos;
 import Compilador.ModuloSintactico.Parser;
 import Compilador.ModuloSintactico.ParserValExt;
+import Compilador.Util.RecolectorDeErrores;
 
 import java.io.*;
 
@@ -33,5 +34,6 @@ public class Main {
         lexer.imprimirTokens();
         TablaDeSimbolos.imprimirTabla();
         ArregloTercetos.imprimirTercetos();
+        RecolectorDeErrores.imprimirMensajes();
     }
 }
