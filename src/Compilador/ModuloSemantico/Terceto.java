@@ -1,9 +1,12 @@
 package Compilador.ModuloSemantico;
 
+import Compilador.ModuloGC.ContadorVarAux;
+
 public class Terceto {
     private String operador;
     private String op1;
     private String op2;
+    private String resultado;
 
     // los operandos pueden ser referencias a la tabla de simbolos (lexemas) o referencia a otro terceto
 
@@ -11,6 +14,11 @@ public class Terceto {
         this.operador = operador;
         this.op1 = op1;
         this.op2 = op2;
+        this.resultado = generarVariableAuxiliar();
+    }
+
+    public String generarVariableAuxiliar(){
+        return "@aux" + ContadorVarAux.obtenerSiguiente();
     }
 
     public void setOp1(String op1) {
@@ -31,5 +39,13 @@ public class Terceto {
 
     public String getOperador() {
         return operador;
+    }
+
+    public String getResultado(){
+        return resultado;
+    }
+
+    public void setResultado(String resul){
+        this.resultado = resul;
     }
 }

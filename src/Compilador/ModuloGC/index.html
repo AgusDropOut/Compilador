@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Programa WASM</title>
+</head>
+<body>
+<h3>Test WASM</h3>
+
+<script>
+    let wasmInstance = null;
+
+    function alert_i32(x) {
+        alert("Valor recibido: " + x);
+    }
+
+    function alert_str(ptr, len) {
+        if (!wasmInstance) { console.error('wasmInstance no inicializada'); return; }
+        const memoryBuffer = wasmInstance.exports.memory.buffer;
+        const bytes = new Uint8Array(memoryBuffer, ptr, len);
+        const string = new TextDecoder('utf8').decode(bytes);
+        alert("Cadena recibida: " + string);
+    }
+
+    const importObject = {
+        env: {
+            alert_i32,
+            alert_str
+        }
+    };
+
+    WebAssembly.instantiateStreaming(fetch("programita.wasm"), importObject)
+        .then(obj => {
+            wasmInstance = obj.instance;    // <-- asignar antes de usar la memoria/imports
+            wasmInstance.exports.main();
+        })
+        .catch(err => console.error("Error cargando wasm:", err));
+</script>
+
+</body>
+</html>
