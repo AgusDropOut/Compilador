@@ -63,24 +63,34 @@ header_funcion        : tipo ID '(' {
                       | tipo error { yyerror("Error: Falta definir un nombre a la función"); }
                       ;
 
-list_sentencia        : /* empty */
+list_sentencia
+                      : /* empty */
                       | list_sentencia sentencia
-
 
                       ;
 
-sentencia             : sentencia_declarativa ';'
+sentencia
+                      : sentencia_declarativa ';'
                       | sentencia_ejecutable ';'
                       | declaracion_funcion
-                      | declaracion_funcion ';' { yyerror("Error: No se debe colocar ';' después de la declaración de función"); }
+                      | declaracion_funcion ';' { yyerror("Error: No debe haber ';' después de la declaración de función"); }
 
-                      /* Errores comunes */
-                      | sentencia_declarativa error { yyerror("Error: Falta ';' al final de la declaración o sentencia mal formada"); }
-                      | sentencia_ejecutable error { yyerror("Error: Falta ';' al final de la sentencia ejecutable o sentencia mal formada" ); }
-                      | error ';' { yyerror("Error: Sentencia inválida detectada — se descarta hasta ';'"); }
-                      | error  {
-                                                  yyerror("Error: Sentencia inválida o mal terminada antes del cierre del bloque '}'");
-                               }
+                      /* Errores comunes mejorados */
+                      | sentencia_declarativa error ';' {
+                          yyerror("Error de sintaxis: declaración mal formada o faltante del ';'");
+                        }
+                      | sentencia_ejecutable error ';' {
+                          yyerror("Error de sintaxis: sentencia ejecutable mal formada o faltante del ';'");
+                        }
+                      /* Captura genérica de errores en sentencias */
+                      | error ';' {
+                          yyerror("Error: Sentencia inválida detectada — se descartó hasta ';'");
+                        }
+
+                      /* Error sin punto y coma: se muestra un mensaje menos confuso */
+                      | error {
+                          yyerror("Error: Sentencia mal formada o falta ';' antes del fin del bloque");
+                        }
                       ;
 
 
