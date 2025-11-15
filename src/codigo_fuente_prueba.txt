@@ -1,27 +1,10 @@
 PROGRAM {
     ulong X1, X2;
-    X1 := 22UL
-    ulong F( ulong A)
-    {
-        A := A + 2UL;
-        A := A - 1UL;
-        return (2UL);
-    };
-
-    if (X1 > 20UL) {
-        X2 := F(X1 -> A) + 5UL;
-    } else {
-        X2 := F(X1 -> A) - 5UL;
-    }endif;
-
-    X1 := X2 + X2 - X2 * F(2UL->A) / X2 + trunc(2.1);
-    print(X2+X2);
-     ulong F(cr ulong A)
-     {
-        return (2UL);
-     }
-     print(X2+X2);
-
+    X1 := trunc(2.1);
+    X2 := X1
+    ulong X;
+    X := 3UL;
+    X, X1 = 3UL , 4UL;
 
   ##   X2 := 2UL (ulong X) { return (2UL); } (X1);##
 }

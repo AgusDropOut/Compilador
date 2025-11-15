@@ -74,7 +74,6 @@ sentencia
                       | sentencia_ejecutable ';'
                       | declaracion_funcion
                       | declaracion_funcion ';' { yyerror("Error: No debe haber ';' después de la declaración de función"); }
-
                       /* Errores comunes mejorados */
                       | sentencia_declarativa error ';' {
                           yyerror("Error de sintaxis: declaración mal formada o faltante del ';'");
@@ -440,6 +439,9 @@ factor                : ID %prec LOWER_THAN_CALL {$$ = chequearAmbito("", ambito
                                                   // 1. Crea un terceto para la operación TRUNC.
                                                   // 2. El resultado (temporal) es el sval de este factor.
                                                   // 3. El tipo es ulong.
+                                                  if(! $3.tipo.equals("dfloat")){
+                                                      RecolectorDeErrores.agregarError("Error: La funcion TRUNC solo acepta operandos de tipo dfloat.",AnalizadorLexico.getNumeroDeLinea());
+                                                  }
                                                   $$ = ArregloTercetos.crearTerceto("TRUNC", $3.sval, null);
                                                   $$.tipo = "ulong";
                       }
