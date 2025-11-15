@@ -1,30 +1,27 @@
 PROGRAM {
     ulong X1, X2;
-    ulong F(cr ulong A)
+    X1 := 22UL;
+    ulong F( ulong A)
     {
+        A := A + 2UL;
+        A := A - 1UL;
         return (2UL);
-    };
+    }
 
-    X1 := X2 + X2 - X2 * F(X2->A) / X2;
+    if (X1 > 20UL) {
+        X2 := F(X1 -> A) + 5UL;
+    } else {
+        X2 := F(X1 -> A) - 5UL;
+    }endif;
+
+    X1 := X2 + X2 - X2 * F(2UL->A) / X2 + trunc(2.1);
     print(X2+X2);
-     ulong X1, X2;
      ulong F(cr ulong A)
      {
         return (2UL);
-     };
+     }
+     print(X2+X2);
 
-     X2 := X1 +A + X1 * A+ X1 / A/ X1 + X1 + A+0UL -1UL -  - 3UL;
-
-     print(X1);
-
-     X2 := X1 - - 1UL / - -2.1 * * (ulong X) { return (X); } (PROGRAMA.X1) - X1 - - + + + F(X1->A);
-     X2 := -F(X1->A);
-     X2 := - - 2.1;
-     X2 := + 2.1;
-     X2 := * 2.1;
-     X2 := / 2.1;
-
-     X2 := 2.1 3UL 4UL F(X1->A);
 
   ##   X2 := 2UL (ulong X) { return (2UL); } (X1);##
 }

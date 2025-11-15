@@ -20,6 +20,7 @@ public class AnalizadorLexico {
     private static TablaDeSimbolos tablaDeSimbolos;
     public static ParserValExt yylval;
     public static boolean flag =true;
+    public static boolean modoPanico = false;
 
     public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos, ParserValExt yyval) throws IOException {
         AnalizadorLexico.matrizDeTransicion = matrizDeTransicion;
@@ -40,12 +41,17 @@ public class AnalizadorLexico {
         lexema.setLength(0);
 
         while (puntero.getPuntero() <= content.length() && !tokenLeido) {
+
             //Manejo de fin de archivo
             if(puntero.getPuntero() < content.length()) {
                 c = content.charAt(puntero.getPuntero());
             } else {
                 c = '$';
             }
+
+
+
+
             siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
             //Manejo de saltos de linea
             manejarSaltoDeLinea(c);
@@ -83,10 +89,17 @@ public class AnalizadorLexico {
         estadoActual = nuevoEstado;
     }
 
-    private static char ultimoChar = '\0';
-
     private static void manejarSaltoDeLinea(char c) {
         if (c == '\n') linea++;
+    }
+    private static final char[] CARACTERES_SINCRONIZACION =
+            { ';', '{', '}', '(', ')', ',' };
+
+    private static boolean esCaracterDeSincronizacion(char c) {
+        for (char s : CARACTERES_SINCRONIZACION) {
+            if (c == s) return true;
+        }
+        return false;
     }
 
     public void imprimirTokens(){

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 %nonassoc '('
 
 
+
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  COMP  CADENA FLECHA
 
 %%
@@ -40,7 +41,7 @@ nombre_programa       : ID  {ambito = $1.sval;}
                       ;
 
 
-declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
+declaracion_funcion   : header_funcion  parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
                                                                                             // Etiqueta de fin de función
                                                                                             String etiquetaFin = "fin_" + ambito; // o derivar el nombre de la función de otra forma
                                                                                             ArregloTercetos.crearTerceto(etiquetaFin, "_", "_");
@@ -50,7 +51,7 @@ declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sent
                                                                                           }
                       ;
 
-header_funcion        : tipo ID {
+header_funcion        : tipo ID '(' {
                                  declaracionDeFuncion($2.sval, ambito, "Función");
                                  entrarAmbito($2.sval);
                                  pilaReturns.push($2.sval + ":" + "false");
@@ -64,21 +65,24 @@ header_funcion        : tipo ID {
 
 list_sentencia        : /* empty */
                       | list_sentencia sentencia
-                      | list_sentencia error  {
-                            yyerror("Error: Sentencia inválida o mal terminada antes del cierre del bloque '}'");
-                        }
+
+
                       ;
 
-sentencia
-                      : sentencia_declarativa ';'
+sentencia             : sentencia_declarativa ';'
                       | sentencia_ejecutable ';'
-                      | declaracion_funcion ';'
+                      | declaracion_funcion
+                      | declaracion_funcion ';' { yyerror("Error: No se debe colocar ';' después de la declaración de función"); }
+
                       /* Errores comunes */
-                      | sentencia_declarativa error { yyerror("Error: Falta ';' al final de la declaración"); }
-                      | declaracion_funcion error { yyerror("Error: Falta ';' al final de la declaración de funcion"); }
-                      | sentencia_ejecutable error { yyerror("Error: Falta ';' al final de la sentencia ejecutable"); }
-                      | error ';' { yyerror("Error: Sentencia inválida detectada — se descarta hasta ';', revisar ';' faltantes"); }
+                      | sentencia_declarativa error { yyerror("Error: Falta ';' al final de la declaración o sentencia mal formada"); }
+                      | sentencia_ejecutable error { yyerror("Error: Falta ';' al final de la sentencia ejecutable o sentencia mal formada" ); }
+                      | error ';' { yyerror("Error: Sentencia inválida detectada — se descarta hasta ';'"); }
+                      | error  {
+                                                  yyerror("Error: Sentencia inválida o mal terminada antes del cierre del bloque '}'");
+                               }
                       ;
+
 
 
 
@@ -231,7 +235,7 @@ while                 : WHILE { ArregloTercetos.apilarTercetoInicialWHILE(); }
 
 
 end_if                : ENDIF {ArregloTercetos.completarTercetoBackPatchingIF();}
-                      | /* empty */ {yyerror("Error: falta palabra reservada 'endif'");}
+                      | error {yyerror("Error: falta palabra reservada 'endif'");}
                       ;
 
 condicion_if          : '(' condicion ')' {ArregloTercetos.crearTercetoBackPatchingIF("bf", $2.sval,null);}
@@ -385,6 +389,14 @@ termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*
                       | factor {$$ = $1; $$.tipo = $1.tipo;}
                       ;
 
+
+
+
+
+
+
+
+
 factor                : ID %prec LOWER_THAN_CALL {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
                       | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
@@ -431,6 +443,8 @@ inicio_llamado        : ID '(' {
                              $$ = chequearAmbito("", ambito, $1.sval);
                              PilaDeFuncionesLlamadas.iniciarLlamada(ambito+":"+$1.sval);
                            }
+
+
 
 %%
 public static final Set<String> erroresEmitidos = new HashSet<>();
@@ -662,15 +676,27 @@ public void registrarReturn() {
         }
 }
 
-//Función para el chequeo de tipos de variables y constantes
 public String chequearTipos(String tipo1, String tipo2){
-    if (!tipo1.equals(tipo2)){
-        yyerror("Error: Tipos incompatibles (" + tipo1 + " y " + tipo2 +").");
+
+    // No permitir operaciones entre dfloat
+    if(tipo1.equals("dfloat") && tipo2.equals("dfloat")){
+        yyerror("Error: No se pueden realizar operaciones entre operandos de tipo dfloat.");
         return "error";
     }
-    else{
-        return tipo1;
+
+    // Si alguno ya es error, propagá el error
+    if(tipo1.equals("error") || tipo2.equals("error")){
+        return "error";
     }
+
+    // Tipos distintos → error
+    if(!tipo1.equals(tipo2)){
+        yyerror("Error: Tipos incompatibles (" + tipo1 + " y " + tipo2 + ").");
+        return "error";
+    }
+
+    // Si todo OK, devolver el tipo
+    return tipo1;
 }
 
 //Función para obtener el tipo de una variable o constante
