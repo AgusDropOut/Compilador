@@ -32,6 +32,10 @@ public class TablaDeSimbolos {
         }
     }
 
+    public static void eliminarSimbolo(String lexema) {
+        tablaSimbolos.remove(lexema);
+    }
+
    public static ArrayList<ElementoTablaDeSimbolos> getElementos(){
        ArrayList<ElementoTablaDeSimbolos> elementos = new ArrayList<>();
        for (Map.Entry<String, ElementoTablaDeSimbolos> entrada : tablaSimbolos.entrySet()) {

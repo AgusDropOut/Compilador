@@ -241,7 +241,7 @@ public class TablaAccionesSemanticas {
         TABLE[11][20] = new AccionSemantica18();
         TABLE[12][20] = new AccionSemantica6();
         TABLE[13][20] = new AccionSemantica18();
-        TABLE[14][20] = new AccionSemantica18();
+        TABLE[14][20] = new AccionSemantica21();
         TABLE[15][20] = new AccionSemantica18();
         TABLE[16][20] = new AccionSemantica18();
 

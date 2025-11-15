@@ -6,6 +6,7 @@ import Compilador.ModuloSemantico.ArregloTercetos;
 import Compilador.ModuloSemantico.Terceto;
 import Compilador.ModuloSintactico.Parser;
 import Compilador.ModuloSintactico.ParserValExt;
+import Compilador.Util.RecolectorDeErrores;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class Main {
         lexer.imprimirTokens();
         TablaDeSimbolos.imprimirTabla();
         ArregloTercetos.imprimirTercetos();
+        RecolectorDeErrores.imprimirMensajes();
         ArrayList<Terceto> tercetosGenerados = new ArrayList<>(ArregloTercetos.obtenerTercetos());
         GeneradorDeCodigo productorAssembler = new GeneradorDeCodigo(tercetosGenerados, "programita");
         productorAssembler.generarCodigo();

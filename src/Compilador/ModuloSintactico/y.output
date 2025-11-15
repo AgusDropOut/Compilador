@@ -1,176 +1,182 @@
    0  $accept : programa $end
 
-   1  programa : ID '{' list_sentencia '}'
-   2           | '{' list_sentencia '}'
-   3           | ID list_sentencia '}'
-   4           | ID list_sentencia
+   1  programa : nombre_programa '{' list_sentencia '}'
+   2           | nombre_programa '{' list_sentencia '}' '}'
+   3           | nombre_programa list_sentencia '}'
+   4           | nombre_programa '{' list_sentencia
+   5           | nombre_programa list_sentencia
+   6           | '{' list_sentencia '}'
 
-   5  list_sentencia :
-   6                 | list_sentencia sentencia
+   7  nombre_programa : ID
 
-   7  declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia '}'
+   8  declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia '}'
 
-   8  header_funcion : tipo ID
-   9                 | tipo error
+   9  header_funcion : tipo ID
+  10                 | tipo error
 
-  10  sentencia : sentencia_declarativa ';'
-  11            | sentencia_ejecutable ';'
-  12            | declaracion_funcion
-  13            | sentencia_declarativa error
-  14            | sentencia_ejecutable error
-  15            | error ';'
+  11  list_sentencia :
+  12                 | list_sentencia sentencia
+  13                 | list_sentencia error
 
-  16  sentencia_declarativa : tipo list_vars
+  14  sentencia : sentencia_declarativa ';'
+  15            | sentencia_ejecutable ';'
+  16            | declaracion_funcion ';'
+  17            | sentencia_declarativa error
+  18            | declaracion_funcion error
+  19            | sentencia_ejecutable error
+  20            | error ';'
 
-  17  parametros_formales : parametro_formal
-  18                      | parametros_formales ',' parametro_formal
+  21  sentencia_declarativa : tipo list_vars
 
-  19  parametro_formal : semantica tipo ID
-  20                   | tipo ID
-  21                   | semantica tipo error
-  22                   | tipo error
-  23                   | semantica error ID
-  24                   | error ID
+  22  parametros_formales : parametro_formal
+  23                      | parametros_formales ',' parametro_formal
 
-  25  semantica : CR
+  24  parametro_formal : semantica tipo ID
+  25                   | tipo ID
+  26                   | semantica tipo error
+  27                   | tipo error
+  28                   | semantica error ID
+  29                   | error ID
 
-  26  sentencia_return : RETURN expresion
+  30  semantica : CR
 
-  27  tipo : ULONG
+  31  sentencia_return : RETURN '(' expresion ')'
 
-  28  list_ctes : CTE
-  29            | list_ctes ',' CTE
-  30            | list_ctes CTE
+  32  tipo : ULONG
 
-  31  list_vars_mix : ID
-  32                | list_vars_mix ',' ID
-  33                | ID '.' ID
-  34                | list_vars_mix ',' ID '.' ID
-  35                | list_vars_mix ID
-  36                | list_vars_mix ID '.' ID
+  33  list_ctes : CTE
+  34            | list_ctes ',' CTE
+  35            | list_ctes CTE
 
-  37  list_vars : ID
-  38            | list_vars ',' ID
-  39            | list_vars ID
+  36  list_vars_mix : ID
+  37                | list_vars_mix ',' ID
+  38                | ID '.' ID
+  39                | list_vars_mix ',' ID '.' ID
+  40                | list_vars_mix ID
+  41                | list_vars_mix ID '.' ID
 
-  40  sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if
-  41                       | IF condicion_if '{' bloque_ejecutable '}' end_if
-  42                       | IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if
-  43                       | IF condicion_if sentencia_ejecutable ';' end_if
-  44                       | IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if
-  45                       | IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if
-  46                       | PRINT '(' CADENA ')'
-  47                       | PRINT '(' expresion ')'
-  48                       | asignacion_simple
-  49                       | asignacion_multiple
-  50                       | sentencia_return
-  51                       | expresion_lambda
-  52                       | while condicion_while DO '{' bloque_ejecutable '}'
-  53                       | while condicion_while DO sentencia_ejecutable
-  54                       | while condicion_while DO
-  55                       | while condicion_while DO '{' '}'
-  56                       | PRINT '(' ')'
-  57                       | while condicion_while '{' bloque_ejecutable '}'
-  58                       | while condicion_while sentencia_ejecutable
-  59                       | IF condicion_if '{' '}' else '{' bloque_ejecutable '}' end_if
-  60                       | IF condicion_if '{' bloque_ejecutable '}' else '{' '}' end_if
-  61                       | IF condicion_if '{' '}' else '{' '}' end_if
-  62                       | IF condicion_if '{' '}' end_if
-  63                       | IF condicion_if else sentencia_ejecutable ';' end_if
-  64                       | IF condicion_if sentencia_ejecutable ';' else end_if
-  65                       | IF condicion_if else end_if
-  66                       | IF condicion_if end_if
-  67                       | IF condicion_if '{' '}' else sentencia_ejecutable ';' end_if
-  68                       | IF condicion_if '{' bloque_ejecutable '}' else end_if
-  69                       | IF condicion_if '{' '}' else end_if
-  70                       | IF condicion_if else '{' bloque_ejecutable '}' end_if
-  71                       | IF condicion_if sentencia_ejecutable ';' else '{' '}' end_if
-  72                       | IF condicion_if else '{' '}' end_if
+  42  list_vars : ID
+  43            | list_vars ',' ID
+  44            | list_vars ID
 
-  73  else : ELSE
+  45  sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if
+  46                       | IF condicion_if '{' bloque_ejecutable '}' end_if
+  47                       | IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if
+  48                       | IF condicion_if sentencia_ejecutable ';' end_if
+  49                       | IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if
+  50                       | IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if
+  51                       | PRINT '(' CADENA ')'
+  52                       | PRINT '(' expresion ')'
+  53                       | asignacion_simple
+  54                       | asignacion_multiple
+  55                       | sentencia_return
+  56                       | expresion_lambda
+  57                       | while condicion_while DO '{' bloque_ejecutable '}'
+  58                       | while condicion_while DO sentencia_ejecutable
+  59                       | while condicion_while DO
+  60                       | while condicion_while DO '{' '}'
+  61                       | PRINT '(' ')'
+  62                       | while condicion_while '{' bloque_ejecutable '}'
+  63                       | while condicion_while sentencia_ejecutable
+  64                       | IF condicion_if '{' '}' else '{' bloque_ejecutable '}' end_if
+  65                       | IF condicion_if '{' bloque_ejecutable '}' else '{' '}' end_if
+  66                       | IF condicion_if '{' '}' else '{' '}' end_if
+  67                       | IF condicion_if '{' '}' end_if
+  68                       | IF condicion_if else sentencia_ejecutable ';' end_if
+  69                       | IF condicion_if sentencia_ejecutable ';' else end_if
+  70                       | IF condicion_if else end_if
+  71                       | IF condicion_if end_if
+  72                       | IF condicion_if '{' '}' else sentencia_ejecutable ';' end_if
+  73                       | IF condicion_if '{' bloque_ejecutable '}' else end_if
+  74                       | IF condicion_if '{' '}' else end_if
+  75                       | IF condicion_if else '{' bloque_ejecutable '}' end_if
+  76                       | IF condicion_if sentencia_ejecutable ';' else '{' '}' end_if
+  77                       | IF condicion_if else '{' '}' end_if
 
-  74  while : WHILE
+  78  else : ELSE
 
-  75  end_if : ENDIF
-  76         |
+  79  while : WHILE
 
-  77  condicion_if : '(' condicion ')'
-  78               | condicion ')'
-  79               | '(' condicion
-  80               | condicion
+  80  end_if : ENDIF
+  81         |
 
-  81  condicion_while : '(' condicion ')'
-  82                  | condicion ')'
-  83                  | '(' condicion
-  84                  | condicion
+  82  condicion_if : '(' condicion ')'
+  83               | condicion ')'
+  84               | '(' condicion
+  85               | condicion
 
-  85  bloque_ejecutable : sentencia_ejecutable ';'
-  86                    | bloque_ejecutable sentencia_ejecutable ';'
-  87                    | bloque_ejecutable error
-  88                    | sentencia_ejecutable error
-  89                    | bloque_ejecutable sentencia_ejecutable error
+  86  condicion_while : '(' condicion ')'
+  87                  | condicion ')'
+  88                  | '(' condicion
+  89                  | condicion
 
-  90  parametros_reales : parametro_real
-  91                    | parametros_reales ',' parametro_real
-  92                    | error
+  90  bloque_ejecutable : sentencia_ejecutable ';'
+  91                    | bloque_ejecutable sentencia_ejecutable ';'
+  92                    | bloque_ejecutable error
+  93                    | sentencia_ejecutable error
+  94                    | bloque_ejecutable sentencia_ejecutable error
 
-  93  parametro_real : expresion FLECHA ID
-  94                 | expresion FLECHA error
-  95                 | expresion ID
+  95  parametros_reales : parametro_real
+  96                    | parametros_reales ',' parametro_real
+  97                    | error
 
-  96  condicion : expresion COMP expresion
+  98  parametro_real : expresion FLECHA ID
+  99                 | expresion FLECHA error
+ 100                 | expresion ID
 
-  97  asignacion_simple : var_asignacion_simple ASIG expresion
+ 101  condicion : expresion COMP expresion
 
-  98  var_asignacion_simple : ID
-  99                        | ID '.' ID
+ 102  asignacion_simple : var_asignacion_simple ASIG expresion
 
- 100  asignacion_multiple : list_vars_mix '=' list_ctes
+ 103  var_asignacion_simple : ID
+ 104                        | ID '.' ID
 
- 101  header_lambda : '(' tipo ID ')'
+ 105  asignacion_multiple : list_vars_mix '=' list_ctes
 
- 102  $$1 :
+ 106  header_lambda : '(' tipo ID ')'
 
- 103  expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' factor_lambda ')'
- 104                   | header_lambda '{' bloque_ejecutable '(' expresion ')'
- 105                   | header_lambda bloque_ejecutable '}' '(' expresion ')'
- 106                   | header_lambda bloque_ejecutable '(' expresion ')'
+ 107  $$1 :
 
- 107  factor_lambda : ID
- 108                | CTE
- 109                | '-' CTE
+ 108  expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' factor_lambda ')'
+ 109                   | header_lambda '{' bloque_ejecutable '(' expresion ')'
+ 110                   | header_lambda bloque_ejecutable '}' '(' expresion ')'
+ 111                   | header_lambda bloque_ejecutable '(' expresion ')'
 
- 110  expresion : expresion '+' termino
- 111            | expresion '-' termino
- 112            | termino
- 113            | error '+' termino
- 114            | expresion '+' error
- 115            | error '-' termino
- 116            | expresion '-' error
- 117            | error '+' error
- 118            | error '-' error
- 119            | TRUNC '(' expresion ')'
- 120            | TRUNC '(' expresion error
- 121            | TRUNC error expresion ')'
- 122            | TRUNC error expresion error
+ 112  factor_lambda : ID
+ 113                | CTE
+ 114                | '-' CTE
 
- 123  termino : termino '*' factor
- 124          | termino '/' factor
- 125          | error '*' factor
- 126          | termino '*' error
- 127          | error '/' factor
- 128          | termino '/' error
- 129          | error '*' error
- 130          | error '/' error
- 131          | factor
+ 115  expresion : expresion '+' termino
+ 116            | expresion '-' termino
+ 117            | termino
+ 118            | error '+' termino
+ 119            | expresion '+' error
+ 120            | error '-' termino
+ 121            | expresion '-' error
+ 122            | error '+' error
+ 123            | error '-' error
 
- 132  factor : ID
- 133         | CTE
- 134         | ID '.' ID
- 135         | inicio_llamado parametros_reales ')'
- 136         | '-' CTE
+ 124  termino : termino '*' factor
+ 125          | termino '/' factor
+ 126          | error '*' factor
+ 127          | termino '*' error
+ 128          | error '/' factor
+ 129          | termino '/' error
+ 130          | error '*' error
+ 131          | error '/' error
+ 132          | factor
 
- 137  inicio_llamado : ID '('
+ 133  factor : ID
+ 134         | CTE
+ 135         | ID '.' ID
+ 136         | inicio_llamado parametros_reales ')'
+ 137         | '-' CTE
+ 138         | TRUNC '(' expresion ')'
+ 139         | TRUNC '(' expresion error
+ 140         | TRUNC error expresion ')'
+ 141         | TRUNC error expresion error
+
+ 142  inicio_llamado : ID '('
 
 state 0
 	$accept : . programa $end  (0)
@@ -180,36 +186,22 @@ state 0
 	.  error
 
 	programa  goto 3
+	nombre_programa  goto 4
 
 
 state 1
-	programa : ID . '{' list_sentencia '}'  (1)
-	programa : ID . list_sentencia '}'  (3)
-	programa : ID . list_sentencia  (4)
-	list_sentencia : .  (5)
+	nombre_programa : ID .  (7)
 
-	'{'  shift 4
-	$end  reduce 5
-	error  reduce 5
-	'('  reduce 5
-	WHILE  reduce 5
-	IF  reduce 5
-	PRINT  reduce 5
-	RETURN  reduce 5
-	ID  reduce 5
-	ULONG  reduce 5
-	'}'  reduce 5
-
-	list_sentencia  goto 5
+	.  reduce 7
 
 
 state 2
-	programa : '{' . list_sentencia '}'  (2)
-	list_sentencia : .  (5)
+	programa : '{' . list_sentencia '}'  (6)
+	list_sentencia : .  (11)
 
-	.  reduce 5
+	.  reduce 11
 
-	list_sentencia  goto 6
+	list_sentencia  goto 5
 
 
 state 3
@@ -219,18 +211,32 @@ state 3
 
 
 state 4
-	programa : ID '{' . list_sentencia '}'  (1)
-	list_sentencia : .  (5)
+	programa : nombre_programa . '{' list_sentencia '}'  (1)
+	programa : nombre_programa . '{' list_sentencia '}' '}'  (2)
+	programa : nombre_programa . list_sentencia '}'  (3)
+	programa : nombre_programa . '{' list_sentencia  (4)
+	programa : nombre_programa . list_sentencia  (5)
+	list_sentencia : .  (11)
 
-	.  reduce 5
+	'{'  shift 6
+	$end  reduce 11
+	error  reduce 11
+	'('  reduce 11
+	WHILE  reduce 11
+	IF  reduce 11
+	PRINT  reduce 11
+	RETURN  reduce 11
+	ID  reduce 11
+	ULONG  reduce 11
+	'}'  reduce 11
 
 	list_sentencia  goto 7
 
 
 state 5
-	programa : ID list_sentencia . '}'  (3)
-	programa : ID list_sentencia .  (4)
-	list_sentencia : list_sentencia . sentencia  (6)
+	programa : '{' list_sentencia . '}'  (6)
+	list_sentencia : list_sentencia . sentencia  (12)
+	list_sentencia : list_sentencia . error  (13)
 
 	error  shift 8
 	'('  shift 9
@@ -241,12 +247,12 @@ state 5
 	ID  shift 14
 	ULONG  shift 15
 	'}'  shift 16
-	$end  reduce 4
+	.  error
 
-	sentencia  goto 17
-	declaracion_funcion  goto 18
-	header_funcion  goto 19
-	tipo  goto 20
+	declaracion_funcion  goto 17
+	header_funcion  goto 18
+	tipo  goto 19
+	sentencia  goto 20
 	sentencia_declarativa  goto 21
 	sentencia_ejecutable  goto 22
 	sentencia_return  goto 23
@@ -260,39 +266,21 @@ state 5
 
 
 state 6
-	programa : '{' list_sentencia . '}'  (2)
-	list_sentencia : list_sentencia . sentencia  (6)
+	programa : nombre_programa '{' . list_sentencia '}'  (1)
+	programa : nombre_programa '{' . list_sentencia '}' '}'  (2)
+	programa : nombre_programa '{' . list_sentencia  (4)
+	list_sentencia : .  (11)
 
-	error  shift 8
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	ULONG  shift 15
-	'}'  shift 31
-	.  error
+	.  reduce 11
 
-	sentencia  goto 17
-	declaracion_funcion  goto 18
-	header_funcion  goto 19
-	tipo  goto 20
-	sentencia_declarativa  goto 21
-	sentencia_ejecutable  goto 22
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
+	list_sentencia  goto 31
 
 
 state 7
-	programa : ID '{' list_sentencia . '}'  (1)
-	list_sentencia : list_sentencia . sentencia  (6)
+	programa : nombre_programa list_sentencia . '}'  (3)
+	programa : nombre_programa list_sentencia .  (5)
+	list_sentencia : list_sentencia . sentencia  (12)
+	list_sentencia : list_sentencia . error  (13)
 
 	error  shift 8
 	'('  shift 9
@@ -303,12 +291,12 @@ state 7
 	ID  shift 14
 	ULONG  shift 15
 	'}'  shift 32
-	.  error
+	$end  reduce 5
 
-	sentencia  goto 17
-	declaracion_funcion  goto 18
-	header_funcion  goto 19
-	tipo  goto 20
+	declaracion_funcion  goto 17
+	header_funcion  goto 18
+	tipo  goto 19
+	sentencia  goto 20
 	sentencia_declarativa  goto 21
 	sentencia_ejecutable  goto 22
 	sentencia_return  goto 23
@@ -322,14 +310,24 @@ state 7
 
 
 state 8
-	sentencia : error . ';'  (15)
+	list_sentencia : list_sentencia error .  (13)
+	sentencia : error . ';'  (20)
 
 	';'  shift 33
-	.  error
+	$end  reduce 13
+	error  reduce 13
+	'('  reduce 13
+	WHILE  reduce 13
+	IF  reduce 13
+	PRINT  reduce 13
+	RETURN  reduce 13
+	ID  reduce 13
+	ULONG  reduce 13
+	'}'  reduce 13
 
 
 state 9
-	header_lambda : '(' . tipo ID ')'  (101)
+	header_lambda : '(' . tipo ID ')'  (106)
 
 	ULONG  shift 15
 	.  error
@@ -338,32 +336,32 @@ state 9
 
 
 state 10
-	while : WHILE .  (74)
+	while : WHILE .  (79)
 
-	.  reduce 74
+	.  reduce 79
 
 
 state 11
-	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if  (40)
-	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' end_if  (41)
-	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if  (42)
-	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' end_if  (43)
-	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if  (44)
-	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if  (45)
-	sentencia_ejecutable : IF . condicion_if '{' '}' else '{' bloque_ejecutable '}' end_if  (59)
-	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else '{' '}' end_if  (60)
-	sentencia_ejecutable : IF . condicion_if '{' '}' else '{' '}' end_if  (61)
-	sentencia_ejecutable : IF . condicion_if '{' '}' end_if  (62)
-	sentencia_ejecutable : IF . condicion_if else sentencia_ejecutable ';' end_if  (63)
-	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else end_if  (64)
-	sentencia_ejecutable : IF . condicion_if else end_if  (65)
-	sentencia_ejecutable : IF . condicion_if end_if  (66)
-	sentencia_ejecutable : IF . condicion_if '{' '}' else sentencia_ejecutable ';' end_if  (67)
-	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else end_if  (68)
-	sentencia_ejecutable : IF . condicion_if '{' '}' else end_if  (69)
-	sentencia_ejecutable : IF . condicion_if else '{' bloque_ejecutable '}' end_if  (70)
-	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else '{' '}' end_if  (71)
-	sentencia_ejecutable : IF . condicion_if else '{' '}' end_if  (72)
+	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if  (45)
+	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' end_if  (46)
+	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if  (47)
+	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' end_if  (48)
+	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if  (49)
+	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if  (50)
+	sentencia_ejecutable : IF . condicion_if '{' '}' else '{' bloque_ejecutable '}' end_if  (64)
+	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else '{' '}' end_if  (65)
+	sentencia_ejecutable : IF . condicion_if '{' '}' else '{' '}' end_if  (66)
+	sentencia_ejecutable : IF . condicion_if '{' '}' end_if  (67)
+	sentencia_ejecutable : IF . condicion_if else sentencia_ejecutable ';' end_if  (68)
+	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else end_if  (69)
+	sentencia_ejecutable : IF . condicion_if else end_if  (70)
+	sentencia_ejecutable : IF . condicion_if end_if  (71)
+	sentencia_ejecutable : IF . condicion_if '{' '}' else sentencia_ejecutable ';' end_if  (72)
+	sentencia_ejecutable : IF . condicion_if '{' bloque_ejecutable '}' else end_if  (73)
+	sentencia_ejecutable : IF . condicion_if '{' '}' else end_if  (74)
+	sentencia_ejecutable : IF . condicion_if else '{' bloque_ejecutable '}' end_if  (75)
+	sentencia_ejecutable : IF . condicion_if sentencia_ejecutable ';' else '{' '}' end_if  (76)
+	sentencia_ejecutable : IF . condicion_if else '{' '}' end_if  (77)
 
 	error  shift 35
 	'-'  shift 36
@@ -382,177 +380,171 @@ state 11
 
 
 state 12
-	sentencia_ejecutable : PRINT . '(' CADENA ')'  (46)
-	sentencia_ejecutable : PRINT . '(' expresion ')'  (47)
-	sentencia_ejecutable : PRINT . '(' ')'  (56)
+	sentencia_ejecutable : PRINT . '(' CADENA ')'  (51)
+	sentencia_ejecutable : PRINT . '(' expresion ')'  (52)
+	sentencia_ejecutable : PRINT . '(' ')'  (61)
 
 	'('  shift 47
 	.  error
 
 
 state 13
-	sentencia_return : RETURN . expresion  (26)
+	sentencia_return : RETURN . '(' expresion ')'  (31)
 
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
+	'('  shift 48
 	.  error
-
-	expresion  goto 48
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
 
 
 state 14
-	list_vars_mix : ID .  (31)
-	list_vars_mix : ID . '.' ID  (33)
-	var_asignacion_simple : ID .  (98)
-	var_asignacion_simple : ID . '.' ID  (99)
+	list_vars_mix : ID .  (36)
+	list_vars_mix : ID . '.' ID  (38)
+	var_asignacion_simple : ID .  (103)
+	var_asignacion_simple : ID . '.' ID  (104)
 
 	'.'  shift 49
-	ID  reduce 31
-	ASIG  reduce 98
-	','  reduce 31
-	'='  reduce 31
+	ID  reduce 36
+	ASIG  reduce 103
+	','  reduce 36
+	'='  reduce 36
 
 
 state 15
-	tipo : ULONG .  (27)
+	tipo : ULONG .  (32)
 
-	.  reduce 27
+	.  reduce 32
 
 
 state 16
-	programa : ID list_sentencia '}' .  (3)
-
-	.  reduce 3
-
-
-state 17
-	list_sentencia : list_sentencia sentencia .  (6)
+	programa : '{' list_sentencia '}' .  (6)
 
 	.  reduce 6
 
 
+state 17
+	sentencia : declaracion_funcion . ';'  (16)
+	sentencia : declaracion_funcion . error  (18)
+
+	error  shift 50
+	';'  shift 51
+	.  error
+
+
 state 18
-	sentencia : declaracion_funcion .  (12)
+	declaracion_funcion : header_funcion . '(' parametros_formales ')' '{' list_sentencia '}'  (8)
+
+	'('  shift 52
+	.  error
+
+
+state 19
+	header_funcion : tipo . ID  (9)
+	header_funcion : tipo . error  (10)
+	sentencia_declarativa : tipo . list_vars  (21)
+
+	error  shift 53
+	ID  shift 54
+	.  error
+
+	list_vars  goto 55
+
+
+state 20
+	list_sentencia : list_sentencia sentencia .  (12)
 
 	.  reduce 12
 
 
-state 19
-	declaracion_funcion : header_funcion . '(' parametros_formales ')' '{' list_sentencia '}'  (7)
-
-	'('  shift 50
-	.  error
-
-
-state 20
-	header_funcion : tipo . ID  (8)
-	header_funcion : tipo . error  (9)
-	sentencia_declarativa : tipo . list_vars  (16)
-
-	error  shift 51
-	ID  shift 52
-	.  error
-
-	list_vars  goto 53
-
-
 state 21
-	sentencia : sentencia_declarativa . ';'  (10)
-	sentencia : sentencia_declarativa . error  (13)
-
-	error  shift 54
-	';'  shift 55
-	.  error
-
-
-state 22
-	sentencia : sentencia_ejecutable . ';'  (11)
-	sentencia : sentencia_ejecutable . error  (14)
+	sentencia : sentencia_declarativa . ';'  (14)
+	sentencia : sentencia_declarativa . error  (17)
 
 	error  shift 56
 	';'  shift 57
 	.  error
 
 
-state 23
-	sentencia_ejecutable : sentencia_return .  (50)
+state 22
+	sentencia : sentencia_ejecutable . ';'  (15)
+	sentencia : sentencia_ejecutable . error  (19)
 
-	.  reduce 50
+	error  shift 58
+	';'  shift 59
+	.  error
+
+
+state 23
+	sentencia_ejecutable : sentencia_return .  (55)
+
+	.  reduce 55
 
 
 state 24
-	list_vars_mix : list_vars_mix . ',' ID  (32)
-	list_vars_mix : list_vars_mix . ',' ID '.' ID  (34)
-	list_vars_mix : list_vars_mix . ID  (35)
-	list_vars_mix : list_vars_mix . ID '.' ID  (36)
-	asignacion_multiple : list_vars_mix . '=' list_ctes  (100)
+	list_vars_mix : list_vars_mix . ',' ID  (37)
+	list_vars_mix : list_vars_mix . ',' ID '.' ID  (39)
+	list_vars_mix : list_vars_mix . ID  (40)
+	list_vars_mix : list_vars_mix . ID '.' ID  (41)
+	asignacion_multiple : list_vars_mix . '=' list_ctes  (105)
 
-	ID  shift 58
-	','  shift 59
-	'='  shift 60
+	ID  shift 60
+	','  shift 61
+	'='  shift 62
 	.  error
 
 
 state 25
-	sentencia_ejecutable : asignacion_simple .  (48)
+	sentencia_ejecutable : asignacion_simple .  (53)
 
-	.  reduce 48
+	.  reduce 53
 
 
 state 26
-	sentencia_ejecutable : asignacion_multiple .  (49)
+	sentencia_ejecutable : asignacion_multiple .  (54)
 
-	.  reduce 49
+	.  reduce 54
 
 
 state 27
-	sentencia_ejecutable : expresion_lambda .  (51)
+	sentencia_ejecutable : expresion_lambda .  (56)
 
-	.  reduce 51
+	.  reduce 56
 
 
 state 28
-	sentencia_ejecutable : while . condicion_while DO '{' bloque_ejecutable '}'  (52)
-	sentencia_ejecutable : while . condicion_while DO sentencia_ejecutable  (53)
-	sentencia_ejecutable : while . condicion_while DO  (54)
-	sentencia_ejecutable : while . condicion_while DO '{' '}'  (55)
-	sentencia_ejecutable : while . condicion_while '{' bloque_ejecutable '}'  (57)
-	sentencia_ejecutable : while . condicion_while sentencia_ejecutable  (58)
+	sentencia_ejecutable : while . condicion_while DO '{' bloque_ejecutable '}'  (57)
+	sentencia_ejecutable : while . condicion_while DO sentencia_ejecutable  (58)
+	sentencia_ejecutable : while . condicion_while DO  (59)
+	sentencia_ejecutable : while . condicion_while DO '{' '}'  (60)
+	sentencia_ejecutable : while . condicion_while '{' bloque_ejecutable '}'  (62)
+	sentencia_ejecutable : while . condicion_while sentencia_ejecutable  (63)
 
 	error  shift 35
 	'-'  shift 36
-	'('  shift 61
+	'('  shift 63
 	CTE  shift 38
 	ID  shift 39
 	TRUNC  shift 40
 	.  error
 
 	expresion  goto 41
-	condicion_while  goto 62
-	condicion  goto 63
+	condicion_while  goto 64
+	condicion  goto 65
 	termino  goto 44
 	factor  goto 45
 	inicio_llamado  goto 46
 
 
 state 29
-	asignacion_simple : var_asignacion_simple . ASIG expresion  (97)
+	asignacion_simple : var_asignacion_simple . ASIG expresion  (102)
 
-	ASIG  shift 64
+	ASIG  shift 66
 	.  error
 
 
 state 30
-	expresion_lambda : header_lambda . '{' bloque_ejecutable '}' $$1 '(' factor_lambda ')'  (103)
-	expresion_lambda : header_lambda . '{' bloque_ejecutable '(' expresion ')'  (104)
-	expresion_lambda : header_lambda . bloque_ejecutable '}' '(' expresion ')'  (105)
-	expresion_lambda : header_lambda . bloque_ejecutable '(' expresion ')'  (106)
+	expresion_lambda : header_lambda . '{' bloque_ejecutable '}' $$1 '(' factor_lambda ')'  (108)
+	expresion_lambda : header_lambda . '{' bloque_ejecutable '(' expresion ')'  (109)
+	expresion_lambda : header_lambda . bloque_ejecutable '}' '(' expresion ')'  (110)
+	expresion_lambda : header_lambda . bloque_ejecutable '(' expresion ')'  (111)
 
 	'('  shift 9
 	WHILE  shift 10
@@ -560,13 +552,13 @@ state 30
 	PRINT  shift 12
 	RETURN  shift 13
 	ID  shift 14
-	'{'  shift 65
+	'{'  shift 67
 	.  error
 
-	sentencia_ejecutable  goto 66
+	sentencia_ejecutable  goto 68
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
-	bloque_ejecutable  goto 67
+	bloque_ejecutable  goto 69
 	asignacion_simple  goto 25
 	asignacion_multiple  goto 26
 	expresion_lambda  goto 27
@@ -576,57 +568,85 @@ state 30
 
 
 state 31
-	programa : '{' list_sentencia '}' .  (2)
+	programa : nombre_programa '{' list_sentencia . '}'  (1)
+	programa : nombre_programa '{' list_sentencia . '}' '}'  (2)
+	programa : nombre_programa '{' list_sentencia .  (4)
+	list_sentencia : list_sentencia . sentencia  (12)
+	list_sentencia : list_sentencia . error  (13)
 
-	.  reduce 2
+	error  shift 8
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	ULONG  shift 15
+	'}'  shift 70
+	$end  reduce 4
+
+	declaracion_funcion  goto 17
+	header_funcion  goto 18
+	tipo  goto 19
+	sentencia  goto 20
+	sentencia_declarativa  goto 21
+	sentencia_ejecutable  goto 22
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
 
 
 state 32
-	programa : ID '{' list_sentencia '}' .  (1)
+	programa : nombre_programa list_sentencia '}' .  (3)
 
-	.  reduce 1
+	.  reduce 3
 
 
 state 33
-	sentencia : error ';' .  (15)
+	sentencia : error ';' .  (20)
 
-	.  reduce 15
+	.  reduce 20
 
 
 state 34
-	header_lambda : '(' tipo . ID ')'  (101)
+	header_lambda : '(' tipo . ID ')'  (106)
 
-	ID  shift 68
+	ID  shift 71
 	.  error
 
 
 state 35
-	expresion : error . '+' termino  (113)
-	expresion : error . '-' termino  (115)
-	expresion : error . '+' error  (117)
-	expresion : error . '-' error  (118)
-	termino : error . '*' factor  (125)
-	termino : error . '/' factor  (127)
-	termino : error . '*' error  (129)
-	termino : error . '/' error  (130)
+	expresion : error . '+' termino  (118)
+	expresion : error . '-' termino  (120)
+	expresion : error . '+' error  (122)
+	expresion : error . '-' error  (123)
+	termino : error . '*' factor  (126)
+	termino : error . '/' factor  (128)
+	termino : error . '*' error  (130)
+	termino : error . '/' error  (131)
 
-	'+'  shift 69
-	'-'  shift 70
-	'*'  shift 71
-	'/'  shift 72
+	'+'  shift 72
+	'-'  shift 73
+	'*'  shift 74
+	'/'  shift 75
 	.  error
 
 
 state 36
-	factor : '-' . CTE  (136)
+	factor : '-' . CTE  (137)
 
-	CTE  shift 73
+	CTE  shift 76
 	.  error
 
 
 state 37
-	condicion_if : '(' . condicion ')'  (77)
-	condicion_if : '(' . condicion  (79)
+	condicion_if : '(' . condicion ')'  (82)
+	condicion_if : '(' . condicion  (84)
 
 	error  shift 35
 	'-'  shift 36
@@ -636,109 +656,109 @@ state 37
 	.  error
 
 	expresion  goto 41
-	condicion  goto 74
+	condicion  goto 77
 	termino  goto 44
 	factor  goto 45
 	inicio_llamado  goto 46
 
 
 state 38
-	factor : CTE .  (133)
+	factor : CTE .  (134)
 
-	.  reduce 133
+	.  reduce 134
 
 
 state 39
-	factor : ID .  (132)
-	factor : ID . '.' ID  (134)
-	inicio_llamado : ID . '('  (137)
+	factor : ID .  (133)
+	factor : ID . '.' ID  (135)
+	inicio_llamado : ID . '('  (142)
 
-	'('  shift 75
-	'.'  shift 76
-	error  reduce 132
-	'+'  reduce 132
-	'-'  reduce 132
-	'*'  reduce 132
-	'/'  reduce 132
-	WHILE  reduce 132
-	IF  reduce 132
-	ELSE  reduce 132
-	ENDIF  reduce 132
-	PRINT  reduce 132
-	RETURN  reduce 132
-	DO  reduce 132
-	ID  reduce 132
-	COMP  reduce 132
-	FLECHA  reduce 132
-	'{'  reduce 132
-	')'  reduce 132
-	';'  reduce 132
+	'('  shift 78
+	'.'  shift 79
+	error  reduce 133
+	'+'  reduce 133
+	'-'  reduce 133
+	'*'  reduce 133
+	'/'  reduce 133
+	WHILE  reduce 133
+	IF  reduce 133
+	ELSE  reduce 133
+	ENDIF  reduce 133
+	PRINT  reduce 133
+	RETURN  reduce 133
+	DO  reduce 133
+	ID  reduce 133
+	COMP  reduce 133
+	FLECHA  reduce 133
+	'{'  reduce 133
+	')'  reduce 133
+	';'  reduce 133
 
 
 state 40
-	expresion : TRUNC . '(' expresion ')'  (119)
-	expresion : TRUNC . '(' expresion error  (120)
-	expresion : TRUNC . error expresion ')'  (121)
-	expresion : TRUNC . error expresion error  (122)
+	factor : TRUNC . '(' expresion ')'  (138)
+	factor : TRUNC . '(' expresion error  (139)
+	factor : TRUNC . error expresion ')'  (140)
+	factor : TRUNC . error expresion error  (141)
 
-	error  shift 77
-	'('  shift 78
+	error  shift 80
+	'('  shift 81
 	.  error
 
 
 state 41
-	condicion : expresion . COMP expresion  (96)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
+	condicion : expresion . COMP expresion  (101)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
 
-	'+'  shift 79
-	'-'  shift 80
-	COMP  shift 81
+	'+'  shift 82
+	'-'  shift 83
+	COMP  shift 84
 	.  error
 
 
 state 42
-	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if  (40)
-	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' end_if  (41)
-	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if  (42)
-	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' end_if  (43)
-	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if  (44)
-	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if  (45)
-	sentencia_ejecutable : IF condicion_if . '{' '}' else '{' bloque_ejecutable '}' end_if  (59)
-	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else '{' '}' end_if  (60)
-	sentencia_ejecutable : IF condicion_if . '{' '}' else '{' '}' end_if  (61)
-	sentencia_ejecutable : IF condicion_if . '{' '}' end_if  (62)
-	sentencia_ejecutable : IF condicion_if . else sentencia_ejecutable ';' end_if  (63)
-	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else end_if  (64)
-	sentencia_ejecutable : IF condicion_if . else end_if  (65)
-	sentencia_ejecutable : IF condicion_if . end_if  (66)
-	sentencia_ejecutable : IF condicion_if . '{' '}' else sentencia_ejecutable ';' end_if  (67)
-	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else end_if  (68)
-	sentencia_ejecutable : IF condicion_if . '{' '}' else end_if  (69)
-	sentencia_ejecutable : IF condicion_if . else '{' bloque_ejecutable '}' end_if  (70)
-	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else '{' '}' end_if  (71)
-	sentencia_ejecutable : IF condicion_if . else '{' '}' end_if  (72)
-	end_if : .  (76)
+	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if  (45)
+	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' end_if  (46)
+	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if  (47)
+	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' end_if  (48)
+	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if  (49)
+	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if  (50)
+	sentencia_ejecutable : IF condicion_if . '{' '}' else '{' bloque_ejecutable '}' end_if  (64)
+	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else '{' '}' end_if  (65)
+	sentencia_ejecutable : IF condicion_if . '{' '}' else '{' '}' end_if  (66)
+	sentencia_ejecutable : IF condicion_if . '{' '}' end_if  (67)
+	sentencia_ejecutable : IF condicion_if . else sentencia_ejecutable ';' end_if  (68)
+	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else end_if  (69)
+	sentencia_ejecutable : IF condicion_if . else end_if  (70)
+	sentencia_ejecutable : IF condicion_if . end_if  (71)
+	sentencia_ejecutable : IF condicion_if . '{' '}' else sentencia_ejecutable ';' end_if  (72)
+	sentencia_ejecutable : IF condicion_if . '{' bloque_ejecutable '}' else end_if  (73)
+	sentencia_ejecutable : IF condicion_if . '{' '}' else end_if  (74)
+	sentencia_ejecutable : IF condicion_if . else '{' bloque_ejecutable '}' end_if  (75)
+	sentencia_ejecutable : IF condicion_if . sentencia_ejecutable ';' else '{' '}' end_if  (76)
+	sentencia_ejecutable : IF condicion_if . else '{' '}' end_if  (77)
+	end_if : .  (81)
 
 	'('  shift 9
 	WHILE  shift 10
 	IF  shift 11
-	ELSE  shift 82
-	ENDIF  shift 83
+	ELSE  shift 85
+	ENDIF  shift 86
 	PRINT  shift 12
 	RETURN  shift 13
 	ID  shift 14
-	'{'  shift 84
-	error  reduce 76
-	';'  reduce 76
+	'{'  shift 87
+	error  reduce 81
+	';'  reduce 81
 
-	sentencia_ejecutable  goto 85
+	sentencia_ejecutable  goto 88
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
-	else  goto 86
-	end_if  goto 87
+	else  goto 89
+	end_if  goto 90
 	asignacion_simple  goto 25
 	asignacion_multiple  goto 26
 	expresion_lambda  goto 27
@@ -748,1024 +768,32 @@ state 42
 
 
 state 43
-	condicion_if : condicion . ')'  (78)
-	condicion_if : condicion .  (80)
+	condicion_if : condicion . ')'  (83)
+	condicion_if : condicion .  (85)
 
-	')'  shift 88
-	error  reduce 80
-	'('  reduce 80
-	WHILE  reduce 80
-	IF  reduce 80
-	ELSE  reduce 80
-	ENDIF  reduce 80
-	PRINT  reduce 80
-	RETURN  reduce 80
-	ID  reduce 80
-	'{'  reduce 80
-	';'  reduce 80
+	')'  shift 91
+	error  reduce 85
+	'('  reduce 85
+	WHILE  reduce 85
+	IF  reduce 85
+	ELSE  reduce 85
+	ENDIF  reduce 85
+	PRINT  reduce 85
+	RETURN  reduce 85
+	ID  reduce 85
+	'{'  reduce 85
+	';'  reduce 85
 
 
 state 44
-	expresion : termino .  (112)
-	termino : termino . '*' factor  (123)
-	termino : termino . '/' factor  (124)
-	termino : termino . '*' error  (126)
-	termino : termino . '/' error  (128)
-
-	'*'  shift 89
-	'/'  shift 90
-	error  reduce 112
-	'+'  reduce 112
-	'-'  reduce 112
-	'('  reduce 112
-	WHILE  reduce 112
-	IF  reduce 112
-	ELSE  reduce 112
-	ENDIF  reduce 112
-	PRINT  reduce 112
-	RETURN  reduce 112
-	DO  reduce 112
-	ID  reduce 112
-	COMP  reduce 112
-	FLECHA  reduce 112
-	'{'  reduce 112
-	')'  reduce 112
-	';'  reduce 112
-
-
-state 45
-	termino : factor .  (131)
-
-	.  reduce 131
-
-
-state 46
-	factor : inicio_llamado . parametros_reales ')'  (135)
-
-	error  shift 91
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	.  error
-
-	expresion  goto 92
-	parametros_reales  goto 93
-	parametro_real  goto 94
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 47
-	sentencia_ejecutable : PRINT '(' . CADENA ')'  (46)
-	sentencia_ejecutable : PRINT '(' . expresion ')'  (47)
-	sentencia_ejecutable : PRINT '(' . ')'  (56)
-
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	CADENA  shift 95
-	')'  shift 96
-	.  error
-
-	expresion  goto 97
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 48
-	sentencia_return : RETURN expresion .  (26)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
-
-	'+'  shift 79
-	'-'  shift 80
-	error  reduce 26
-	';'  reduce 26
-
-
-state 49
-	list_vars_mix : ID '.' . ID  (33)
-	var_asignacion_simple : ID '.' . ID  (99)
-
-	ID  shift 98
-	.  error
-
-
-state 50
-	declaracion_funcion : header_funcion '(' . parametros_formales ')' '{' list_sentencia '}'  (7)
-
-	error  shift 99
-	CR  shift 100
-	ULONG  shift 15
-	.  error
-
-	parametros_formales  goto 101
-	tipo  goto 102
-	parametro_formal  goto 103
-	semantica  goto 104
-
-
-state 51
-	header_funcion : tipo error .  (9)
-
-	.  reduce 9
-
-
-state 52
-	header_funcion : tipo ID .  (8)
-	list_vars : ID .  (37)
-
-	error  reduce 37
-	'('  reduce 8
-	ID  reduce 37
-	';'  reduce 37
-	','  reduce 37
-
-
-state 53
-	sentencia_declarativa : tipo list_vars .  (16)
-	list_vars : list_vars . ',' ID  (38)
-	list_vars : list_vars . ID  (39)
-
-	ID  shift 105
-	','  shift 106
-	error  reduce 16
-	';'  reduce 16
-
-
-state 54
-	sentencia : sentencia_declarativa error .  (13)
-
-	.  reduce 13
-
-
-state 55
-	sentencia : sentencia_declarativa ';' .  (10)
-
-	.  reduce 10
-
-
-state 56
-	sentencia : sentencia_ejecutable error .  (14)
-
-	.  reduce 14
-
-
-state 57
-	sentencia : sentencia_ejecutable ';' .  (11)
-
-	.  reduce 11
-
-
-state 58
-	list_vars_mix : list_vars_mix ID .  (35)
-	list_vars_mix : list_vars_mix ID . '.' ID  (36)
-
-	'.'  shift 107
-	ID  reduce 35
-	','  reduce 35
-	'='  reduce 35
-
-
-state 59
-	list_vars_mix : list_vars_mix ',' . ID  (32)
-	list_vars_mix : list_vars_mix ',' . ID '.' ID  (34)
-
-	ID  shift 108
-	.  error
-
-
-state 60
-	asignacion_multiple : list_vars_mix '=' . list_ctes  (100)
-
-	CTE  shift 109
-	.  error
-
-	list_ctes  goto 110
-
-
-state 61
-	condicion_while : '(' . condicion ')'  (81)
-	condicion_while : '(' . condicion  (83)
-
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	.  error
-
-	expresion  goto 41
-	condicion  goto 111
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 62
-	sentencia_ejecutable : while condicion_while . DO '{' bloque_ejecutable '}'  (52)
-	sentencia_ejecutable : while condicion_while . DO sentencia_ejecutable  (53)
-	sentencia_ejecutable : while condicion_while . DO  (54)
-	sentencia_ejecutable : while condicion_while . DO '{' '}'  (55)
-	sentencia_ejecutable : while condicion_while . '{' bloque_ejecutable '}'  (57)
-	sentencia_ejecutable : while condicion_while . sentencia_ejecutable  (58)
-
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	DO  shift 112
-	ID  shift 14
-	'{'  shift 113
-	.  error
-
-	sentencia_ejecutable  goto 114
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 63
-	condicion_while : condicion . ')'  (82)
-	condicion_while : condicion .  (84)
-
-	')'  shift 115
-	'('  reduce 84
-	WHILE  reduce 84
-	IF  reduce 84
-	PRINT  reduce 84
-	RETURN  reduce 84
-	DO  reduce 84
-	ID  reduce 84
-	'{'  reduce 84
-
-
-state 64
-	asignacion_simple : var_asignacion_simple ASIG . expresion  (97)
-
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	.  error
-
-	expresion  goto 116
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 65
-	expresion_lambda : header_lambda '{' . bloque_ejecutable '}' $$1 '(' factor_lambda ')'  (103)
-	expresion_lambda : header_lambda '{' . bloque_ejecutable '(' expresion ')'  (104)
-
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	.  error
-
-	sentencia_ejecutable  goto 66
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	bloque_ejecutable  goto 117
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 66
-	bloque_ejecutable : sentencia_ejecutable . ';'  (85)
-	bloque_ejecutable : sentencia_ejecutable . error  (88)
-
-	error  shift 118
-	';'  shift 119
-	.  error
-
-
-state 67
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
-	expresion_lambda : header_lambda bloque_ejecutable . '}' '(' expresion ')'  (105)
-	expresion_lambda : header_lambda bloque_ejecutable . '(' expresion ')'  (106)
-
-	error  shift 120
-	'('  shift 121
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 122
-	.  error
-
-	sentencia_ejecutable  goto 123
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 68
-	header_lambda : '(' tipo ID . ')'  (101)
-
-	')'  shift 124
-	.  error
-
-
-state 69
-	expresion : error '+' . termino  (113)
-	expresion : error '+' . error  (117)
-
-	error  shift 125
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	termino  goto 126
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 70
-	expresion : error '-' . termino  (115)
-	expresion : error '-' . error  (118)
-
-	error  shift 127
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	termino  goto 128
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 71
-	termino : error '*' . factor  (125)
-	termino : error '*' . error  (129)
-
-	error  shift 129
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	factor  goto 130
-	inicio_llamado  goto 46
-
-
-state 72
-	termino : error '/' . factor  (127)
-	termino : error '/' . error  (130)
-
-	error  shift 131
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	factor  goto 132
-	inicio_llamado  goto 46
-
-
-state 73
-	factor : '-' CTE .  (136)
-
-	.  reduce 136
-
-
-state 74
-	condicion_if : '(' condicion . ')'  (77)
-	condicion_if : '(' condicion .  (79)
-
-	')'  shift 133
-	error  reduce 79
-	'('  reduce 79
-	WHILE  reduce 79
-	IF  reduce 79
-	ELSE  reduce 79
-	ENDIF  reduce 79
-	PRINT  reduce 79
-	RETURN  reduce 79
-	ID  reduce 79
-	'{'  reduce 79
-	';'  reduce 79
-
-
-state 75
-	inicio_llamado : ID '(' .  (137)
-
-	.  reduce 137
-
-
-state 76
-	factor : ID '.' . ID  (134)
-
-	ID  shift 134
-	.  error
-
-
-state 77
-	expresion : TRUNC error . expresion ')'  (121)
-	expresion : TRUNC error . expresion error  (122)
-
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	.  error
-
-	expresion  goto 135
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 78
-	expresion : TRUNC '(' . expresion ')'  (119)
-	expresion : TRUNC '(' . expresion error  (120)
-
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	.  error
-
-	expresion  goto 136
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 79
-	expresion : expresion '+' . termino  (110)
-	expresion : expresion '+' . error  (114)
-
-	error  shift 137
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	termino  goto 138
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 80
-	expresion : expresion '-' . termino  (111)
-	expresion : expresion '-' . error  (116)
-
-	error  shift 139
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	termino  goto 140
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 81
-	condicion : expresion COMP . expresion  (96)
-
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	.  error
-
-	expresion  goto 141
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 82
-	else : ELSE .  (73)
-
-	.  reduce 73
-
-
-state 83
-	end_if : ENDIF .  (75)
-
-	.  reduce 75
-
-
-state 84
-	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if  (40)
-	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' end_if  (41)
-	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else sentencia_ejecutable ';' end_if  (44)
-	sentencia_ejecutable : IF condicion_if '{' . '}' else '{' bloque_ejecutable '}' end_if  (59)
-	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else '{' '}' end_if  (60)
-	sentencia_ejecutable : IF condicion_if '{' . '}' else '{' '}' end_if  (61)
-	sentencia_ejecutable : IF condicion_if '{' . '}' end_if  (62)
-	sentencia_ejecutable : IF condicion_if '{' . '}' else sentencia_ejecutable ';' end_if  (67)
-	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else end_if  (68)
-	sentencia_ejecutable : IF condicion_if '{' . '}' else end_if  (69)
-
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 142
-	.  error
-
-	sentencia_ejecutable  goto 66
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	bloque_ejecutable  goto 143
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 85
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else sentencia_ejecutable ';' end_if  (42)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' end_if  (43)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else '{' bloque_ejecutable '}' end_if  (45)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else end_if  (64)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else '{' '}' end_if  (71)
-
-	';'  shift 144
-	.  error
-
-
-state 86
-	sentencia_ejecutable : IF condicion_if else . sentencia_ejecutable ';' end_if  (63)
-	sentencia_ejecutable : IF condicion_if else . end_if  (65)
-	sentencia_ejecutable : IF condicion_if else . '{' bloque_ejecutable '}' end_if  (70)
-	sentencia_ejecutable : IF condicion_if else . '{' '}' end_if  (72)
-	end_if : .  (76)
-
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	ENDIF  shift 83
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'{'  shift 145
-	error  reduce 76
-	';'  reduce 76
-
-	sentencia_ejecutable  goto 146
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	end_if  goto 147
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 87
-	sentencia_ejecutable : IF condicion_if end_if .  (66)
-
-	.  reduce 66
-
-
-state 88
-	condicion_if : condicion ')' .  (78)
-
-	.  reduce 78
-
-
-state 89
-	termino : termino '*' . factor  (123)
-	termino : termino '*' . error  (126)
-
-	error  shift 148
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	factor  goto 149
-	inicio_llamado  goto 46
-
-
-state 90
-	termino : termino '/' . factor  (124)
-	termino : termino '/' . error  (128)
-
-	error  shift 150
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	.  error
-
-	factor  goto 151
-	inicio_llamado  goto 46
-
-
-state 91
-	parametros_reales : error .  (92)
-	expresion : error . '+' termino  (113)
-	expresion : error . '-' termino  (115)
-	expresion : error . '+' error  (117)
-	expresion : error . '-' error  (118)
-	termino : error . '*' factor  (125)
-	termino : error . '/' factor  (127)
-	termino : error . '*' error  (129)
-	termino : error . '/' error  (130)
-
-	'+'  shift 69
-	'-'  shift 70
-	'*'  shift 71
-	'/'  shift 72
-	')'  reduce 92
-	','  reduce 92
-
-
-state 92
-	parametro_real : expresion . FLECHA ID  (93)
-	parametro_real : expresion . FLECHA error  (94)
-	parametro_real : expresion . ID  (95)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
-
-	'+'  shift 79
-	'-'  shift 80
-	ID  shift 152
-	FLECHA  shift 153
-	.  error
-
-
-state 93
-	parametros_reales : parametros_reales . ',' parametro_real  (91)
-	factor : inicio_llamado parametros_reales . ')'  (135)
-
-	')'  shift 154
-	','  shift 155
-	.  error
-
-
-state 94
-	parametros_reales : parametro_real .  (90)
-
-	.  reduce 90
-
-
-state 95
-	sentencia_ejecutable : PRINT '(' CADENA . ')'  (46)
-
-	')'  shift 156
-	.  error
-
-
-state 96
-	sentencia_ejecutable : PRINT '(' ')' .  (56)
-
-	.  reduce 56
-
-
-state 97
-	sentencia_ejecutable : PRINT '(' expresion . ')'  (47)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
-
-	'+'  shift 79
-	'-'  shift 80
-	')'  shift 157
-	.  error
-
-
-state 98
-	list_vars_mix : ID '.' ID .  (33)
-	var_asignacion_simple : ID '.' ID .  (99)
-
-	ID  reduce 33
-	ASIG  reduce 99
-	','  reduce 33
-	'='  reduce 33
-
-
-state 99
-	parametro_formal : error . ID  (24)
-
-	ID  shift 158
-	.  error
-
-
-state 100
-	semantica : CR .  (25)
-
-	.  reduce 25
-
-
-state 101
-	declaracion_funcion : header_funcion '(' parametros_formales . ')' '{' list_sentencia '}'  (7)
-	parametros_formales : parametros_formales . ',' parametro_formal  (18)
-
-	')'  shift 159
-	','  shift 160
-	.  error
-
-
-state 102
-	parametro_formal : tipo . ID  (20)
-	parametro_formal : tipo . error  (22)
-
-	error  shift 161
-	ID  shift 162
-	.  error
-
-
-state 103
-	parametros_formales : parametro_formal .  (17)
-
-	.  reduce 17
-
-
-state 104
-	parametro_formal : semantica . tipo ID  (19)
-	parametro_formal : semantica . tipo error  (21)
-	parametro_formal : semantica . error ID  (23)
-
-	error  shift 163
-	ULONG  shift 15
-	.  error
-
-	tipo  goto 164
-
-
-state 105
-	list_vars : list_vars ID .  (39)
-
-	.  reduce 39
-
-
-state 106
-	list_vars : list_vars ',' . ID  (38)
-
-	ID  shift 165
-	.  error
-
-
-state 107
-	list_vars_mix : list_vars_mix ID '.' . ID  (36)
-
-	ID  shift 166
-	.  error
-
-
-state 108
-	list_vars_mix : list_vars_mix ',' ID .  (32)
-	list_vars_mix : list_vars_mix ',' ID . '.' ID  (34)
-
-	'.'  shift 167
-	ID  reduce 32
-	','  reduce 32
-	'='  reduce 32
-
-
-state 109
-	list_ctes : CTE .  (28)
-
-	.  reduce 28
-
-
-state 110
-	list_ctes : list_ctes . ',' CTE  (29)
-	list_ctes : list_ctes . CTE  (30)
-	asignacion_multiple : list_vars_mix '=' list_ctes .  (100)
-
-	CTE  shift 168
-	','  shift 169
-	error  reduce 100
-	';'  reduce 100
-
-
-state 111
-	condicion_while : '(' condicion . ')'  (81)
-	condicion_while : '(' condicion .  (83)
-
-	')'  shift 170
-	'('  reduce 83
-	WHILE  reduce 83
-	IF  reduce 83
-	PRINT  reduce 83
-	RETURN  reduce 83
-	DO  reduce 83
-	ID  reduce 83
-	'{'  reduce 83
-
-
-state 112
-	sentencia_ejecutable : while condicion_while DO . '{' bloque_ejecutable '}'  (52)
-	sentencia_ejecutable : while condicion_while DO . sentencia_ejecutable  (53)
-	sentencia_ejecutable : while condicion_while DO .  (54)
-	sentencia_ejecutable : while condicion_while DO . '{' '}'  (55)
-
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'{'  shift 171
-	error  reduce 54
-	';'  reduce 54
-
-	sentencia_ejecutable  goto 172
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 113
-	sentencia_ejecutable : while condicion_while '{' . bloque_ejecutable '}'  (57)
-
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	.  error
-
-	sentencia_ejecutable  goto 66
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	bloque_ejecutable  goto 173
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 114
-	sentencia_ejecutable : while condicion_while sentencia_ejecutable .  (58)
-
-	.  reduce 58
-
-
-state 115
-	condicion_while : condicion ')' .  (82)
-
-	.  reduce 82
-
-
-state 116
-	asignacion_simple : var_asignacion_simple ASIG expresion .  (97)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
-
-	'+'  shift 79
-	'-'  shift 80
-	error  reduce 97
-	';'  reduce 97
-
-
-state 117
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
-	expresion_lambda : header_lambda '{' bloque_ejecutable . '}' $$1 '(' factor_lambda ')'  (103)
-	expresion_lambda : header_lambda '{' bloque_ejecutable . '(' expresion ')'  (104)
-
-	error  shift 120
-	'('  shift 174
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 175
-	.  error
-
-	sentencia_ejecutable  goto 123
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 118
-	bloque_ejecutable : sentencia_ejecutable error .  (88)
-
-	.  reduce 88
-
-
-state 119
-	bloque_ejecutable : sentencia_ejecutable ';' .  (85)
-
-	.  reduce 85
-
-
-state 120
-	bloque_ejecutable : bloque_ejecutable error .  (87)
-
-	.  reduce 87
-
-
-state 121
-	header_lambda : '(' . tipo ID ')'  (101)
-	expresion_lambda : header_lambda bloque_ejecutable '(' . expresion ')'  (106)
-
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
-	ULONG  shift 15
-	.  error
-
-	tipo  goto 34
-	expresion  goto 176
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
-
-
-state 122
-	expresion_lambda : header_lambda bloque_ejecutable '}' . '(' expresion ')'  (105)
-
-	'('  shift 177
-	.  error
-
-
-state 123
-	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable . ';'  (86)
-	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable . error  (89)
-
-	error  shift 178
-	';'  shift 179
-	.  error
-
-
-state 124
-	header_lambda : '(' tipo ID ')' .  (101)
-
-	.  reduce 101
-
-
-state 125
-	expresion : error '+' error .  (117)
-	termino : error . '*' factor  (125)
-	termino : error . '/' factor  (127)
-	termino : error . '*' error  (129)
-	termino : error . '/' error  (130)
-
-	'*'  shift 71
-	'/'  shift 72
+	expresion : termino .  (117)
+	termino : termino . '*' factor  (124)
+	termino : termino . '/' factor  (125)
+	termino : termino . '*' error  (127)
+	termino : termino . '/' error  (129)
+
+	'*'  shift 92
+	'/'  shift 93
 	error  reduce 117
 	'+'  reduce 117
 	'-'  reduce 117
@@ -1785,43 +813,1057 @@ state 125
 	';'  reduce 117
 
 
-state 126
-	expresion : error '+' termino .  (113)
-	termino : termino . '*' factor  (123)
-	termino : termino . '/' factor  (124)
-	termino : termino . '*' error  (126)
-	termino : termino . '/' error  (128)
+state 45
+	termino : factor .  (132)
 
-	'*'  shift 89
-	'/'  shift 90
-	error  reduce 113
-	'+'  reduce 113
-	'-'  reduce 113
-	'('  reduce 113
-	WHILE  reduce 113
-	IF  reduce 113
-	ELSE  reduce 113
-	ENDIF  reduce 113
-	PRINT  reduce 113
-	RETURN  reduce 113
-	DO  reduce 113
-	ID  reduce 113
-	COMP  reduce 113
-	FLECHA  reduce 113
-	'{'  reduce 113
-	')'  reduce 113
-	';'  reduce 113
+	.  reduce 132
+
+
+state 46
+	factor : inicio_llamado . parametros_reales ')'  (136)
+
+	error  shift 94
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	expresion  goto 95
+	parametros_reales  goto 96
+	parametro_real  goto 97
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 47
+	sentencia_ejecutable : PRINT '(' . CADENA ')'  (51)
+	sentencia_ejecutable : PRINT '(' . expresion ')'  (52)
+	sentencia_ejecutable : PRINT '(' . ')'  (61)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	CADENA  shift 98
+	')'  shift 99
+	.  error
+
+	expresion  goto 100
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 48
+	sentencia_return : RETURN '(' . expresion ')'  (31)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	expresion  goto 101
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 49
+	list_vars_mix : ID '.' . ID  (38)
+	var_asignacion_simple : ID '.' . ID  (104)
+
+	ID  shift 102
+	.  error
+
+
+state 50
+	sentencia : declaracion_funcion error .  (18)
+
+	.  reduce 18
+
+
+state 51
+	sentencia : declaracion_funcion ';' .  (16)
+
+	.  reduce 16
+
+
+state 52
+	declaracion_funcion : header_funcion '(' . parametros_formales ')' '{' list_sentencia '}'  (8)
+
+	error  shift 103
+	CR  shift 104
+	ULONG  shift 15
+	.  error
+
+	parametros_formales  goto 105
+	tipo  goto 106
+	parametro_formal  goto 107
+	semantica  goto 108
+
+
+state 53
+	header_funcion : tipo error .  (10)
+
+	.  reduce 10
+
+
+state 54
+	header_funcion : tipo ID .  (9)
+	list_vars : ID .  (42)
+
+	error  reduce 42
+	'('  reduce 9
+	ID  reduce 42
+	';'  reduce 42
+	','  reduce 42
+
+
+state 55
+	sentencia_declarativa : tipo list_vars .  (21)
+	list_vars : list_vars . ',' ID  (43)
+	list_vars : list_vars . ID  (44)
+
+	ID  shift 109
+	','  shift 110
+	error  reduce 21
+	';'  reduce 21
+
+
+state 56
+	sentencia : sentencia_declarativa error .  (17)
+
+	.  reduce 17
+
+
+state 57
+	sentencia : sentencia_declarativa ';' .  (14)
+
+	.  reduce 14
+
+
+state 58
+	sentencia : sentencia_ejecutable error .  (19)
+
+	.  reduce 19
+
+
+state 59
+	sentencia : sentencia_ejecutable ';' .  (15)
+
+	.  reduce 15
+
+
+state 60
+	list_vars_mix : list_vars_mix ID .  (40)
+	list_vars_mix : list_vars_mix ID . '.' ID  (41)
+
+	'.'  shift 111
+	ID  reduce 40
+	','  reduce 40
+	'='  reduce 40
+
+
+state 61
+	list_vars_mix : list_vars_mix ',' . ID  (37)
+	list_vars_mix : list_vars_mix ',' . ID '.' ID  (39)
+
+	ID  shift 112
+	.  error
+
+
+state 62
+	asignacion_multiple : list_vars_mix '=' . list_ctes  (105)
+
+	CTE  shift 113
+	.  error
+
+	list_ctes  goto 114
+
+
+state 63
+	condicion_while : '(' . condicion ')'  (86)
+	condicion_while : '(' . condicion  (88)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	expresion  goto 41
+	condicion  goto 115
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 64
+	sentencia_ejecutable : while condicion_while . DO '{' bloque_ejecutable '}'  (57)
+	sentencia_ejecutable : while condicion_while . DO sentencia_ejecutable  (58)
+	sentencia_ejecutable : while condicion_while . DO  (59)
+	sentencia_ejecutable : while condicion_while . DO '{' '}'  (60)
+	sentencia_ejecutable : while condicion_while . '{' bloque_ejecutable '}'  (62)
+	sentencia_ejecutable : while condicion_while . sentencia_ejecutable  (63)
+
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	DO  shift 116
+	ID  shift 14
+	'{'  shift 117
+	.  error
+
+	sentencia_ejecutable  goto 118
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 65
+	condicion_while : condicion . ')'  (87)
+	condicion_while : condicion .  (89)
+
+	')'  shift 119
+	'('  reduce 89
+	WHILE  reduce 89
+	IF  reduce 89
+	PRINT  reduce 89
+	RETURN  reduce 89
+	DO  reduce 89
+	ID  reduce 89
+	'{'  reduce 89
+
+
+state 66
+	asignacion_simple : var_asignacion_simple ASIG . expresion  (102)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	expresion  goto 120
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 67
+	expresion_lambda : header_lambda '{' . bloque_ejecutable '}' $$1 '(' factor_lambda ')'  (108)
+	expresion_lambda : header_lambda '{' . bloque_ejecutable '(' expresion ')'  (109)
+
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	.  error
+
+	sentencia_ejecutable  goto 68
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	bloque_ejecutable  goto 121
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 68
+	bloque_ejecutable : sentencia_ejecutable . ';'  (90)
+	bloque_ejecutable : sentencia_ejecutable . error  (93)
+
+	error  shift 122
+	';'  shift 123
+	.  error
+
+
+state 69
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
+	expresion_lambda : header_lambda bloque_ejecutable . '}' '(' expresion ')'  (110)
+	expresion_lambda : header_lambda bloque_ejecutable . '(' expresion ')'  (111)
+
+	error  shift 124
+	'('  shift 125
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 126
+	.  error
+
+	sentencia_ejecutable  goto 127
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 70
+	programa : nombre_programa '{' list_sentencia '}' .  (1)
+	programa : nombre_programa '{' list_sentencia '}' . '}'  (2)
+
+	'}'  shift 128
+	$end  reduce 1
+
+
+state 71
+	header_lambda : '(' tipo ID . ')'  (106)
+
+	')'  shift 129
+	.  error
+
+
+state 72
+	expresion : error '+' . termino  (118)
+	expresion : error '+' . error  (122)
+
+	error  shift 130
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	termino  goto 131
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 73
+	expresion : error '-' . termino  (120)
+	expresion : error '-' . error  (123)
+
+	error  shift 132
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	termino  goto 133
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 74
+	termino : error '*' . factor  (126)
+	termino : error '*' . error  (130)
+
+	error  shift 134
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	factor  goto 135
+	inicio_llamado  goto 46
+
+
+state 75
+	termino : error '/' . factor  (128)
+	termino : error '/' . error  (131)
+
+	error  shift 136
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	factor  goto 137
+	inicio_llamado  goto 46
+
+
+state 76
+	factor : '-' CTE .  (137)
+
+	.  reduce 137
+
+
+state 77
+	condicion_if : '(' condicion . ')'  (82)
+	condicion_if : '(' condicion .  (84)
+
+	')'  shift 138
+	error  reduce 84
+	'('  reduce 84
+	WHILE  reduce 84
+	IF  reduce 84
+	ELSE  reduce 84
+	ENDIF  reduce 84
+	PRINT  reduce 84
+	RETURN  reduce 84
+	ID  reduce 84
+	'{'  reduce 84
+	';'  reduce 84
+
+
+state 78
+	inicio_llamado : ID '(' .  (142)
+
+	.  reduce 142
+
+
+state 79
+	factor : ID '.' . ID  (135)
+
+	ID  shift 139
+	.  error
+
+
+state 80
+	factor : TRUNC error . expresion ')'  (140)
+	factor : TRUNC error . expresion error  (141)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	expresion  goto 140
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 81
+	factor : TRUNC '(' . expresion ')'  (138)
+	factor : TRUNC '(' . expresion error  (139)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	expresion  goto 141
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 82
+	expresion : expresion '+' . termino  (115)
+	expresion : expresion '+' . error  (119)
+
+	error  shift 142
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	termino  goto 143
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 83
+	expresion : expresion '-' . termino  (116)
+	expresion : expresion '-' . error  (121)
+
+	error  shift 144
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	termino  goto 145
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 84
+	condicion : expresion COMP . expresion  (101)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	expresion  goto 146
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 85
+	else : ELSE .  (78)
+
+	.  reduce 78
+
+
+state 86
+	end_if : ENDIF .  (80)
+
+	.  reduce 80
+
+
+state 87
+	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if  (45)
+	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' end_if  (46)
+	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else sentencia_ejecutable ';' end_if  (49)
+	sentencia_ejecutable : IF condicion_if '{' . '}' else '{' bloque_ejecutable '}' end_if  (64)
+	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else '{' '}' end_if  (65)
+	sentencia_ejecutable : IF condicion_if '{' . '}' else '{' '}' end_if  (66)
+	sentencia_ejecutable : IF condicion_if '{' . '}' end_if  (67)
+	sentencia_ejecutable : IF condicion_if '{' . '}' else sentencia_ejecutable ';' end_if  (72)
+	sentencia_ejecutable : IF condicion_if '{' . bloque_ejecutable '}' else end_if  (73)
+	sentencia_ejecutable : IF condicion_if '{' . '}' else end_if  (74)
+
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 147
+	.  error
+
+	sentencia_ejecutable  goto 68
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	bloque_ejecutable  goto 148
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 88
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else sentencia_ejecutable ';' end_if  (47)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' end_if  (48)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else '{' bloque_ejecutable '}' end_if  (50)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else end_if  (69)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable . ';' else '{' '}' end_if  (76)
+
+	';'  shift 149
+	.  error
+
+
+state 89
+	sentencia_ejecutable : IF condicion_if else . sentencia_ejecutable ';' end_if  (68)
+	sentencia_ejecutable : IF condicion_if else . end_if  (70)
+	sentencia_ejecutable : IF condicion_if else . '{' bloque_ejecutable '}' end_if  (75)
+	sentencia_ejecutable : IF condicion_if else . '{' '}' end_if  (77)
+	end_if : .  (81)
+
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	ENDIF  shift 86
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'{'  shift 150
+	error  reduce 81
+	';'  reduce 81
+
+	sentencia_ejecutable  goto 151
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	end_if  goto 152
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 90
+	sentencia_ejecutable : IF condicion_if end_if .  (71)
+
+	.  reduce 71
+
+
+state 91
+	condicion_if : condicion ')' .  (83)
+
+	.  reduce 83
+
+
+state 92
+	termino : termino '*' . factor  (124)
+	termino : termino '*' . error  (127)
+
+	error  shift 153
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	factor  goto 154
+	inicio_llamado  goto 46
+
+
+state 93
+	termino : termino '/' . factor  (125)
+	termino : termino '/' . error  (129)
+
+	error  shift 155
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	.  error
+
+	factor  goto 156
+	inicio_llamado  goto 46
+
+
+state 94
+	parametros_reales : error .  (97)
+	expresion : error . '+' termino  (118)
+	expresion : error . '-' termino  (120)
+	expresion : error . '+' error  (122)
+	expresion : error . '-' error  (123)
+	termino : error . '*' factor  (126)
+	termino : error . '/' factor  (128)
+	termino : error . '*' error  (130)
+	termino : error . '/' error  (131)
+
+	'+'  shift 72
+	'-'  shift 73
+	'*'  shift 74
+	'/'  shift 75
+	')'  reduce 97
+	','  reduce 97
+
+
+state 95
+	parametro_real : expresion . FLECHA ID  (98)
+	parametro_real : expresion . FLECHA error  (99)
+	parametro_real : expresion . ID  (100)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
+
+	'+'  shift 82
+	'-'  shift 83
+	ID  shift 157
+	FLECHA  shift 158
+	.  error
+
+
+state 96
+	parametros_reales : parametros_reales . ',' parametro_real  (96)
+	factor : inicio_llamado parametros_reales . ')'  (136)
+
+	')'  shift 159
+	','  shift 160
+	.  error
+
+
+state 97
+	parametros_reales : parametro_real .  (95)
+
+	.  reduce 95
+
+
+state 98
+	sentencia_ejecutable : PRINT '(' CADENA . ')'  (51)
+
+	')'  shift 161
+	.  error
+
+
+state 99
+	sentencia_ejecutable : PRINT '(' ')' .  (61)
+
+	.  reduce 61
+
+
+state 100
+	sentencia_ejecutable : PRINT '(' expresion . ')'  (52)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
+
+	'+'  shift 82
+	'-'  shift 83
+	')'  shift 162
+	.  error
+
+
+state 101
+	sentencia_return : RETURN '(' expresion . ')'  (31)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
+
+	'+'  shift 82
+	'-'  shift 83
+	')'  shift 163
+	.  error
+
+
+state 102
+	list_vars_mix : ID '.' ID .  (38)
+	var_asignacion_simple : ID '.' ID .  (104)
+
+	ID  reduce 38
+	ASIG  reduce 104
+	','  reduce 38
+	'='  reduce 38
+
+
+state 103
+	parametro_formal : error . ID  (29)
+
+	ID  shift 164
+	.  error
+
+
+state 104
+	semantica : CR .  (30)
+
+	.  reduce 30
+
+
+state 105
+	declaracion_funcion : header_funcion '(' parametros_formales . ')' '{' list_sentencia '}'  (8)
+	parametros_formales : parametros_formales . ',' parametro_formal  (23)
+
+	')'  shift 165
+	','  shift 166
+	.  error
+
+
+state 106
+	parametro_formal : tipo . ID  (25)
+	parametro_formal : tipo . error  (27)
+
+	error  shift 167
+	ID  shift 168
+	.  error
+
+
+state 107
+	parametros_formales : parametro_formal .  (22)
+
+	.  reduce 22
+
+
+state 108
+	parametro_formal : semantica . tipo ID  (24)
+	parametro_formal : semantica . tipo error  (26)
+	parametro_formal : semantica . error ID  (28)
+
+	error  shift 169
+	ULONG  shift 15
+	.  error
+
+	tipo  goto 170
+
+
+state 109
+	list_vars : list_vars ID .  (44)
+
+	.  reduce 44
+
+
+state 110
+	list_vars : list_vars ',' . ID  (43)
+
+	ID  shift 171
+	.  error
+
+
+state 111
+	list_vars_mix : list_vars_mix ID '.' . ID  (41)
+
+	ID  shift 172
+	.  error
+
+
+state 112
+	list_vars_mix : list_vars_mix ',' ID .  (37)
+	list_vars_mix : list_vars_mix ',' ID . '.' ID  (39)
+
+	'.'  shift 173
+	ID  reduce 37
+	','  reduce 37
+	'='  reduce 37
+
+
+state 113
+	list_ctes : CTE .  (33)
+
+	.  reduce 33
+
+
+state 114
+	list_ctes : list_ctes . ',' CTE  (34)
+	list_ctes : list_ctes . CTE  (35)
+	asignacion_multiple : list_vars_mix '=' list_ctes .  (105)
+
+	CTE  shift 174
+	','  shift 175
+	error  reduce 105
+	';'  reduce 105
+
+
+state 115
+	condicion_while : '(' condicion . ')'  (86)
+	condicion_while : '(' condicion .  (88)
+
+	')'  shift 176
+	'('  reduce 88
+	WHILE  reduce 88
+	IF  reduce 88
+	PRINT  reduce 88
+	RETURN  reduce 88
+	DO  reduce 88
+	ID  reduce 88
+	'{'  reduce 88
+
+
+state 116
+	sentencia_ejecutable : while condicion_while DO . '{' bloque_ejecutable '}'  (57)
+	sentencia_ejecutable : while condicion_while DO . sentencia_ejecutable  (58)
+	sentencia_ejecutable : while condicion_while DO .  (59)
+	sentencia_ejecutable : while condicion_while DO . '{' '}'  (60)
+
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'{'  shift 177
+	error  reduce 59
+	';'  reduce 59
+
+	sentencia_ejecutable  goto 178
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 117
+	sentencia_ejecutable : while condicion_while '{' . bloque_ejecutable '}'  (62)
+
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	.  error
+
+	sentencia_ejecutable  goto 68
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	bloque_ejecutable  goto 179
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 118
+	sentencia_ejecutable : while condicion_while sentencia_ejecutable .  (63)
+
+	.  reduce 63
+
+
+state 119
+	condicion_while : condicion ')' .  (87)
+
+	.  reduce 87
+
+
+state 120
+	asignacion_simple : var_asignacion_simple ASIG expresion .  (102)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
+
+	'+'  shift 82
+	'-'  shift 83
+	error  reduce 102
+	';'  reduce 102
+
+
+state 121
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
+	expresion_lambda : header_lambda '{' bloque_ejecutable . '}' $$1 '(' factor_lambda ')'  (108)
+	expresion_lambda : header_lambda '{' bloque_ejecutable . '(' expresion ')'  (109)
+
+	error  shift 124
+	'('  shift 180
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 181
+	.  error
+
+	sentencia_ejecutable  goto 127
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 122
+	bloque_ejecutable : sentencia_ejecutable error .  (93)
+
+	.  reduce 93
+
+
+state 123
+	bloque_ejecutable : sentencia_ejecutable ';' .  (90)
+
+	.  reduce 90
+
+
+state 124
+	bloque_ejecutable : bloque_ejecutable error .  (92)
+
+	.  reduce 92
+
+
+state 125
+	header_lambda : '(' . tipo ID ')'  (106)
+	expresion_lambda : header_lambda bloque_ejecutable '(' . expresion ')'  (111)
+
+	error  shift 35
+	'-'  shift 36
+	CTE  shift 38
+	ID  shift 39
+	TRUNC  shift 40
+	ULONG  shift 15
+	.  error
+
+	tipo  goto 34
+	expresion  goto 182
+	termino  goto 44
+	factor  goto 45
+	inicio_llamado  goto 46
+
+
+state 126
+	expresion_lambda : header_lambda bloque_ejecutable '}' . '(' expresion ')'  (110)
+
+	'('  shift 183
+	.  error
 
 
 state 127
-	expresion : error '-' error .  (118)
-	termino : error . '*' factor  (125)
-	termino : error . '/' factor  (127)
-	termino : error . '*' error  (129)
-	termino : error . '/' error  (130)
+	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable . ';'  (91)
+	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable . error  (94)
 
-	'*'  shift 71
-	'/'  shift 72
+	error  shift 184
+	';'  shift 185
+	.  error
+
+
+state 128
+	programa : nombre_programa '{' list_sentencia '}' '}' .  (2)
+
+	.  reduce 2
+
+
+state 129
+	header_lambda : '(' tipo ID ')' .  (106)
+
+	.  reduce 106
+
+
+state 130
+	expresion : error '+' error .  (122)
+	termino : error . '*' factor  (126)
+	termino : error . '/' factor  (128)
+	termino : error . '*' error  (130)
+	termino : error . '/' error  (131)
+
+	'*'  shift 74
+	'/'  shift 75
+	error  reduce 122
+	'+'  reduce 122
+	'-'  reduce 122
+	'('  reduce 122
+	WHILE  reduce 122
+	IF  reduce 122
+	ELSE  reduce 122
+	ENDIF  reduce 122
+	PRINT  reduce 122
+	RETURN  reduce 122
+	DO  reduce 122
+	ID  reduce 122
+	COMP  reduce 122
+	FLECHA  reduce 122
+	'{'  reduce 122
+	')'  reduce 122
+	';'  reduce 122
+
+
+state 131
+	expresion : error '+' termino .  (118)
+	termino : termino . '*' factor  (124)
+	termino : termino . '/' factor  (125)
+	termino : termino . '*' error  (127)
+	termino : termino . '/' error  (129)
+
+	'*'  shift 92
+	'/'  shift 93
 	error  reduce 118
 	'+'  reduce 118
 	'-'  reduce 118
@@ -1841,15 +1883,165 @@ state 127
 	';'  reduce 118
 
 
-state 128
-	expresion : error '-' termino .  (115)
-	termino : termino . '*' factor  (123)
-	termino : termino . '/' factor  (124)
-	termino : termino . '*' error  (126)
-	termino : termino . '/' error  (128)
+state 132
+	expresion : error '-' error .  (123)
+	termino : error . '*' factor  (126)
+	termino : error . '/' factor  (128)
+	termino : error . '*' error  (130)
+	termino : error . '/' error  (131)
 
-	'*'  shift 89
-	'/'  shift 90
+	'*'  shift 74
+	'/'  shift 75
+	error  reduce 123
+	'+'  reduce 123
+	'-'  reduce 123
+	'('  reduce 123
+	WHILE  reduce 123
+	IF  reduce 123
+	ELSE  reduce 123
+	ENDIF  reduce 123
+	PRINT  reduce 123
+	RETURN  reduce 123
+	DO  reduce 123
+	ID  reduce 123
+	COMP  reduce 123
+	FLECHA  reduce 123
+	'{'  reduce 123
+	')'  reduce 123
+	';'  reduce 123
+
+
+state 133
+	expresion : error '-' termino .  (120)
+	termino : termino . '*' factor  (124)
+	termino : termino . '/' factor  (125)
+	termino : termino . '*' error  (127)
+	termino : termino . '/' error  (129)
+
+	'*'  shift 92
+	'/'  shift 93
+	error  reduce 120
+	'+'  reduce 120
+	'-'  reduce 120
+	'('  reduce 120
+	WHILE  reduce 120
+	IF  reduce 120
+	ELSE  reduce 120
+	ENDIF  reduce 120
+	PRINT  reduce 120
+	RETURN  reduce 120
+	DO  reduce 120
+	ID  reduce 120
+	COMP  reduce 120
+	FLECHA  reduce 120
+	'{'  reduce 120
+	')'  reduce 120
+	';'  reduce 120
+
+
+state 134
+	termino : error '*' error .  (130)
+
+	.  reduce 130
+
+
+state 135
+	termino : error '*' factor .  (126)
+
+	.  reduce 126
+
+
+state 136
+	termino : error '/' error .  (131)
+
+	.  reduce 131
+
+
+state 137
+	termino : error '/' factor .  (128)
+
+	.  reduce 128
+
+
+state 138
+	condicion_if : '(' condicion ')' .  (82)
+
+	.  reduce 82
+
+
+state 139
+	factor : ID '.' ID .  (135)
+
+	.  reduce 135
+
+
+state 140
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
+	factor : TRUNC error expresion . ')'  (140)
+	factor : TRUNC error expresion . error  (141)
+
+	error  shift 186
+	'+'  shift 82
+	'-'  shift 83
+	')'  shift 187
+	.  error
+
+
+state 141
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
+	factor : TRUNC '(' expresion . ')'  (138)
+	factor : TRUNC '(' expresion . error  (139)
+
+	error  shift 188
+	'+'  shift 82
+	'-'  shift 83
+	')'  shift 189
+	.  error
+
+
+state 142
+	expresion : expresion '+' error .  (119)
+	termino : error . '*' factor  (126)
+	termino : error . '/' factor  (128)
+	termino : error . '*' error  (130)
+	termino : error . '/' error  (131)
+
+	'*'  shift 74
+	'/'  shift 75
+	error  reduce 119
+	'+'  reduce 119
+	'-'  reduce 119
+	'('  reduce 119
+	WHILE  reduce 119
+	IF  reduce 119
+	ELSE  reduce 119
+	ENDIF  reduce 119
+	PRINT  reduce 119
+	RETURN  reduce 119
+	DO  reduce 119
+	ID  reduce 119
+	COMP  reduce 119
+	FLECHA  reduce 119
+	'{'  reduce 119
+	')'  reduce 119
+	';'  reduce 119
+
+
+state 143
+	expresion : expresion '+' termino .  (115)
+	termino : termino . '*' factor  (124)
+	termino : termino . '/' factor  (125)
+	termino : termino . '*' error  (127)
+	termino : termino . '/' error  (129)
+
+	'*'  shift 92
+	'/'  shift 93
 	error  reduce 115
 	'+'  reduce 115
 	'-'  reduce 115
@@ -1869,137 +2061,43 @@ state 128
 	';'  reduce 115
 
 
-state 129
-	termino : error '*' error .  (129)
+state 144
+	expresion : expresion '-' error .  (121)
+	termino : error . '*' factor  (126)
+	termino : error . '/' factor  (128)
+	termino : error . '*' error  (130)
+	termino : error . '/' error  (131)
 
-	.  reduce 129
-
-
-state 130
-	termino : error '*' factor .  (125)
-
-	.  reduce 125
-
-
-state 131
-	termino : error '/' error .  (130)
-
-	.  reduce 130
-
-
-state 132
-	termino : error '/' factor .  (127)
-
-	.  reduce 127
-
-
-state 133
-	condicion_if : '(' condicion ')' .  (77)
-
-	.  reduce 77
+	'*'  shift 74
+	'/'  shift 75
+	error  reduce 121
+	'+'  reduce 121
+	'-'  reduce 121
+	'('  reduce 121
+	WHILE  reduce 121
+	IF  reduce 121
+	ELSE  reduce 121
+	ENDIF  reduce 121
+	PRINT  reduce 121
+	RETURN  reduce 121
+	DO  reduce 121
+	ID  reduce 121
+	COMP  reduce 121
+	FLECHA  reduce 121
+	'{'  reduce 121
+	')'  reduce 121
+	';'  reduce 121
 
 
-state 134
-	factor : ID '.' ID .  (134)
+state 145
+	expresion : expresion '-' termino .  (116)
+	termino : termino . '*' factor  (124)
+	termino : termino . '/' factor  (125)
+	termino : termino . '*' error  (127)
+	termino : termino . '/' error  (129)
 
-	.  reduce 134
-
-
-state 135
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
-	expresion : TRUNC error expresion . ')'  (121)
-	expresion : TRUNC error expresion . error  (122)
-
-	error  shift 180
-	'+'  shift 79
-	'-'  shift 80
-	')'  shift 181
-	.  error
-
-
-state 136
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
-	expresion : TRUNC '(' expresion . ')'  (119)
-	expresion : TRUNC '(' expresion . error  (120)
-
-	error  shift 182
-	'+'  shift 79
-	'-'  shift 80
-	')'  shift 183
-	.  error
-
-
-state 137
-	expresion : expresion '+' error .  (114)
-	termino : error . '*' factor  (125)
-	termino : error . '/' factor  (127)
-	termino : error . '*' error  (129)
-	termino : error . '/' error  (130)
-
-	'*'  shift 71
-	'/'  shift 72
-	error  reduce 114
-	'+'  reduce 114
-	'-'  reduce 114
-	'('  reduce 114
-	WHILE  reduce 114
-	IF  reduce 114
-	ELSE  reduce 114
-	ENDIF  reduce 114
-	PRINT  reduce 114
-	RETURN  reduce 114
-	DO  reduce 114
-	ID  reduce 114
-	COMP  reduce 114
-	FLECHA  reduce 114
-	'{'  reduce 114
-	')'  reduce 114
-	';'  reduce 114
-
-
-state 138
-	expresion : expresion '+' termino .  (110)
-	termino : termino . '*' factor  (123)
-	termino : termino . '/' factor  (124)
-	termino : termino . '*' error  (126)
-	termino : termino . '/' error  (128)
-
-	'*'  shift 89
-	'/'  shift 90
-	error  reduce 110
-	'+'  reduce 110
-	'-'  reduce 110
-	'('  reduce 110
-	WHILE  reduce 110
-	IF  reduce 110
-	ELSE  reduce 110
-	ENDIF  reduce 110
-	PRINT  reduce 110
-	RETURN  reduce 110
-	DO  reduce 110
-	ID  reduce 110
-	COMP  reduce 110
-	FLECHA  reduce 110
-	'{'  reduce 110
-	')'  reduce 110
-	';'  reduce 110
-
-
-state 139
-	expresion : expresion '-' error .  (116)
-	termino : error . '*' factor  (125)
-	termino : error . '/' factor  (127)
-	termino : error . '*' error  (129)
-	termino : error . '/' error  (130)
-
-	'*'  shift 71
-	'/'  shift 72
+	'*'  shift 92
+	'/'  shift 93
 	error  reduce 116
 	'+'  reduce 116
 	'-'  reduce 116
@@ -2019,208 +2117,180 @@ state 139
 	';'  reduce 116
 
 
-state 140
-	expresion : expresion '-' termino .  (111)
-	termino : termino . '*' factor  (123)
-	termino : termino . '/' factor  (124)
-	termino : termino . '*' error  (126)
-	termino : termino . '/' error  (128)
-
-	'*'  shift 89
-	'/'  shift 90
-	error  reduce 111
-	'+'  reduce 111
-	'-'  reduce 111
-	'('  reduce 111
-	WHILE  reduce 111
-	IF  reduce 111
-	ELSE  reduce 111
-	ENDIF  reduce 111
-	PRINT  reduce 111
-	RETURN  reduce 111
-	DO  reduce 111
-	ID  reduce 111
-	COMP  reduce 111
-	FLECHA  reduce 111
-	'{'  reduce 111
-	')'  reduce 111
-	';'  reduce 111
-
-
-state 141
-	condicion : expresion COMP expresion .  (96)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
-
-	'+'  shift 79
-	'-'  shift 80
-	error  reduce 96
-	'('  reduce 96
-	WHILE  reduce 96
-	IF  reduce 96
-	ELSE  reduce 96
-	ENDIF  reduce 96
-	PRINT  reduce 96
-	RETURN  reduce 96
-	DO  reduce 96
-	ID  reduce 96
-	'{'  reduce 96
-	')'  reduce 96
-	';'  reduce 96
-
-
-state 142
-	sentencia_ejecutable : IF condicion_if '{' '}' . else '{' bloque_ejecutable '}' end_if  (59)
-	sentencia_ejecutable : IF condicion_if '{' '}' . else '{' '}' end_if  (61)
-	sentencia_ejecutable : IF condicion_if '{' '}' . end_if  (62)
-	sentencia_ejecutable : IF condicion_if '{' '}' . else sentencia_ejecutable ';' end_if  (67)
-	sentencia_ejecutable : IF condicion_if '{' '}' . else end_if  (69)
-	end_if : .  (76)
-
-	ELSE  shift 82
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	else  goto 184
-	end_if  goto 185
-
-
-state 143
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else '{' bloque_ejecutable '}' end_if  (40)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' end_if  (41)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else sentencia_ejecutable ';' end_if  (44)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else '{' '}' end_if  (60)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else end_if  (68)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
-
-	error  shift 120
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 186
-	.  error
-
-	sentencia_ejecutable  goto 123
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
-state 144
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else sentencia_ejecutable ';' end_if  (42)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . end_if  (43)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else '{' bloque_ejecutable '}' end_if  (45)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else end_if  (64)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else '{' '}' end_if  (71)
-	end_if : .  (76)
-
-	ELSE  shift 82
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	else  goto 187
-	end_if  goto 188
-
-
-state 145
-	sentencia_ejecutable : IF condicion_if else '{' . bloque_ejecutable '}' end_if  (70)
-	sentencia_ejecutable : IF condicion_if else '{' . '}' end_if  (72)
-
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 189
-	.  error
-
-	sentencia_ejecutable  goto 66
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	bloque_ejecutable  goto 190
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
 state 146
-	sentencia_ejecutable : IF condicion_if else sentencia_ejecutable . ';' end_if  (63)
+	condicion : expresion COMP expresion .  (101)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
 
-	';'  shift 191
-	.  error
+	'+'  shift 82
+	'-'  shift 83
+	error  reduce 101
+	'('  reduce 101
+	WHILE  reduce 101
+	IF  reduce 101
+	ELSE  reduce 101
+	ENDIF  reduce 101
+	PRINT  reduce 101
+	RETURN  reduce 101
+	DO  reduce 101
+	ID  reduce 101
+	'{'  reduce 101
+	')'  reduce 101
+	';'  reduce 101
 
 
 state 147
-	sentencia_ejecutable : IF condicion_if else end_if .  (65)
+	sentencia_ejecutable : IF condicion_if '{' '}' . else '{' bloque_ejecutable '}' end_if  (64)
+	sentencia_ejecutable : IF condicion_if '{' '}' . else '{' '}' end_if  (66)
+	sentencia_ejecutable : IF condicion_if '{' '}' . end_if  (67)
+	sentencia_ejecutable : IF condicion_if '{' '}' . else sentencia_ejecutable ';' end_if  (72)
+	sentencia_ejecutable : IF condicion_if '{' '}' . else end_if  (74)
+	end_if : .  (81)
 
-	.  reduce 65
+	ELSE  shift 85
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	else  goto 190
+	end_if  goto 191
 
 
 state 148
-	termino : termino '*' error .  (126)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else '{' bloque_ejecutable '}' end_if  (45)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' end_if  (46)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else sentencia_ejecutable ';' end_if  (49)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else '{' '}' end_if  (65)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable . '}' else end_if  (73)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
 
-	.  reduce 126
+	error  shift 124
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 192
+	.  error
+
+	sentencia_ejecutable  goto 127
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
 
 
 state 149
-	termino : termino '*' factor .  (123)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else sentencia_ejecutable ';' end_if  (47)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . end_if  (48)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else '{' bloque_ejecutable '}' end_if  (50)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else end_if  (69)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' . else '{' '}' end_if  (76)
+	end_if : .  (81)
 
-	.  reduce 123
+	ELSE  shift 85
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	else  goto 193
+	end_if  goto 194
 
 
 state 150
-	termino : termino '/' error .  (128)
+	sentencia_ejecutable : IF condicion_if else '{' . bloque_ejecutable '}' end_if  (75)
+	sentencia_ejecutable : IF condicion_if else '{' . '}' end_if  (77)
 
-	.  reduce 128
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 195
+	.  error
+
+	sentencia_ejecutable  goto 68
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	bloque_ejecutable  goto 196
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
 
 
 state 151
-	termino : termino '/' factor .  (124)
+	sentencia_ejecutable : IF condicion_if else sentencia_ejecutable . ';' end_if  (68)
+
+	';'  shift 197
+	.  error
+
+
+state 152
+	sentencia_ejecutable : IF condicion_if else end_if .  (70)
+
+	.  reduce 70
+
+
+state 153
+	termino : termino '*' error .  (127)
+
+	.  reduce 127
+
+
+state 154
+	termino : termino '*' factor .  (124)
 
 	.  reduce 124
 
 
-state 152
-	parametro_real : expresion ID .  (95)
+state 155
+	termino : termino '/' error .  (129)
 
-	.  reduce 95
+	.  reduce 129
 
 
-state 153
-	parametro_real : expresion FLECHA . ID  (93)
-	parametro_real : expresion FLECHA . error  (94)
+state 156
+	termino : termino '/' factor .  (125)
 
-	error  shift 192
-	ID  shift 193
+	.  reduce 125
+
+
+state 157
+	parametro_real : expresion ID .  (100)
+
+	.  reduce 100
+
+
+state 158
+	parametro_real : expresion FLECHA . ID  (98)
+	parametro_real : expresion FLECHA . error  (99)
+
+	error  shift 198
+	ID  shift 199
 	.  error
 
 
-state 154
-	factor : inicio_llamado parametros_reales ')' .  (135)
+state 159
+	factor : inicio_llamado parametros_reales ')' .  (136)
 
-	.  reduce 135
+	.  reduce 136
 
 
-state 155
-	parametros_reales : parametros_reales ',' . parametro_real  (91)
+state 160
+	parametros_reales : parametros_reales ',' . parametro_real  (96)
 
 	error  shift 35
 	'-'  shift 36
@@ -2229,165 +2299,171 @@ state 155
 	TRUNC  shift 40
 	.  error
 
-	expresion  goto 92
-	parametro_real  goto 194
+	expresion  goto 95
+	parametro_real  goto 200
 	termino  goto 44
 	factor  goto 45
 	inicio_llamado  goto 46
 
 
-state 156
-	sentencia_ejecutable : PRINT '(' CADENA ')' .  (46)
-
-	.  reduce 46
-
-
-state 157
-	sentencia_ejecutable : PRINT '(' expresion ')' .  (47)
-
-	.  reduce 47
-
-
-state 158
-	parametro_formal : error ID .  (24)
-
-	.  reduce 24
-
-
-state 159
-	declaracion_funcion : header_funcion '(' parametros_formales ')' . '{' list_sentencia '}'  (7)
-
-	'{'  shift 195
-	.  error
-
-
-state 160
-	parametros_formales : parametros_formales ',' . parametro_formal  (18)
-
-	error  shift 99
-	CR  shift 100
-	ULONG  shift 15
-	.  error
-
-	tipo  goto 102
-	parametro_formal  goto 196
-	semantica  goto 104
-
-
 state 161
-	parametro_formal : tipo error .  (22)
+	sentencia_ejecutable : PRINT '(' CADENA ')' .  (51)
 
-	.  reduce 22
+	.  reduce 51
 
 
 state 162
-	parametro_formal : tipo ID .  (20)
+	sentencia_ejecutable : PRINT '(' expresion ')' .  (52)
 
-	.  reduce 20
+	.  reduce 52
 
 
 state 163
-	parametro_formal : semantica error . ID  (23)
+	sentencia_return : RETURN '(' expresion ')' .  (31)
 
-	ID  shift 197
-	.  error
+	.  reduce 31
 
 
 state 164
-	parametro_formal : semantica tipo . ID  (19)
-	parametro_formal : semantica tipo . error  (21)
+	parametro_formal : error ID .  (29)
 
-	error  shift 198
-	ID  shift 199
-	.  error
+	.  reduce 29
 
 
 state 165
-	list_vars : list_vars ',' ID .  (38)
+	declaracion_funcion : header_funcion '(' parametros_formales ')' . '{' list_sentencia '}'  (8)
 
-	.  reduce 38
-
-
-state 166
-	list_vars_mix : list_vars_mix ID '.' ID .  (36)
-
-	.  reduce 36
-
-
-state 167
-	list_vars_mix : list_vars_mix ',' ID '.' . ID  (34)
-
-	ID  shift 200
+	'{'  shift 201
 	.  error
 
 
-state 168
-	list_ctes : list_ctes CTE .  (30)
+state 166
+	parametros_formales : parametros_formales ',' . parametro_formal  (23)
 
-	.  reduce 30
+	error  shift 103
+	CR  shift 104
+	ULONG  shift 15
+	.  error
+
+	tipo  goto 106
+	parametro_formal  goto 202
+	semantica  goto 108
+
+
+state 167
+	parametro_formal : tipo error .  (27)
+
+	.  reduce 27
+
+
+state 168
+	parametro_formal : tipo ID .  (25)
+
+	.  reduce 25
 
 
 state 169
-	list_ctes : list_ctes ',' . CTE  (29)
+	parametro_formal : semantica error . ID  (28)
 
-	CTE  shift 201
+	ID  shift 203
 	.  error
 
 
 state 170
-	condicion_while : '(' condicion ')' .  (81)
+	parametro_formal : semantica tipo . ID  (24)
+	parametro_formal : semantica tipo . error  (26)
 
-	.  reduce 81
+	error  shift 204
+	ID  shift 205
+	.  error
 
 
 state 171
-	sentencia_ejecutable : while condicion_while DO '{' . bloque_ejecutable '}'  (52)
-	sentencia_ejecutable : while condicion_while DO '{' . '}'  (55)
+	list_vars : list_vars ',' ID .  (43)
 
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 202
-	.  error
-
-	sentencia_ejecutable  goto 66
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	bloque_ejecutable  goto 203
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
+	.  reduce 43
 
 
 state 172
-	sentencia_ejecutable : while condicion_while DO sentencia_ejecutable .  (53)
+	list_vars_mix : list_vars_mix ID '.' ID .  (41)
 
-	.  reduce 53
+	.  reduce 41
 
 
 state 173
-	sentencia_ejecutable : while condicion_while '{' bloque_ejecutable . '}'  (57)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
+	list_vars_mix : list_vars_mix ',' ID '.' . ID  (39)
 
-	error  shift 120
+	ID  shift 206
+	.  error
+
+
+state 174
+	list_ctes : list_ctes CTE .  (35)
+
+	.  reduce 35
+
+
+state 175
+	list_ctes : list_ctes ',' . CTE  (34)
+
+	CTE  shift 207
+	.  error
+
+
+state 176
+	condicion_while : '(' condicion ')' .  (86)
+
+	.  reduce 86
+
+
+state 177
+	sentencia_ejecutable : while condicion_while DO '{' . bloque_ejecutable '}'  (57)
+	sentencia_ejecutable : while condicion_while DO '{' . '}'  (60)
+
 	'('  shift 9
 	WHILE  shift 10
 	IF  shift 11
 	PRINT  shift 12
 	RETURN  shift 13
 	ID  shift 14
-	'}'  shift 204
+	'}'  shift 208
 	.  error
 
-	sentencia_ejecutable  goto 123
+	sentencia_ejecutable  goto 68
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	bloque_ejecutable  goto 209
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 178
+	sentencia_ejecutable : while condicion_while DO sentencia_ejecutable .  (58)
+
+	.  reduce 58
+
+
+state 179
+	sentencia_ejecutable : while condicion_while '{' bloque_ejecutable . '}'  (62)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
+
+	error  shift 124
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 210
+	.  error
+
+	sentencia_ejecutable  goto 127
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
 	asignacion_simple  goto 25
@@ -2398,9 +2474,9 @@ state 173
 	header_lambda  goto 30
 
 
-state 174
-	header_lambda : '(' . tipo ID ')'  (101)
-	expresion_lambda : header_lambda '{' bloque_ejecutable '(' . expresion ')'  (104)
+state 180
+	header_lambda : '(' . tipo ID ')'  (106)
+	expresion_lambda : header_lambda '{' bloque_ejecutable '(' . expresion ')'  (109)
 
 	error  shift 35
 	'-'  shift 36
@@ -2411,36 +2487,36 @@ state 174
 	.  error
 
 	tipo  goto 34
-	expresion  goto 205
+	expresion  goto 211
 	termino  goto 44
 	factor  goto 45
 	inicio_llamado  goto 46
 
 
-state 175
-	expresion_lambda : header_lambda '{' bloque_ejecutable '}' . $$1 '(' factor_lambda ')'  (103)
-	$$1 : .  (102)
+state 181
+	expresion_lambda : header_lambda '{' bloque_ejecutable '}' . $$1 '(' factor_lambda ')'  (108)
+	$$1 : .  (107)
 
-	.  reduce 102
+	.  reduce 107
 
-	$$1  goto 206
+	$$1  goto 212
 
 
-state 176
-	expresion_lambda : header_lambda bloque_ejecutable '(' expresion . ')'  (106)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
+state 182
+	expresion_lambda : header_lambda bloque_ejecutable '(' expresion . ')'  (111)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
 
-	'+'  shift 79
-	'-'  shift 80
-	')'  shift 207
+	'+'  shift 82
+	'-'  shift 83
+	')'  shift 213
 	.  error
 
 
-state 177
-	expresion_lambda : header_lambda bloque_ejecutable '}' '(' . expresion ')'  (105)
+state 183
+	expresion_lambda : header_lambda bloque_ejecutable '}' '(' . expresion ')'  (110)
 
 	error  shift 35
 	'-'  shift 36
@@ -2449,167 +2525,70 @@ state 177
 	TRUNC  shift 40
 	.  error
 
-	expresion  goto 208
+	expresion  goto 214
 	termino  goto 44
 	factor  goto 45
 	inicio_llamado  goto 46
 
 
-state 178
-	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable error .  (89)
-
-	.  reduce 89
-
-
-state 179
-	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable ';' .  (86)
-
-	.  reduce 86
-
-
-state 180
-	expresion : TRUNC error expresion error .  (122)
-
-	.  reduce 122
-
-
-state 181
-	expresion : TRUNC error expresion ')' .  (121)
-
-	.  reduce 121
-
-
-state 182
-	expresion : TRUNC '(' expresion error .  (120)
-
-	.  reduce 120
-
-
-state 183
-	expresion : TRUNC '(' expresion ')' .  (119)
-
-	.  reduce 119
-
-
 state 184
-	sentencia_ejecutable : IF condicion_if '{' '}' else . '{' bloque_ejecutable '}' end_if  (59)
-	sentencia_ejecutable : IF condicion_if '{' '}' else . '{' '}' end_if  (61)
-	sentencia_ejecutable : IF condicion_if '{' '}' else . sentencia_ejecutable ';' end_if  (67)
-	sentencia_ejecutable : IF condicion_if '{' '}' else . end_if  (69)
-	end_if : .  (76)
+	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable error .  (94)
 
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	ENDIF  shift 83
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'{'  shift 209
-	error  reduce 76
-	';'  reduce 76
-
-	sentencia_ejecutable  goto 210
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	end_if  goto 211
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
+	.  reduce 94
 
 
 state 185
-	sentencia_ejecutable : IF condicion_if '{' '}' end_if .  (62)
+	bloque_ejecutable : bloque_ejecutable sentencia_ejecutable ';' .  (91)
 
-	.  reduce 62
+	.  reduce 91
 
 
 state 186
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else '{' bloque_ejecutable '}' end_if  (40)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . end_if  (41)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else sentencia_ejecutable ';' end_if  (44)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else '{' '}' end_if  (60)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else end_if  (68)
-	end_if : .  (76)
+	factor : TRUNC error expresion error .  (141)
 
-	ELSE  shift 82
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	else  goto 212
-	end_if  goto 213
+	.  reduce 141
 
 
 state 187
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . sentencia_ejecutable ';' end_if  (42)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . '{' bloque_ejecutable '}' end_if  (45)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . end_if  (64)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . '{' '}' end_if  (71)
-	end_if : .  (76)
+	factor : TRUNC error expresion ')' .  (140)
 
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	ENDIF  shift 83
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'{'  shift 214
-	error  reduce 76
-	';'  reduce 76
-
-	sentencia_ejecutable  goto 215
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	end_if  goto 216
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
+	.  reduce 140
 
 
 state 188
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' end_if .  (43)
+	factor : TRUNC '(' expresion error .  (139)
 
-	.  reduce 43
+	.  reduce 139
 
 
 state 189
-	sentencia_ejecutable : IF condicion_if else '{' '}' . end_if  (72)
-	end_if : .  (76)
+	factor : TRUNC '(' expresion ')' .  (138)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	end_if  goto 217
+	.  reduce 138
 
 
 state 190
-	sentencia_ejecutable : IF condicion_if else '{' bloque_ejecutable . '}' end_if  (70)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
+	sentencia_ejecutable : IF condicion_if '{' '}' else . '{' bloque_ejecutable '}' end_if  (64)
+	sentencia_ejecutable : IF condicion_if '{' '}' else . '{' '}' end_if  (66)
+	sentencia_ejecutable : IF condicion_if '{' '}' else . sentencia_ejecutable ';' end_if  (72)
+	sentencia_ejecutable : IF condicion_if '{' '}' else . end_if  (74)
+	end_if : .  (81)
 
-	error  shift 120
 	'('  shift 9
 	WHILE  shift 10
 	IF  shift 11
+	ENDIF  shift 86
 	PRINT  shift 12
 	RETURN  shift 13
 	ID  shift 14
-	'}'  shift 218
-	.  error
+	'{'  shift 215
+	error  reduce 81
+	';'  reduce 81
 
-	sentencia_ejecutable  goto 123
+	sentencia_ejecutable  goto 216
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
+	end_if  goto 217
 	asignacion_simple  goto 25
 	asignacion_multiple  goto 26
 	expresion_lambda  goto 27
@@ -2619,102 +2598,92 @@ state 190
 
 
 state 191
-	sentencia_ejecutable : IF condicion_if else sentencia_ejecutable ';' . end_if  (63)
-	end_if : .  (76)
+	sentencia_ejecutable : IF condicion_if '{' '}' end_if .  (67)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	end_if  goto 219
+	.  reduce 67
 
 
 state 192
-	parametro_real : expresion FLECHA error .  (94)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else '{' bloque_ejecutable '}' end_if  (45)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . end_if  (46)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else sentencia_ejecutable ';' end_if  (49)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else '{' '}' end_if  (65)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' . else end_if  (73)
+	end_if : .  (81)
 
-	.  reduce 94
+	ELSE  shift 85
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	else  goto 218
+	end_if  goto 219
 
 
 state 193
-	parametro_real : expresion FLECHA ID .  (93)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . sentencia_ejecutable ';' end_if  (47)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . '{' bloque_ejecutable '}' end_if  (50)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . end_if  (69)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else . '{' '}' end_if  (76)
+	end_if : .  (81)
 
-	.  reduce 93
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	ENDIF  shift 86
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'{'  shift 220
+	error  reduce 81
+	';'  reduce 81
+
+	sentencia_ejecutable  goto 221
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	end_if  goto 222
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
 
 
 state 194
-	parametros_reales : parametros_reales ',' parametro_real .  (91)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' end_if .  (48)
 
-	.  reduce 91
+	.  reduce 48
 
 
 state 195
-	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' . list_sentencia '}'  (7)
-	list_sentencia : .  (5)
+	sentencia_ejecutable : IF condicion_if else '{' '}' . end_if  (77)
+	end_if : .  (81)
 
-	.  reduce 5
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
 
-	list_sentencia  goto 220
+	end_if  goto 223
 
 
 state 196
-	parametros_formales : parametros_formales ',' parametro_formal .  (18)
+	sentencia_ejecutable : IF condicion_if else '{' bloque_ejecutable . '}' end_if  (75)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
 
-	.  reduce 18
-
-
-state 197
-	parametro_formal : semantica error ID .  (23)
-
-	.  reduce 23
-
-
-state 198
-	parametro_formal : semantica tipo error .  (21)
-
-	.  reduce 21
-
-
-state 199
-	parametro_formal : semantica tipo ID .  (19)
-
-	.  reduce 19
-
-
-state 200
-	list_vars_mix : list_vars_mix ',' ID '.' ID .  (34)
-
-	.  reduce 34
-
-
-state 201
-	list_ctes : list_ctes ',' CTE .  (29)
-
-	.  reduce 29
-
-
-state 202
-	sentencia_ejecutable : while condicion_while DO '{' '}' .  (55)
-
-	.  reduce 55
-
-
-state 203
-	sentencia_ejecutable : while condicion_while DO '{' bloque_ejecutable . '}'  (52)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
-
-	error  shift 120
+	error  shift 124
 	'('  shift 9
 	WHILE  shift 10
 	IF  shift 11
 	PRINT  shift 12
 	RETURN  shift 13
 	ID  shift 14
-	'}'  shift 221
+	'}'  shift 224
 	.  error
 
-	sentencia_ejecutable  goto 123
+	sentencia_ejecutable  goto 127
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
 	asignacion_simple  goto 25
@@ -2725,68 +2694,105 @@ state 203
 	header_lambda  goto 30
 
 
-state 204
-	sentencia_ejecutable : while condicion_while '{' bloque_ejecutable '}' .  (57)
+state 197
+	sentencia_ejecutable : IF condicion_if else sentencia_ejecutable ';' . end_if  (68)
+	end_if : .  (81)
 
-	.  reduce 57
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	end_if  goto 225
+
+
+state 198
+	parametro_real : expresion FLECHA error .  (99)
+
+	.  reduce 99
+
+
+state 199
+	parametro_real : expresion FLECHA ID .  (98)
+
+	.  reduce 98
+
+
+state 200
+	parametros_reales : parametros_reales ',' parametro_real .  (96)
+
+	.  reduce 96
+
+
+state 201
+	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' . list_sentencia '}'  (8)
+	list_sentencia : .  (11)
+
+	.  reduce 11
+
+	list_sentencia  goto 226
+
+
+state 202
+	parametros_formales : parametros_formales ',' parametro_formal .  (23)
+
+	.  reduce 23
+
+
+state 203
+	parametro_formal : semantica error ID .  (28)
+
+	.  reduce 28
+
+
+state 204
+	parametro_formal : semantica tipo error .  (26)
+
+	.  reduce 26
 
 
 state 205
-	expresion_lambda : header_lambda '{' bloque_ejecutable '(' expresion . ')'  (104)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
+	parametro_formal : semantica tipo ID .  (24)
 
-	'+'  shift 79
-	'-'  shift 80
-	')'  shift 222
-	.  error
+	.  reduce 24
 
 
 state 206
-	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 . '(' factor_lambda ')'  (103)
+	list_vars_mix : list_vars_mix ',' ID '.' ID .  (39)
 
-	'('  shift 223
-	.  error
+	.  reduce 39
 
 
 state 207
-	expresion_lambda : header_lambda bloque_ejecutable '(' expresion ')' .  (106)
+	list_ctes : list_ctes ',' CTE .  (34)
 
-	.  reduce 106
+	.  reduce 34
 
 
 state 208
-	expresion_lambda : header_lambda bloque_ejecutable '}' '(' expresion . ')'  (105)
-	expresion : expresion . '+' termino  (110)
-	expresion : expresion . '-' termino  (111)
-	expresion : expresion . '+' error  (114)
-	expresion : expresion . '-' error  (116)
+	sentencia_ejecutable : while condicion_while DO '{' '}' .  (60)
 
-	'+'  shift 79
-	'-'  shift 80
-	')'  shift 224
-	.  error
+	.  reduce 60
 
 
 state 209
-	sentencia_ejecutable : IF condicion_if '{' '}' else '{' . bloque_ejecutable '}' end_if  (59)
-	sentencia_ejecutable : IF condicion_if '{' '}' else '{' . '}' end_if  (61)
+	sentencia_ejecutable : while condicion_while DO '{' bloque_ejecutable . '}'  (57)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
 
+	error  shift 124
 	'('  shift 9
 	WHILE  shift 10
 	IF  shift 11
 	PRINT  shift 12
 	RETURN  shift 13
 	ID  shift 14
-	'}'  shift 225
+	'}'  shift 227
 	.  error
 
-	sentencia_ejecutable  goto 66
+	sentencia_ejecutable  goto 127
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
-	bloque_ejecutable  goto 226
 	asignacion_simple  goto 25
 	asignacion_multiple  goto 26
 	expresion_lambda  goto 27
@@ -2796,57 +2802,53 @@ state 209
 
 
 state 210
-	sentencia_ejecutable : IF condicion_if '{' '}' else sentencia_ejecutable . ';' end_if  (67)
+	sentencia_ejecutable : while condicion_while '{' bloque_ejecutable '}' .  (62)
 
-	';'  shift 227
-	.  error
+	.  reduce 62
 
 
 state 211
-	sentencia_ejecutable : IF condicion_if '{' '}' else end_if .  (69)
+	expresion_lambda : header_lambda '{' bloque_ejecutable '(' expresion . ')'  (109)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
 
-	.  reduce 69
+	'+'  shift 82
+	'-'  shift 83
+	')'  shift 228
+	.  error
 
 
 state 212
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . '{' bloque_ejecutable '}' end_if  (40)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . sentencia_ejecutable ';' end_if  (44)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . '{' '}' end_if  (60)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . end_if  (68)
-	end_if : .  (76)
+	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 . '(' factor_lambda ')'  (108)
 
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	ENDIF  shift 83
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'{'  shift 228
-	error  reduce 76
-	';'  reduce 76
-
-	sentencia_ejecutable  goto 229
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	end_if  goto 230
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
+	'('  shift 229
+	.  error
 
 
 state 213
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' end_if .  (41)
+	expresion_lambda : header_lambda bloque_ejecutable '(' expresion ')' .  (111)
 
-	.  reduce 41
+	.  reduce 111
 
 
 state 214
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' . bloque_ejecutable '}' end_if  (45)
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' . '}' end_if  (71)
+	expresion_lambda : header_lambda bloque_ejecutable '}' '(' expresion . ')'  (110)
+	expresion : expresion . '+' termino  (115)
+	expresion : expresion . '-' termino  (116)
+	expresion : expresion . '+' error  (119)
+	expresion : expresion . '-' error  (121)
+
+	'+'  shift 82
+	'-'  shift 83
+	')'  shift 230
+	.  error
+
+
+state 215
+	sentencia_ejecutable : IF condicion_if '{' '}' else '{' . bloque_ejecutable '}' end_if  (64)
+	sentencia_ejecutable : IF condicion_if '{' '}' else '{' . '}' end_if  (66)
 
 	'('  shift 9
 	WHILE  shift 10
@@ -2857,7 +2859,7 @@ state 214
 	'}'  shift 231
 	.  error
 
-	sentencia_ejecutable  goto 66
+	sentencia_ejecutable  goto 68
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
 	bloque_ejecutable  goto 232
@@ -2869,45 +2871,120 @@ state 214
 	header_lambda  goto 30
 
 
-state 215
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable . ';' end_if  (42)
+state 216
+	sentencia_ejecutable : IF condicion_if '{' '}' else sentencia_ejecutable . ';' end_if  (72)
 
 	';'  shift 233
 	.  error
 
 
-state 216
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else end_if .  (64)
-
-	.  reduce 64
-
-
 state 217
-	sentencia_ejecutable : IF condicion_if else '{' '}' end_if .  (72)
+	sentencia_ejecutable : IF condicion_if '{' '}' else end_if .  (74)
 
-	.  reduce 72
+	.  reduce 74
 
 
 state 218
-	sentencia_ejecutable : IF condicion_if else '{' bloque_ejecutable '}' . end_if  (70)
-	end_if : .  (76)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . '{' bloque_ejecutable '}' end_if  (45)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . sentencia_ejecutable ';' end_if  (49)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . '{' '}' end_if  (65)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else . end_if  (73)
+	end_if : .  (81)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	ENDIF  shift 86
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'{'  shift 234
+	error  reduce 81
+	';'  reduce 81
 
-	end_if  goto 234
+	sentencia_ejecutable  goto 235
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	end_if  goto 236
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
 
 
 state 219
-	sentencia_ejecutable : IF condicion_if else sentencia_ejecutable ';' end_if .  (63)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' end_if .  (46)
 
-	.  reduce 63
+	.  reduce 46
 
 
 state 220
-	list_sentencia : list_sentencia . sentencia  (6)
-	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia . '}'  (7)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' . bloque_ejecutable '}' end_if  (50)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' . '}' end_if  (76)
+
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 237
+	.  error
+
+	sentencia_ejecutable  goto 68
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	bloque_ejecutable  goto 238
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
+
+
+state 221
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable . ';' end_if  (47)
+
+	';'  shift 239
+	.  error
+
+
+state 222
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else end_if .  (69)
+
+	.  reduce 69
+
+
+state 223
+	sentencia_ejecutable : IF condicion_if else '{' '}' end_if .  (77)
+
+	.  reduce 77
+
+
+state 224
+	sentencia_ejecutable : IF condicion_if else '{' bloque_ejecutable '}' . end_if  (75)
+	end_if : .  (81)
+
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	end_if  goto 240
+
+
+state 225
+	sentencia_ejecutable : IF condicion_if else sentencia_ejecutable ';' end_if .  (68)
+
+	.  reduce 68
+
+
+state 226
+	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia . '}'  (8)
+	list_sentencia : list_sentencia . sentencia  (12)
+	list_sentencia : list_sentencia . error  (13)
 
 	error  shift 8
 	'('  shift 9
@@ -2917,13 +2994,13 @@ state 220
 	RETURN  shift 13
 	ID  shift 14
 	ULONG  shift 15
-	'}'  shift 235
+	'}'  shift 241
 	.  error
 
-	sentencia  goto 17
-	declaracion_funcion  goto 18
-	header_funcion  goto 19
-	tipo  goto 20
+	declaracion_funcion  goto 17
+	header_funcion  goto 18
+	tipo  goto 19
+	sentencia  goto 20
 	sentencia_declarativa  goto 21
 	sentencia_ejecutable  goto 22
 	sentencia_return  goto 23
@@ -2936,140 +3013,53 @@ state 220
 	header_lambda  goto 30
 
 
-state 221
-	sentencia_ejecutable : while condicion_while DO '{' bloque_ejecutable '}' .  (52)
-
-	.  reduce 52
-
-
-state 222
-	expresion_lambda : header_lambda '{' bloque_ejecutable '(' expresion ')' .  (104)
-
-	.  reduce 104
-
-
-state 223
-	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' . factor_lambda ')'  (103)
-
-	'-'  shift 236
-	CTE  shift 237
-	ID  shift 238
-	.  error
-
-	factor_lambda  goto 239
-
-
-state 224
-	expresion_lambda : header_lambda bloque_ejecutable '}' '(' expresion ')' .  (105)
-
-	.  reduce 105
-
-
-state 225
-	sentencia_ejecutable : IF condicion_if '{' '}' else '{' '}' . end_if  (61)
-	end_if : .  (76)
-
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	end_if  goto 240
-
-
-state 226
-	sentencia_ejecutable : IF condicion_if '{' '}' else '{' bloque_ejecutable . '}' end_if  (59)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
-
-	error  shift 120
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 241
-	.  error
-
-	sentencia_ejecutable  goto 123
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
-
-
 state 227
-	sentencia_ejecutable : IF condicion_if '{' '}' else sentencia_ejecutable ';' . end_if  (67)
-	end_if : .  (76)
+	sentencia_ejecutable : while condicion_while DO '{' bloque_ejecutable '}' .  (57)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	end_if  goto 242
+	.  reduce 57
 
 
 state 228
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' . bloque_ejecutable '}' end_if  (40)
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' . '}' end_if  (60)
+	expresion_lambda : header_lambda '{' bloque_ejecutable '(' expresion ')' .  (109)
 
-	'('  shift 9
-	WHILE  shift 10
-	IF  shift 11
-	PRINT  shift 12
-	RETURN  shift 13
-	ID  shift 14
-	'}'  shift 243
-	.  error
-
-	sentencia_ejecutable  goto 66
-	sentencia_return  goto 23
-	list_vars_mix  goto 24
-	bloque_ejecutable  goto 244
-	asignacion_simple  goto 25
-	asignacion_multiple  goto 26
-	expresion_lambda  goto 27
-	while  goto 28
-	var_asignacion_simple  goto 29
-	header_lambda  goto 30
+	.  reduce 109
 
 
 state 229
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable . ';' end_if  (44)
+	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' . factor_lambda ')'  (108)
 
-	';'  shift 245
+	'-'  shift 242
+	CTE  shift 243
+	ID  shift 244
 	.  error
+
+	factor_lambda  goto 245
 
 
 state 230
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else end_if .  (68)
+	expresion_lambda : header_lambda bloque_ejecutable '}' '(' expresion ')' .  (110)
 
-	.  reduce 68
+	.  reduce 110
 
 
 state 231
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' '}' . end_if  (71)
-	end_if : .  (76)
+	sentencia_ejecutable : IF condicion_if '{' '}' else '{' '}' . end_if  (66)
+	end_if : .  (81)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
 
 	end_if  goto 246
 
 
 state 232
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable . '}' end_if  (45)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
+	sentencia_ejecutable : IF condicion_if '{' '}' else '{' bloque_ejecutable . '}' end_if  (64)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
 
-	error  shift 120
+	error  shift 124
 	'('  shift 9
 	WHILE  shift 10
 	IF  shift 11
@@ -3079,7 +3069,7 @@ state 232
 	'}'  shift 247
 	.  error
 
-	sentencia_ejecutable  goto 123
+	sentencia_ejecutable  goto 127
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
 	asignacion_simple  goto 25
@@ -3091,95 +3081,72 @@ state 232
 
 
 state 233
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' . end_if  (42)
-	end_if : .  (76)
+	sentencia_ejecutable : IF condicion_if '{' '}' else sentencia_ejecutable ';' . end_if  (72)
+	end_if : .  (81)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
 
 	end_if  goto 248
 
 
 state 234
-	sentencia_ejecutable : IF condicion_if else '{' bloque_ejecutable '}' end_if .  (70)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' . bloque_ejecutable '}' end_if  (45)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' . '}' end_if  (65)
 
-	.  reduce 70
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 249
+	.  error
+
+	sentencia_ejecutable  goto 68
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	bloque_ejecutable  goto 250
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
 
 
 state 235
-	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' .  (7)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable . ';' end_if  (49)
 
-	.  reduce 7
+	';'  shift 251
+	.  error
 
 
 state 236
-	factor_lambda : '-' . CTE  (109)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else end_if .  (73)
 
-	CTE  shift 249
-	.  error
+	.  reduce 73
 
 
 state 237
-	factor_lambda : CTE .  (108)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' '}' . end_if  (76)
+	end_if : .  (81)
 
-	.  reduce 108
-
-
-state 238
-	factor_lambda : ID .  (107)
-
-	.  reduce 107
-
-
-state 239
-	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' factor_lambda . ')'  (103)
-
-	')'  shift 250
-	.  error
-
-
-state 240
-	sentencia_ejecutable : IF condicion_if '{' '}' else '{' '}' end_if .  (61)
-
-	.  reduce 61
-
-
-state 241
-	sentencia_ejecutable : IF condicion_if '{' '}' else '{' bloque_ejecutable '}' . end_if  (59)
-	end_if : .  (76)
-
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
-
-	end_if  goto 251
-
-
-state 242
-	sentencia_ejecutable : IF condicion_if '{' '}' else sentencia_ejecutable ';' end_if .  (67)
-
-	.  reduce 67
-
-
-state 243
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' '}' . end_if  (60)
-	end_if : .  (76)
-
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
 
 	end_if  goto 252
 
 
-state 244
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable . '}' end_if  (40)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (86)
-	bloque_ejecutable : bloque_ejecutable . error  (87)
-	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (89)
+state 238
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable . '}' end_if  (50)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
 
-	error  shift 120
+	error  shift 124
 	'('  shift 9
 	WHILE  shift 10
 	IF  shift 11
@@ -3189,7 +3156,7 @@ state 244
 	'}'  shift 253
 	.  error
 
-	sentencia_ejecutable  goto 123
+	sentencia_ejecutable  goto 127
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
 	asignacion_simple  goto 25
@@ -3200,92 +3167,202 @@ state 244
 	header_lambda  goto 30
 
 
-state 245
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' . end_if  (44)
-	end_if : .  (76)
+state 239
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' . end_if  (47)
+	end_if : .  (81)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
 
 	end_if  goto 254
 
 
-state 246
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' '}' end_if .  (71)
+state 240
+	sentencia_ejecutable : IF condicion_if else '{' bloque_ejecutable '}' end_if .  (75)
 
-	.  reduce 71
+	.  reduce 75
+
+
+state 241
+	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' .  (8)
+
+	.  reduce 8
+
+
+state 242
+	factor_lambda : '-' . CTE  (114)
+
+	CTE  shift 255
+	.  error
+
+
+state 243
+	factor_lambda : CTE .  (113)
+
+	.  reduce 113
+
+
+state 244
+	factor_lambda : ID .  (112)
+
+	.  reduce 112
+
+
+state 245
+	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' factor_lambda . ')'  (108)
+
+	')'  shift 256
+	.  error
+
+
+state 246
+	sentencia_ejecutable : IF condicion_if '{' '}' else '{' '}' end_if .  (66)
+
+	.  reduce 66
 
 
 state 247
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' . end_if  (45)
-	end_if : .  (76)
+	sentencia_ejecutable : IF condicion_if '{' '}' else '{' bloque_ejecutable '}' . end_if  (64)
+	end_if : .  (81)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
 
-	end_if  goto 255
+	end_if  goto 257
 
 
 state 248
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if .  (42)
+	sentencia_ejecutable : IF condicion_if '{' '}' else sentencia_ejecutable ';' end_if .  (72)
 
-	.  reduce 42
+	.  reduce 72
 
 
 state 249
-	factor_lambda : '-' CTE .  (109)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' '}' . end_if  (65)
+	end_if : .  (81)
 
-	.  reduce 109
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	end_if  goto 258
 
 
 state 250
-	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' factor_lambda ')' .  (103)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable . '}' end_if  (45)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable ';'  (91)
+	bloque_ejecutable : bloque_ejecutable . error  (92)
+	bloque_ejecutable : bloque_ejecutable . sentencia_ejecutable error  (94)
 
-	.  reduce 103
+	error  shift 124
+	'('  shift 9
+	WHILE  shift 10
+	IF  shift 11
+	PRINT  shift 12
+	RETURN  shift 13
+	ID  shift 14
+	'}'  shift 259
+	.  error
+
+	sentencia_ejecutable  goto 127
+	sentencia_return  goto 23
+	list_vars_mix  goto 24
+	asignacion_simple  goto 25
+	asignacion_multiple  goto 26
+	expresion_lambda  goto 27
+	while  goto 28
+	var_asignacion_simple  goto 29
+	header_lambda  goto 30
 
 
 state 251
-	sentencia_ejecutable : IF condicion_if '{' '}' else '{' bloque_ejecutable '}' end_if .  (59)
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' . end_if  (49)
+	end_if : .  (81)
 
-	.  reduce 59
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	end_if  goto 260
 
 
 state 252
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' '}' end_if .  (60)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' '}' end_if .  (76)
 
-	.  reduce 60
+	.  reduce 76
 
 
 state 253
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' . end_if  (40)
-	end_if : .  (76)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' . end_if  (50)
+	end_if : .  (81)
 
-	ENDIF  shift 83
-	error  reduce 76
-	';'  reduce 76
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
 
-	end_if  goto 256
+	end_if  goto 261
 
 
 state 254
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if .  (44)
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else sentencia_ejecutable ';' end_if .  (47)
 
-	.  reduce 44
+	.  reduce 47
 
 
 state 255
-	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if .  (45)
+	factor_lambda : '-' CTE .  (114)
+
+	.  reduce 114
+
+
+state 256
+	expresion_lambda : header_lambda '{' bloque_ejecutable '}' $$1 '(' factor_lambda ')' .  (108)
+
+	.  reduce 108
+
+
+state 257
+	sentencia_ejecutable : IF condicion_if '{' '}' else '{' bloque_ejecutable '}' end_if .  (64)
+
+	.  reduce 64
+
+
+state 258
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' '}' end_if .  (65)
+
+	.  reduce 65
+
+
+state 259
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' . end_if  (45)
+	end_if : .  (81)
+
+	ENDIF  shift 86
+	error  reduce 81
+	';'  reduce 81
+
+	end_if  goto 262
+
+
+state 260
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else sentencia_ejecutable ';' end_if .  (49)
+
+	.  reduce 49
+
+
+state 261
+	sentencia_ejecutable : IF condicion_if sentencia_ejecutable ';' else '{' bloque_ejecutable '}' end_if .  (50)
+
+	.  reduce 50
+
+
+state 262
+	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if .  (45)
 
 	.  reduce 45
 
 
-state 256
-	sentencia_ejecutable : IF condicion_if '{' bloque_ejecutable '}' else '{' bloque_ejecutable '}' end_if .  (40)
-
-	.  reduce 40
-
-
-31 terminals, 36 nonterminals
-138 grammar rules, 257 states
+31 terminals, 37 nonterminals
+143 grammar rules, 263 states

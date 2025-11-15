@@ -93,14 +93,26 @@ public class ArregloTercetos {
 
     public static void imprimirTercetos() {
         System.out.println("===== LISTA DE TERCETOS =====");
+        Pattern patronEntero = Pattern.compile("^\\d+$"); // solo enteros (positivos o negativos)
+
         for (int i = 0; i < tercetos.size(); i++) {
             Terceto t = tercetos.get(i);
-            // Ejemplo de salida: [0] (BF, cond1, ?)
+            String op1 = t.getOp1();
+            String op2 = t.getOp2();
+
+            // Si son enteros puros, los mostramos entre []
+            if (op1 != null && patronEntero.matcher(op1).matches()) {
+                op1 = "[" + op1 + "]";
+            }
+            if (op2 != null && patronEntero.matcher(op2).matches()) {
+                op2 = "[" + op2 + "]";
+            }
+
             System.out.printf("[%d] (%s, %s, %s)%n",
                     i,
                     t.getOperador(),
-                    t.getOp1() != null ? t.getOp1() : "_",
-                    t.getOp2() != null ? t.getOp2() : "_");
+                    op1 != null ? op1 : "_",
+                    op2 != null ? op2 : "_");
         }
         System.out.println("=============================");
     }

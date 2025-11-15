@@ -24,7 +24,9 @@ public class AnalizadorLexico {
     public AnalizadorLexico(MatrizDeTransicion matrizDeTransicion, String codigoFuente, TablaAccionesSemanticas accionesSemanticas, TablaDeSimbolos tablaDeSimbolos, ParserValExt yyval) throws IOException {
         AnalizadorLexico.matrizDeTransicion = matrizDeTransicion;
         puntero = new Puntero(0);
-        content = new String(Files.readAllBytes(Paths.get(codigoFuente)));
+        content = new String(Files.readAllBytes(Paths.get(codigoFuente)))
+                .replace("\r\n", "\n")
+                .replace("\r", "\n");
         lexema = new StringBuilder();
         tablaAccionesSemanticas = accionesSemanticas;
         AnalizadorLexico.tablaDeSimbolos = tablaDeSimbolos;
@@ -35,7 +37,6 @@ public class AnalizadorLexico {
         int siguienteEstado = 0;
         char c = 'a';
         boolean tokenLeido = false;
-        int token = -1;
         lexema.setLength(0);
 
         while (puntero.getPuntero() <= content.length() && !tokenLeido) {
@@ -44,18 +45,10 @@ public class AnalizadorLexico {
                 c = content.charAt(puntero.getPuntero());
             } else {
                 c = '$';
-                return 0;
             }
             siguienteEstado = matrizDeTransicion.getEstado(estadoActual, c);
             //Manejo de saltos de linea
-            if (c == '\n' || c == '\r') {
-                if (!flag) {
-                    linea++;
-                    flag = true;
-                } else {
-                    flag = false;
-                }
-            }
+            manejarSaltoDeLinea(c);
 
 
 
@@ -77,6 +70,9 @@ public class AnalizadorLexico {
             puntero.avanzar();
         }
         TokensEncontrados.add(lexema.toString());
+        if(c == '$'){
+            return 0;
+        }
         return MapaDeTokensAID.getToken(lexema.toString());
     }
 
@@ -85,6 +81,12 @@ public class AnalizadorLexico {
     }
     public static void setEstadoActual(int nuevoEstado){
         estadoActual = nuevoEstado;
+    }
+
+    private static char ultimoChar = '\0';
+
+    private static void manejarSaltoDeLinea(char c) {
+        if (c == '\n') linea++;
     }
 
     public void imprimirTokens(){
