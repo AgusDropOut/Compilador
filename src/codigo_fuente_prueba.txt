@@ -5,21 +5,19 @@ MAIN {
         TEST := TEST + 10UL;
         print(TEST);
         return (TEST);
-    };
+    }
 
     print(PRUEBA);
 
     PRUEBA := G(PRUEBA -> TEST);
     print("Hola");
     return (PRUEBA);
-  };
+  }
 
     ulong C;
     ulong D;
 
   C := 78UL;
-  D := F(C -> PRUEBA) + 65UL - trunc(trunc(-788.78D-2) / 6UL);
+  D := F(C -> PRUEBA) + 65UL - trunc(-788.78D-2);
   print(D);
-
-
 }

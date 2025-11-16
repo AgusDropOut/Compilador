@@ -274,647 +274,823 @@ import Compilador.ModuloSemantico.Terceto;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Pattern;
+
+/**
+ * Generador de código WebAssembly (WAT) a partir de tercetos.
+ * Toma la representación intermedia producida por el compilador y
+ * arma el código ejecutable final en formato WAT.
+ */
 
 public class GeneradorDeCodigo {
+    // Lista de tercetos (código intermedio) a traducir
     private final ArrayList<Terceto> listaTercetos;
     private final String nombrePrograma;
 
-    private final StringBuilder assembler = new StringBuilder();
-    private final StringBuilder seccionGlobals = new StringBuilder();
-    private final StringBuilder seccionData = new StringBuilder();
+    // Construcción del código WAT final
+    private final StringBuilder codigoWAT = new StringBuilder();
+    private final StringBuilder variablesGlobales = new StringBuilder();
+    private final StringBuilder seccionDatos = new StringBuilder();
+
+    // Almacena el código de cada función (nombre -> código)
     private final Map<String, StringBuilder> funciones = new LinkedHashMap<>();
+
+    // Control de contexto durante generación
     private final Stack<String> pilaFunciones = new Stack<>();
-    private final Stack<String> pilaScopes = new Stack<>();
-    private final Map<String, Boolean> funcionTieneReturn = new HashMap<>();
-
-    private final Map<String, String> tiposGlobal = new HashMap<>(); // nombre -> i32|f64
-
-    private final Map<String, Long> valoresEnteros = new HashMap<>();
-    private final Map<String, Double> valoresFlotantes = new HashMap<>();
-    private int contadorTemps = 0;
-
-    // Pool de cadenas
-    private final Map<String, Integer> offsetCadena = new HashMap<>();
-    private final Map<String, Integer> longitudCadena = new HashMap<>();
-    private int siguienteOffsetData = 0;
-
-    private int contadorAuxiliares = 0;
     private String funcionActual = "main";
     private String scopeActual = null;
 
-    // Patrones del lenguaje
-    private static final Pattern P_ULONG = Pattern.compile("\\d+UL");
-    private static final Pattern P_DFLOAT = Pattern.compile("[+\\-]?\\d+\\.\\d+D[+\\-]?\\d+");
+    // Registro de tipos de variables (nombre -> "i32" o "f64")
+    private final Map<String, String> tiposVariable = new HashMap<>();
+
+    // Gestión de cadenas de texto
+    private final Map<String, Integer> posicionCadena = new HashMap<>();
+    private final Map<String, Integer> largoCadena = new HashMap<>();
+    private int siguientePosicionMemoria = 0;
+
+    // Contadores para nombres únicos
+    private int contadorTemporales = 0;
 
     public GeneradorDeCodigo(ArrayList<Terceto> tercetos, String nombrePrograma) {
         this.listaTercetos = tercetos;
         this.nombrePrograma = nombrePrograma;
     }
 
+    /**
+     * Punto de entrada principal: arma el módulo WAT completo.
+     * - Escribe los imports y memoria.
+     * - Declara todas las variables globales.
+     * - Traduce cada terceto.
+     * - Ensambla todas las funciones en el orden correcto.
+     */
+
     public void generarCodigo() {
-        assembler.append("(module\n");
-        assembler.append("  (import \"env\" \"alert_i32\" (func $alert_i32 (param i32)))\n");
-        assembler.append("  (import \"env\" \"alert_str\" (func $alert_str (param i32 i32)))\n");
-        assembler.append("  (memory (export \"memory\") 1)\n");
+        // 1. Encabezado del módulo WAT
+        codigoWAT.append("(module\n");
+        codigoWAT.append("  (import \"env\" \"alert_i32\" (func $alert_i32 (param i32)))\n");
+        codigoWAT.append("  (import \"env\" \"alert_str\" (func $alert_str (param i32 i32)))\n");
+        codigoWAT.append("  (memory (export \"memory\") 1)\n");
 
-        declararVariablesGlobalesDesdeTS();
+        // 2. Declarar todas las variables globales
+        declararVariablesGlobales();
 
-        funciones.putIfAbsent("main", new StringBuilder());
+        // 3. Inicializar función main
+        funciones.put("main", new StringBuilder());
         funcionActual = "main";
 
+        // 4. Procesar cada terceto
         for (int i = 0; i < listaTercetos.size(); i++) {
-            generarInstruccionesDesdeTerceto(listaTercetos.get(i), i);
+            procesarTerceto(listaTercetos.get(i));
         }
 
-        assembler.append(seccionGlobals);
-        assembler.append(seccionData);
+        // 5. Ensamblar todo el código
+        codigoWAT.append(variablesGlobales);
+        codigoWAT.append(seccionDatos);
 
+        // 6. Escribir todas las funciones
         for (Map.Entry<String, StringBuilder> entrada : funciones.entrySet()) {
-            String nombre = entrada.getKey();
-            StringBuilder cuerpo = entrada.getValue();
-            assembler.append("\n  (func $").append(nombre);
-            if (!"main".equals(nombre)) {
-                assembler.append(" (result i32)");
+            String nombreFunc = entrada.getKey();
+            StringBuilder codigoFunc = entrada.getValue();
+
+            codigoWAT.append("\n  (func $").append(nombreFunc);
+
+            // Main no retorna valor, otras funciones sí
+            if (nombreFunc.equals("main")) {
+                codigoWAT.append(" (export \"main\")");
             } else {
-                assembler.append(" (export \"main\")");
+                codigoWAT.append(" (result i32)");
             }
-            assembler.append("\n");
-            assembler.append(cuerpo);
-            if (!"main".equals(nombre) && !funcionTieneReturn.getOrDefault(nombre, false)) {
-                assembler.append("    i32.const 0\n");
-                assembler.append("    return\n");
-            }
-            assembler.append("  )\n");
+
+            codigoWAT.append("\n");
+            codigoWAT.append(codigoFunc);
+            codigoWAT.append("  )\n");
         }
 
-        assembler.append(")\n");
+        codigoWAT.append(")\n");
     }
 
-    private void declararVariablesGlobalesDesdeTS() {
-        for (ElementoTablaDeSimbolos e : TablaDeSimbolos.getElementos()) {
-            String uso = e.getUso();
-            if (uso == null || "Función".equals(uso)) continue;
+    /**
+     * Recorre la tabla de símbolos y declara todas las variables globales
+     * que realmente pertenecen al programa (se saltean literales y cadenas).
+     * Cada variable se declara como global mutable y queda disponible para cualquier función.
+     */
 
-            String lexema = TablaDeSimbolos.getLexema(e);
-            if (lexema == null) continue;
+    private void declararVariablesGlobales() {
+        for (ElementoTablaDeSimbolos elemento : TablaDeSimbolos.getElementos()) {
+            String uso = elemento.getUso();
 
-            if (esLiteralCadena(lexema)) {
-                registrarCadenaEnData(lexema);
+            // Ignorar funciones
+            if (uso == null || uso.equals("Función")) {
                 continue;
             }
-            if (esLiteralEnteroSinSigno(lexema) || esLiteralFlotante(lexema)) continue;
 
-            String nombreWasm = limpiarNombre(lexema);
-            if (tiposGlobal.containsKey(nombreWasm)) continue;
-
-            seccionGlobals.append("  (global $")
-                    .append(nombreWasm)
-                    .append(" (mut i32) (i32.const 0))\n");
-            tiposGlobal.put(nombreWasm, "i32");
-        }
-    }
-
-    private void generarInstruccionesDesdeTerceto(Terceto t, int idx) {
-        String op = t.getOperador();
-        boolean esLambda = op != null && op.contains("lambda");
-        String inicioRaw = null;
-
-        if (op.startsWith("ini_")) {
-            inicioRaw = op.substring(esLambda ? 5 : 4);
-            op = "FUNC_BEGIN";
-        } else if (op.startsWith("fin_")) {
-            op = "FUNC_END";
-        }
-
-        StringBuilder cuerpo = funciones.computeIfAbsent(funcionActual, k -> new StringBuilder());
-
-        switch (op) {
-            case "+" -> {
-                String a1 = resolverOperando(t.getOp1());
-                String a2 = resolverOperando(t.getOp2());
-                emitirPushEntero(a1, cuerpo);
-                emitirPushEntero(a2, cuerpo);
-                cuerpo.append("    i32.add\n");
-                String tmp = crearTempEntero();
-                cuerpo.append("    global.set $").append(tmp).append("\n");
-                t.setResultado(tmp);
+            String lexema = TablaDeSimbolos.getLexema(elemento);
+            if (lexema == null) {
+                continue;
             }
-            case "-" -> {
-                String a1 = resolverOperando(t.getOp1());
-                String a2 = resolverOperando(t.getOp2());
-                emitirPushEntero(a1, cuerpo);
-                emitirPushEntero(a2, cuerpo);
-                cuerpo.append("    i32.sub\n");
-                String tmp = crearTempEntero();
-                cuerpo.append("    global.set $").append(tmp).append("\n");
-                t.setResultado(tmp);
+
+            // Las cadenas van a la sección de datos
+            if (esCadena(lexema)) {
+                registrarCadena(lexema);
+                continue;
             }
-            case "*" -> {
-                String a1 = resolverOperando(t.getOp1());
-                String a2 = resolverOperando(t.getOp2());
-                boolean usarF64 = debeUsarFlotante(a1, a2);
-                if (usarF64) {
-                    emitirPushFlotante(a1, cuerpo);
-                    emitirPushFlotante(a2, cuerpo);
-                    cuerpo.append("    f64.mul\n");
-                    String aux = crearVariableTemporal("f64");
-                    cuerpo.append("    global.set $").append(aux).append("\n");
-                    t.setResultado(aux);
-                    Double v1 = obtenerValorFlotanteConstante(a1);
-                    Double v2 = obtenerValorFlotanteConstante(a2);
-                    if (v1 != null && v2 != null) valoresFlotantes.put(aux, v1 * v2);
-                } else {
-                    emitirPushEntero(a1, cuerpo);
-                    emitirPushEntero(a2, cuerpo);
-                    cuerpo.append("    i32.mul\n");
-                    String aux = crearVariableTemporal("i32");
-                    cuerpo.append("    global.set $").append(aux).append("\n");
-                    t.setResultado(aux);
-                    Long v1 = obtenerValorEnteroConstante(a1);
-                    Long v2 = obtenerValorEnteroConstante(a2);
-                    if (v1 != null && v2 != null) valoresEnteros.put(aux, (v1 * v2) & 0xFFFFFFFFL);
-                }
+
+            // Los literales no necesitan declaración
+            if (esNumeroULONG(lexema) || esNumeroFlotante(lexema)) {
+                continue;
             }
-            case "/" -> {
-                String a1 = resolverOperando(t.getOp1());
-                String a2 = resolverOperando(t.getOp2());
 
-                boolean a1f = esLiteralFlotante(a1) || esGlobalFlotante(a1);
-                boolean a2f = esLiteralFlotante(a2) || esGlobalFlotante(a2);
-
-                if (!a1f && !a2f) {
-                    emitirPushEntero(a1, cuerpo);
-                    emitirPushEntero(a2, cuerpo);
-                    cuerpo.append("    i32.div_u\n");
-                    String tmp = crearTempEntero();
-                    cuerpo.append("    global.set $").append(tmp).append("\n");
-                    t.setResultado(tmp);
-                } else {
-                    emitirPushFlotante(a1, cuerpo);
-                    emitirPushFlotante(a2, cuerpo);
-                    cuerpo.append("    f64.div\n");
-                    String tmpf = "_tf" + (contadorTemps++);
-                    asegurarGlobalFlotante(tmpf);
-                    cuerpo.append("    global.set $").append(limpiarNombre(tmpf)).append("\n");
-                    t.setResultado(tmpf);
-                }
-            }
-            case ":=" -> {
-                String destinoId = resolverOperando(t.getOp1());
-                String origen = resolverOperando(t.getOp2());
-                String destino = asegurarGlobalEntero(destinoId);
-                if (esGlobalFlotante(origen) || esLiteralFlotante(origen)) {
-                    emitirPushFlotante(origen, cuerpo);
-                    cuerpo.append("    i32.trunc_f64_u\n");
-                } else {
-                    emitirPushEntero(origen, cuerpo);
-                }
-                cuerpo.append("    global.set $").append(destino).append("\n");
-                t.setResultado(destino);
-                if (esLiteralEnteroSinSigno(origen)) {
-                    long v = Long.parseLong(origen.substring(0, origen.length() - 2));
-                    valoresEnteros.put(destino, v);
-                }
-            }
-            case "PRINT" -> {
-                String rawOp = t.getOp1();
-                String a1 = resolverOperando(rawOp);
-
-                if (rawOp != null && esLiteralCadena(rawOp)) {
-                    int off = registrarCadenaEnData(rawOp);
-                    int len = longitudCadena.getOrDefault(rawOp, 0);
-                    cuerpo.append("    i32.const ").append(off).append("\n");
-                    cuerpo.append("    i32.const ").append(len).append("\n");
-                    cuerpo.append("    call $alert_str\n");
-                } else {
-                    emitirPushEntero(a1, cuerpo);
-                    cuerpo.append("    call $alert_i32\n");
-                }
-                t.setResultado("");
-            }
-            case "TRUNC" -> {
-                String a1 = resolverOperando(t.getOp1());
-
-                if (esLiteralFlotante(a1) || esGlobalFlotante(a1)) {
-                    emitirPushFlotante(a1, cuerpo);
-                    cuerpo.append("    f64.abs\n");
-                    cuerpo.append("    f64.trunc\n");
-                    cuerpo.append("    i32.trunc_f64_u\n");
-                } else {
-                    emitirPushEntero(a1, cuerpo);
-                }
-                String tmp = crearTempEntero();
-                cuerpo.append("    global.set $").append(tmp).append("\n");
-                t.setResultado(tmp);
-            }
-            case "CALL" -> {
-                String raw = t.getOp1();
-                String nombreFuncion = raw;
-                String mapeo = null;
-
-                if (raw != null && raw.contains("(") && raw.endsWith(")")) {
-                    int p = raw.indexOf('(');
-                    nombreFuncion = raw.substring(0, p).trim();
-                    mapeo = raw.substring(p + 1, raw.length() - 1).trim();
-                }
-
-                // Paso 1: setear parámetros (igual que ya haces)
-                if (mapeo != null && mapeo.contains("->")) {
-                    String[] pares = mapeo.split(",");
-                    for (String par : pares) {
-                        String s = par.trim();
-                        if (s.isEmpty()) continue;
-                        int flecha = s.indexOf("->");
-                        if (flecha < 0) continue;
-                        String arg = s.substring(0, flecha).trim();
-                        String param = s.substring(flecha + 2).trim();
-                        if (arg.isEmpty() || param.isEmpty()) continue;
-
-                        String valorArg = resolverOperando(arg);
-
-                        String lexParam = param;
-                        for (ElementoTablaDeSimbolos e : TablaDeSimbolos.getElementos()) {
-                            String lex = TablaDeSimbolos.getLexema(e);
-                            if (lex == null) continue;
-                            if (lex.startsWith(param + ":") && lex.contains(":" + nombreFuncion)) {
-                                lexParam = lex;
-                                break;
-                            }
-                        }
-
-                        String globalParam = asegurarGlobalEntero(
-                                resolverIdentificadorEnTS(lexParam)
-                        );
-                        emitirPushEntero(valorArg, cuerpo);
-                        cuerpo.append("    global.set $")
-                                .append(limpiarNombre(globalParam))
-                                .append("\n");
-                    }
-                }
-
-                // Paso 2: llamar a la función
-                String nombreWasm = resolverNombreFuncionEnTS(nombreFuncion);
-                cuerpo.append("    call $").append(nombreWasm).append("\n");
-
-                // Paso 3: guardar el valor devuelto (en la pila) en un temporal global
-                String tmp = crearTempEntero();
-                cuerpo.append("    global.set $").append(tmp).append("\n");
-                t.setResultado(tmp);
-            }
-            case "RETURN", "return" -> {
-                String opRet = t.getOp1();
-
-                if (opRet == null || opRet.isBlank()) {
-                    // return sin expresión: devuelve 0
-                    cuerpo.append("    i32.const 0\n");
-                } else {
-                    String val = resolverOperando(opRet);
-
-                    if (esLiteralEnteroSinSigno(val)) {
-                        // literal tipo 65UL
-                        cuerpo.append("    i32.const ")
-                                .append(val.substring(0, val.length() - 2))
-                                .append("\n");
-                    } else if (esLiteralFlotante(val) || esGlobalFlotante(val)) {
-                        // si en el futuro devuelves flotantes, aquí iría la lógica f64
-                        emitirPushFlotante(val, cuerpo);
-                        cuerpo.append("    i32.trunc_f64_u\n");
-                    } else {
-                        // variable/global/temporal
-                        cuerpo.append("    global.get $")
-                                .append(limpiarNombre(val))
-                                .append("\n");
-                    }
-                }
-
-                funcionTieneReturn.put(funcionActual, true);
-                cuerpo.append("    return\n");
-                t.setResultado(opRet);
-            }
-            case "JMP" -> {
-                String a1 = resolverOperando(t.getOp1());
-                cuerpo.append("    ;; jmp ").append(a1).append("\n");
-            }
-            case "FUNC_BEGIN" -> {
-                String fnLexTS = normalizarNombreFuncionEnTS(inicioRaw);
-                String fnWasm = limpiarNombre(fnLexTS);
-                pilaFunciones.push(funcionActual);
-                pilaScopes.push(scopeActual == null ? "" : scopeActual);
-                funcionActual = fnWasm;
-                funciones.putIfAbsent(funcionActual, new StringBuilder());
-                int p = fnLexTS.indexOf(':');
-                scopeActual = (p > 0 && p < fnLexTS.length() - 1)
-                        ? fnLexTS.substring(p + 1)
-                        : "";
-            }
-            case "FUNC_END" -> {
-                funcionActual = pilaFunciones.isEmpty() ? "main" : pilaFunciones.pop();
-                scopeActual = pilaScopes.isEmpty() ? "" : pilaScopes.pop();
-            }
-            case "LAMBDA" -> {
-                // no-op
-            }
-            default -> {
-                // no-op
-            }
-        }
-    }
-
-    private boolean esEntero(String val) {
-        if (val == null || val.isBlank()) return false;
-        if (val.matches("\\d+")) return true;
-        if (val.endsWith("UL") && val.substring(0, val.length() - 2).matches("\\d+")) return true;
-        String k = limpiarNombre(val);
-        return "i32".equals(tiposGlobal.get(k));
-    }
-
-    private boolean debeUsarFlotante(String a1, String a2) {
-        return esLiteralFlotante(a1) || esLiteralFlotante(a2) || esGlobalFlotante(a1) || esGlobalFlotante(a2);
-    }
-
-    private String crearVariableTemporal(String tipo) {
-        String nombre = "aux" + contadorAuxiliares++;
-        if (!tiposGlobal.containsKey(nombre)) {
-            if ("f64".equals(tipo)) {
-                seccionGlobals.append("  (global $")
-                        .append(nombre)
-                        .append(" (mut f64) (f64.const 0))\n");
-                tiposGlobal.put(nombre, "f64");
-            } else {
-                seccionGlobals.append("  (global $")
-                        .append(nombre)
+            // Declarar variable global
+            String nombreLimpio = limpiarNombre(lexema);
+            if (!tiposVariable.containsKey(nombreLimpio)) {
+                variablesGlobales.append("  (global $")
+                        .append(nombreLimpio)
                         .append(" (mut i32) (i32.const 0))\n");
-                tiposGlobal.put(nombre, "i32");
+                tiposVariable.put(nombreLimpio, "i32");
             }
         }
+    }
+
+    /**
+     * Traduce un terceto según su operador.
+     * También detecta instrucciones especiales como inicio y fin de función.
+     */
+
+    private void procesarTerceto(Terceto terceto) {
+        String operador = terceto.getOperador();
+
+        // Detectar inicio/fin de función
+        if (operador.startsWith("ini_")) {
+            String nombreFunc = operador.substring(4);
+            iniciarFuncion(nombreFunc);
+            return;
+        }
+
+        if (operador.startsWith("fin_")) {
+            finalizarFuncion();
+            return;
+        }
+
+        // Obtener el código de la función actual
+        StringBuilder codigo = funciones.get(funcionActual);
+
+        // Procesar según el operador
+        switch (operador) {
+            case "+" -> procesarSuma(terceto, codigo);
+            case "-" -> procesarResta(terceto, codigo);
+            case "*" -> procesarMultiplicacion(terceto, codigo);
+            case "/" -> procesarDivision(terceto, codigo);
+            case ":=" -> procesarAsignacion(terceto, codigo);
+            case "PRINT" -> procesarPrint(terceto, codigo);
+            case "TRUNC" -> procesarTrunc(terceto, codigo);
+            case "CALL" -> procesarLlamadaFuncion(terceto, codigo);
+            case "JMP" -> codigo.append("    ;; jmp\n");
+            case "LAMBDA" -> { /* no hacer nada */ }
+        }
+    }
+
+    /**
+     * Traduce una operación de suma
+     * Carga los operandos en la pila, ejecuta la instrucción WAT correspondiente
+     * y guarda el resultado en un temporal global.
+     */
+
+    private void procesarSuma(Terceto terceto, StringBuilder codigo) {
+        String operando1 = obtenerValor(terceto.getOp1());
+        String operando2 = obtenerValor(terceto.getOp2());
+
+        // Poner ambos operandos en la pila
+        ponerEnteroEnPila(operando1, codigo);
+        ponerEnteroEnPila(operando2, codigo);
+
+        // Sumar
+        codigo.append("    i32.add\n");
+
+        // Guardar resultado en temporal
+        String temporal = crearTemporal();
+        codigo.append("    global.set $").append(temporal).append("\n");
+        terceto.setResultado(temporal);
+    }
+
+    /**
+     * Traduce una operación de resta
+     * Carga los operandos en la pila, ejecuta la instrucción WAT correspondiente
+     * y guarda el resultado en un temporal global.
+     */
+
+    private void procesarResta(Terceto terceto, StringBuilder codigo) {
+        String operando1 = obtenerValor(terceto.getOp1());
+        String operando2 = obtenerValor(terceto.getOp2());
+
+        ponerEnteroEnPila(operando1, codigo);
+        ponerEnteroEnPila(operando2, codigo);
+        codigo.append("    i32.sub\n");
+
+        String temporal = crearTemporal();
+        codigo.append("    global.set $").append(temporal).append("\n");
+        terceto.setResultado(temporal);
+    }
+
+    /**
+     * Traduce una operación de múltiplicación.
+     * Carga los operandos en la pila, ejecuta la instrucción WAT correspondiente
+     * y guarda el resultado en un temporal global.
+     */
+
+    private void procesarMultiplicacion(Terceto terceto, StringBuilder codigo) {
+        String operando1 = obtenerValor(terceto.getOp1());
+        String operando2 = obtenerValor(terceto.getOp2());
+
+        // Si alguno es flotante, usar multiplicación flotante
+        if (esFlotante(operando1) || esFlotante(operando2)) {
+            ponerFlotanteEnPila(operando1, codigo);
+            ponerFlotanteEnPila(operando2, codigo);
+            codigo.append("    f64.mul\n");
+
+            String temporal = crearTemporalFlotante();
+            codigo.append("    global.set $").append(temporal).append("\n");
+            terceto.setResultado(temporal);
+        } else {
+            ponerEnteroEnPila(operando1, codigo);
+            ponerEnteroEnPila(operando2, codigo);
+            codigo.append("    i32.mul\n");
+
+            String temporal = crearTemporal();
+            codigo.append("    global.set $").append(temporal).append("\n");
+            terceto.setResultado(temporal);
+        }
+    }
+
+    /**
+     * Traduce una operación de división
+     * Carga los operandos en la pila, ejecuta la instrucción WAT correspondiente
+     * y guarda el resultado en un temporal global.
+     */
+
+    private void procesarDivision(Terceto terceto, StringBuilder codigo) {
+        String operando1 = obtenerValor(terceto.getOp1());
+        String operando2 = obtenerValor(terceto.getOp2());
+
+        if (esFlotante(operando1) || esFlotante(operando2)) {
+            ponerFlotanteEnPila(operando1, codigo);
+            ponerFlotanteEnPila(operando2, codigo);
+            codigo.append("    f64.div\n");
+
+            String temporal = crearTemporalFlotante();
+            codigo.append("    global.set $").append(temporal).append("\n");
+            terceto.setResultado(temporal);
+        } else {
+            ponerEnteroEnPila(operando1, codigo);
+            ponerEnteroEnPila(operando2, codigo);
+            codigo.append("    i32.div_u\n");
+
+            String temporal = crearTemporal();
+            codigo.append("    global.set $").append(temporal).append("\n");
+            terceto.setResultado(temporal);
+        }
+    }
+
+    /**
+     * Traduce una asignación.
+     * Si la asignación va al valor de retorno de una función, se emite un return.
+     * En cualquier otro caso simplemente se actualiza la variable destino.
+     */
+
+    private void procesarAsignacion(Terceto terceto, StringBuilder codigo) {
+        String destino = obtenerValor(terceto.getOp1());
+        String origen = obtenerValor(terceto.getOp2());
+
+        // Si es asignación a variable de retorno, hacer return
+        if (destino.startsWith("_ret_")) {
+            if (origen == null || origen.isEmpty()) {
+                codigo.append("    i32.const 0\n");
+            } else if (esNumeroULONG(origen)) {
+                // Quitar el sufijo "UL"
+                String numero = origen.substring(0, origen.length() - 2);
+                codigo.append("    i32.const ").append(numero).append("\n");
+            } else if (esFlotante(origen)) {
+                ponerFlotanteEnPila(origen, codigo);
+                codigo.append("    i32.trunc_f64_u\n");
+            } else {
+                String nombreVar = asegurarVariableEntera(origen);
+                codigo.append("    global.get $").append(nombreVar).append("\n");
+            }
+            codigo.append("    return\n");
+            terceto.setResultado(origen);
+            return;
+        }
+
+        // Asignación normal
+        String nombreDestino = asegurarVariableEntera(destino);
+
+        if (esFlotante(origen)) {
+            ponerFlotanteEnPila(origen, codigo);
+            codigo.append("    i32.trunc_f64_u\n");
+        } else {
+            ponerEnteroEnPila(origen, codigo);
+        }
+
+        codigo.append("    global.set $").append(nombreDestino).append("\n");
+        terceto.setResultado(nombreDestino);
+    }
+
+    /**
+     * Traduce la instrucción PRINT.
+     * Si el operando es una cadena, se usa la función alert_str.
+     * Si es un número, se usa la función alert_i32.
+     */
+
+    private void procesarPrint(Terceto terceto, StringBuilder codigo) {
+        String operandoOriginal = terceto.getOp1();
+        String operando = obtenerValor(operandoOriginal);
+
+        // Si es una cadena, usar alert_str
+        if (operandoOriginal != null && esCadena(operandoOriginal)) {
+            int posicion = registrarCadena(operandoOriginal);
+            int largo = largoCadena.get(operandoOriginal);
+
+            codigo.append("    i32.const ").append(posicion).append("\n");
+            codigo.append("    i32.const ").append(largo).append("\n");
+            codigo.append("    call $alert_str\n");
+        } else {
+            // Imprimir número
+            ponerEnteroEnPila(operando, codigo);
+            codigo.append("    call $alert_i32\n");
+        }
+
+        terceto.setResultado("");
+    }
+
+    /**
+     * Implementa la operación TRUNC.
+     * Si el valor es un literal flotante, se calcula el truncado en tiempo de compilación.
+     * Si es una variable, se convierte a f64, se trunca y finalmente se pasa a entero sin signo.
+     */
+
+    private void procesarTrunc(Terceto terceto, StringBuilder codigo) {
+        String operandoOriginal = terceto.getOp1();
+
+        // Si es un literal flotante, calcular en tiempo de compilación
+        if (esNumeroFlotante(operandoOriginal)) {
+            double valor = parsearFlotante(operandoOriginal);
+            long truncado = (long) Math.abs(Math.floor(valor));
+            codigo.append("    i32.const ").append(truncado).append("\n");
+        } else {
+            // Es una variable
+            String operando = obtenerValor(operandoOriginal);
+
+            if (esFlotante(operando)) {
+                ponerFlotanteEnPila(operando, codigo);
+                codigo.append("    f64.abs\n");
+                codigo.append("    f64.trunc\n");
+                codigo.append("    i32.trunc_f64_u\n");
+            } else {
+                ponerEnteroEnPila(operando, codigo);
+            }
+        }
+
+        String temporal = crearTemporal();
+        codigo.append("    global.set $").append(temporal).append("\n");
+        terceto.setResultado(temporal);
+    }
+
+    /**
+     * Traduce una llamada a función.
+     * WebAssembly no acepta dos puntos en los nombres (“F:MAIN”), por lo que
+     * se reconstruye el nombre quitando esos caracteres y reemplazándolos por guiones bajos.
+     * Después de llamar, el resultado se guarda en un temporal global.
+     */
+
+    private void procesarLlamadaFuncion(Terceto terceto, StringBuilder codigo) {
+        // op1 viene de los tercetos como "F:MAIN" o "G:MAIN:F"
+        String nombreFuncionTS = terceto.getOp1(); // p.ej. "F:MAIN"
+
+        // Si en algún momento op1 viniera con parámetros "F:MAIN(...)", los recortamos
+        if (nombreFuncionTS != null && nombreFuncionTS.contains("(")) {
+            int posPar = nombreFuncionTS.indexOf('(');
+            nombreFuncionTS = nombreFuncionTS.substring(0, posPar).trim();
+        }
+
+        // Normalizar al mismo formato que usás al crear las funciones desde "ini_*"
+        String nombreFuncionWasm = limpiarNombre(nombreFuncionTS);
+
+
+        if (nombreFuncionTS != null && nombreFuncionTS.contains(":")) {
+            // Reordenar "F:MAIN" -> "MAIN:F", "G:MAIN:F" -> "MAIN:F:G"
+            String[] partes = nombreFuncionTS.split(":");
+            if (partes.length == 2) {          // F:MAIN
+                nombreFuncionTS = partes[1] + ":" + partes[0];       // MAIN:F
+            } else if (partes.length == 3) {   // G:MAIN:F
+                nombreFuncionTS = partes[1] + ":" + partes[2] + ":" + partes[0]; // MAIN:F:G
+            }
+            nombreFuncionWasm = limpiarNombre(nombreFuncionTS); // MAIN:F -> MAIN_F, MAIN:F:G -> MAIN_F_G
+        }
+
+        // Generar la llamada
+        codigo.append("    call $").append(nombreFuncionWasm).append("\n");
+
+        // Guardar el resultado en un temporal global
+        String temporal = crearTemporal();
+        codigo.append("    global.set $").append(temporal).append("\n");
+        terceto.setResultado(temporal);
+    }
+
+    /**
+     * Registra el comienzo de una función nueva.
+     * Se crea un bloque de código separado y se cambia el contexto actual.
+     * Si el nombre viene con “A:B”, se lo deja en un formato simple
+     * reemplazando los “:” por guiones bajos para que WebAssembly lo acepte.
+     */
+
+    private void iniciarFuncion(String nombreFunc) {
+        pilaFunciones.push(funcionActual);
+
+        // Normalizar el nombre de función
+        String nombreLimpio = limpiarNombre(nombreFunc);
+        funcionActual = nombreLimpio;
+        funciones.put(nombreLimpio, new StringBuilder());
+
+        // Actualizar scope actual: partir del nombre "original", pero si tu TS
+        // guarda la función con ":" usa ese formato de forma consistente.
+        if (nombreFunc.contains(":")) {
+            int pos = nombreFunc.indexOf(':');
+            scopeActual = nombreFunc.substring(pos + 1);
+        } else {
+            // opcional: si tu compilador está usando "_" en vez de ":", puedes deshacer el cambio
+            scopeActual = nombreFunc;
+        }
+    }
+
+    /**
+     * Indica el cierre de la función actual y vuelve al ámbito anterior.
+     */
+
+    private void finalizarFuncion() {
+        if (!pilaFunciones.isEmpty()) {
+            funcionActual = pilaFunciones.pop();
+        } else {
+            funcionActual = "main";
+        }
+    }
+
+    /**
+     * Coloca un entero en la pila.
+     * Si viene como literal “123UL” se le quita el sufijo.
+     * Si es una variable, se obtiene desde su global correspondiente.
+     */
+
+    private void ponerEnteroEnPila(String valor, StringBuilder codigo) {
+        if (valor == null || valor.isEmpty()) {
+            codigo.append("    i32.const 0\n");
+            return;
+        }
+
+        if (esNumeroULONG(valor)) {
+            // Quitar sufijo "UL" y usar el número
+            String numero = valor.substring(0, valor.length() - 2);
+            codigo.append("    i32.const ").append(numero).append("\n");
+        } else {
+            // Es una variable
+            String nombreVar = asegurarVariableEntera(valor);
+            codigo.append("    global.get $").append(nombreVar).append("\n");
+        }
+    }
+
+    /**
+     * Coloca un valor flotante en la pila.
+     * Convierte literales con formato del lenguaje (1,5d+00) al formato que espera WAT.
+     * Si es una variable entera, también la convierte a f64.
+     */
+
+    private void ponerFlotanteEnPila(String valor, StringBuilder codigo) {
+        if (valor == null || valor.isEmpty()) {
+            codigo.append("    f64.const 0\n");
+            return;
+        }
+
+        if (esNumeroFlotante(valor)) {
+            // Convertir formato del lenguaje a formato WAT
+            String numeroWAT = valor.replace(',', '.')
+                    .replace('d', 'E')
+                    .replace('D', 'E');
+            codigo.append("    f64.const ").append(numeroWAT).append("\n");
+        } else if (esNumeroULONG(valor)) {
+            // Convertir entero a flotante
+            String numero = valor.substring(0, valor.length() - 2);
+            codigo.append("    i32.const ").append(numero).append("\n");
+            codigo.append("    f64.convert_i32_u\n");
+        } else {
+            // Es una variable
+            String nombreVar = limpiarNombre(valor);
+            codigo.append("    global.get $").append(nombreVar).append("\n");
+
+            // Si no es flotante, convertir
+            if (!tiposVariable.getOrDefault(nombreVar, "i32").equals("f64")) {
+                codigo.append("    f64.convert_i32_u\n");
+            }
+        }
+    }
+
+    /**
+     * Resuelve un operando.
+     * Puede ser:
+     * - un literal,
+     * - una referencia a terceto,
+     * - una variable con o sin scope,
+     * - o una cadena.
+     * Devuelve el nombre definitivo tal cual tiene que usarse en WAT.
+     */
+
+    private String obtenerValor(String operando) {
+        if (operando == null) {
+            return "";
+        }
+
+        // Si es referencia a terceto [N] o N
+        if (operando.startsWith("[") && operando.endsWith("]")) {
+            int indice = Integer.parseInt(operando.substring(1, operando.length() - 1));
+            return listaTercetos.get(indice).getResultado();
+        }
+
+        if (operando.matches("\\d+") && !operando.contains("UL")) {
+            int indice = Integer.parseInt(operando);
+            if (indice < listaTercetos.size()) {
+                return listaTercetos.get(indice).getResultado();
+            }
+        }
+
+        // Si es literal o variable, devolverlo tal cual
+        if (esNumeroULONG(operando) || esNumeroFlotante(operando) || esCadena(operando)) {
+            return operando.trim();
+        }
+
+        // Es un identificador, buscar en tabla de símbolos
+        return buscarEnTablaSimbolos(operando);
+    }
+
+    /**
+     * Busca un símbolo considerando el scope actual.
+     * Si el nombre no tenía scope, se intenta completar con el ámbito que esté activo.
+     */
+
+    private String buscarEnTablaSimbolos(String nombre) {
+        if (nombre == null || nombre.isEmpty()) {
+            return "_";
+        }
+
+        nombre = nombre.trim();
+
+        // Si ya tiene scope (contiene ":"), devolverlo
+        if (nombre.contains(":")) {
+            return nombre;
+        }
+
+        // Buscar con scope actual
+        if (scopeActual != null && !scopeActual.isEmpty()) {
+            String conScope = nombre + ":" + scopeActual;
+            if (existeEnTablaSimbolos(conScope)) {
+                return conScope;
+            }
+        }
+
+        // Buscar sin scope
+        for (ElementoTablaDeSimbolos elem : TablaDeSimbolos.getElementos()) {
+            String lexema = TablaDeSimbolos.getLexema(elem);
+            if (lexema != null && lexema.startsWith(nombre + ":")) {
+                return lexema;
+            }
+        }
+
         return nombre;
     }
 
-    private boolean esGlobalFlotante(String val) {
-        if (val == null || val.isEmpty()) return false;
-        String id = limpiarNombre(val);
-        return "f64".equals(tiposGlobal.get(id));
-    }
-
-    private String crearTempEntero() {
-        String id = "_t" + (contadorTemps++);
-        asegurarGlobalEntero(id);
-        return id;
-    }
-
-    private String asegurarGlobalEntero(String id) {
-        String k = limpiarNombre(id);
-        if (!tiposGlobal.containsKey(k)) {
-            seccionGlobals.append("  (global $")
-                    .append(k)
-                    .append(" (mut i32) (i32.const 0))\n");
-            tiposGlobal.put(k, "i32");
-        }
-        return k;
-    }
-
-    private void asegurarGlobalFlotante(String id) {
-        String k = limpiarNombre(id);
-        if (!tiposGlobal.containsKey(k)) {
-            seccionGlobals.append("  (global $")
-                    .append(k)
-                    .append(" (mut f64) (f64.const 0))\n");
-            tiposGlobal.put(k, "f64");
-        }
-    }
-
-    private void emitirPushEntero(String val, StringBuilder cuerpo) {
-        if (val == null || val.isEmpty()) {
-            cuerpo.append("    i32.const 0\n");
-            return;
-        }
-        if (esLiteralCadena(val)) {
-            cuerpo.append("    i32.const 0\n");
-            return;
-        }
-        if (esLiteralEnteroSinSigno(val)) {
-            cuerpo.append("    i32.const ").append(val.substring(0, val.length() - 2)).append("\n");
-            return;
-        }
-        if (esLiteralFlotante(val) || esGlobalFlotante(val)) {
-            emitirPushFlotante(val, cuerpo);
-            cuerpo.append("    i32.trunc_f64_u\n");
-            return;
-        }
-        cuerpo.append("    global.get $").append(limpiarNombre(val)).append("\n");
-    }
-
-    private void emitirPushFlotante(String val, StringBuilder cuerpo) {
-        if (val == null || val.isEmpty()) {
-            cuerpo.append("    f64.const 0\n");
-            return;
-        }
-        if (esLiteralCadena(val)) {
-            cuerpo.append("    f64.const 0\n");
-            return;
-        }
-        if (esLiteralFlotante(val)) {
-            String s = val.replace('d', 'E').replace('D', 'E');
-            cuerpo.append("    f64.const ").append(s).append("\n");
-            return;
-        }
-        if (esLiteralEnteroSinSigno(val)) {
-            cuerpo.append("    i32.const ").append(val.substring(0, val.length() - 2)).append("\n");
-            cuerpo.append("    f64.convert_i32_u\n");
-            return;
-        }
-        String id = limpiarNombre(val);
-        cuerpo.append("    global.get $").append(id).append("\n");
-        if (!esGlobalFlotante(val)) {
-            cuerpo.append("    f64.convert_i32_u\n");
-        }
-    }
-
-    private boolean esLiteralEnteroSinSigno(String s) {
-        return s != null && P_ULONG.matcher(s.trim()).matches();
-    }
-
-    private boolean esLiteralFlotante(String s) {
-        return s != null && P_DFLOAT.matcher(s.trim()).matches();
-    }
-
-    private boolean esLiteralCadena(String s) {
-        return s != null && s.length() >= 2 && s.startsWith("\"") && s.endsWith("\"");
-    }
-
-    private Double parsearLiteralFlotante(String lit) {
-        return Double.parseDouble(lit.trim().replace('d', 'E').replace('D', 'E'));
-    }
-
-    private Long obtenerValorEnteroConstante(String v) {
-        if (v == null) return null;
-        if (esLiteralEnteroSinSigno(v)) {
-            return Long.parseLong(v.substring(0, v.length() - 2));
-        }
-        return valoresEnteros.get(v);
-    }
-
-    private Double obtenerValorFlotanteConstante(String v) {
-        if (v == null) return null;
-        if (esLiteralFlotante(v)) return parsearLiteralFlotante(v);
-        if (esLiteralEnteroSinSigno(v)) {
-            return Double.parseDouble(v.substring(0, v.length() - 2));
-        }
-        if (valoresFlotantes.containsKey(v)) return valoresFlotantes.get(v);
-        if (valoresEnteros.containsKey(v)) return valoresEnteros.get(v).doubleValue();
-        return null;
-    }
-
-    private String resolverOperando(String op) {
-        if (op == null) return "";
-        if (op.matches("\\[\\d+\\]")) {
-            int i = Integer.parseInt(op.substring(1, op.length() - 1));
-            return listaTercetos.get(i).getResultado();
-        }
-        if (op.matches("\\d+")) {
-            int i = Integer.parseInt(op);
-            return listaTercetos.get(i).getResultado();
-        }
-        if (esLiteralEnteroSinSigno(op) || esLiteralFlotante(op) || esLiteralCadena(op)) {
-            return op.trim();
-        }
-        String lex = resolverIdentificadorEnTS(op);
-        return limpiarNombre(lex);
-    }
-
-    private String resolverIdentificadorEnTS(String raw) {
-        if (raw == null) return "_";
-        String id = raw.trim();
-        if (id.isEmpty()) return "_";
-        if (id.contains(":")) return id;
-        if (scopeActual != null && !scopeActual.isBlank()) {
-            String lex = id + ":" + scopeActual;
-            if (existeLexemaEnTS(lex)) return lex;
-        }
-        String porNombre = buscarPorNombreEnTS(id);
-        return porNombre != null ? porNombre : id;
-    }
-
-    private boolean existeLexemaEnTS(String lexema) {
-        for (ElementoTablaDeSimbolos e : TablaDeSimbolos.getElementos()) {
-            String lex = TablaDeSimbolos.getLexema(e);
-            if (lexema.equals(lex)) return true;
+    /**
+     * Verifica si un lexema existe en la tabla de símbolos
+     */
+    private boolean existeEnTablaSimbolos(String lexema) {
+        for (ElementoTablaDeSimbolos elem : TablaDeSimbolos.getElementos()) {
+            String lex = TablaDeSimbolos.getLexema(elem);
+            if (lexema.equals(lex)) {
+                return true;
+            }
         }
         return false;
     }
 
-    private String buscarPorNombreEnTS(String nombre) {
-        String fallback = null;
-        for (ElementoTablaDeSimbolos e : TablaDeSimbolos.getElementos()) {
-            String lex = TablaDeSimbolos.getLexema(e);
-            if (lex == null) continue;
-            if (lex.startsWith(nombre + ":")) {
-                if (scopeActual != null && lex.endsWith(":" + scopeActual)) return lex;
-                if (fallback == null) fallback = lex;
-            }
-        }
-        return fallback;
+    /**
+     * Crea variables auxiliares globales para guardar resultados de operaciones.
+     * Los nombres se generan automáticamente (_t0, _t1, etc).
+     */
+    private String crearTemporal() {
+        String nombre = "_t" + contadorTemporales++;
+        asegurarVariableEntera(nombre);
+        return nombre;
     }
 
-    private String resolverNombreFuncionEnTS(String raw) {
-        if (raw == null) return "_";
-        String r = raw.trim();
-        if (r.isEmpty()) return "_";
+    /**
+     * Crea variables auxiliares globales para guardar resultados de operaciones.
+     * Los nombres se generan automáticamente (_t0, _t1, etc).
+     */
 
-        if (r.contains(":")) {
-            String[] partes = r.split(":");
-            int mainIdx = -1;
-            for (int i = 0; i < partes.length; i++) {
-                if ("MAIN".equals(partes[i])) {
-                    mainIdx = i;
-                    break;
+    private String crearTemporalFlotante() {
+        String nombre = "_tf" + contadorTemporales++;
+        String nombreLimpio = limpiarNombre(nombre);
+
+        if (!tiposVariable.containsKey(nombreLimpio)) {
+            variablesGlobales.append("  (global $")
+                    .append(nombreLimpio)
+                    .append(" (mut f64) (f64.const 0))\n");
+            tiposVariable.put(nombreLimpio, "f64");
+        }
+
+        return nombre;
+    }
+
+    /**
+     * Asegura que una variable entera exista en la sección de globales.
+     * Si no está declarada, la agrega.
+     */
+    private String asegurarVariableEntera(String nombre) {
+        if (nombre == null || nombre.isEmpty()) {
+            return "_";
+        }
+
+        String nombreLimpio = limpiarNombre(nombre);
+
+        if (!tiposVariable.containsKey(nombreLimpio)) {
+            variablesGlobales.append("  (global $")
+                    .append(nombreLimpio)
+                    .append(" (mut i32) (i32.const 0))\n");
+            tiposVariable.put(nombreLimpio, "i32");
+        }
+
+        return nombreLimpio;
+    }
+
+    /**
+     * Guarda una cadena literal en la memoria.
+     * Se almacena byte a byte y se recuerdan su posición y longitud.
+     */
+
+    private int registrarCadena(String cadena) {
+        // Si ya está registrada, devolver su posición
+        if (posicionCadena.containsKey(cadena)) {
+            return posicionCadena.get(cadena);
+        }
+
+        // Quitar comillas
+        String sinComillas = cadena.substring(1, cadena.length() - 1);
+        byte[] bytes = sinComillas.getBytes(StandardCharsets.UTF_8);
+        int largo = bytes.length;
+
+        // Asignar posición en memoria
+        int posicion = siguientePosicionMemoria;
+        siguientePosicionMemoria += largo;
+
+        // Generar código de datos
+        seccionDatos.append("  (data (i32.const ")
+                .append(posicion)
+                .append(") \"");
+
+        // Recorre cada byte de la cadena y lo escribe en el bloque (data):
+        // - si es un caracter ASCII imprimible, se copia tal cual,
+        // - si es un caracter especial o no imprimible, se escribe como \xx en hexadecimal.
+        // De esta forma, se asegura la validez de la cadena en el formato WAT.
+        for (byte b : bytes) {
+            int valor = b & 0xFF;
+            if (valor >= 32 && valor <= 126 && valor != '"' && valor != '\\') {
+                seccionDatos.append((char) valor);
+            } else {
+                String hex = Integer.toHexString(valor);
+                if (hex.length() == 1) {
+                    hex = "0" + hex;
                 }
-            }
-            if (mainIdx >= 0) {
-                List<String> lista = new ArrayList<>(Arrays.asList(partes));
-                Collections.rotate(lista, -mainIdx);
-                r = String.join(":", lista);
+                seccionDatos.append("\\").append(hex);
             }
         }
-        return limpiarNombre(r);
+
+        seccionDatos.append("\")\n");
+
+        // Guardar información
+        posicionCadena.put(cadena, posicion);
+        largoCadena.put(cadena, largo);
+
+        return posicion;
     }
 
-    private String normalizarNombreFuncionEnTS(String inicioRaw) {
-        if (inicioRaw == null || inicioRaw.isBlank()) return "_";
-        return inicioRaw.trim();
-    }
-
+    /**
+     * Adapta un nombre de variable o función para que sea válido dentro de WAT.
+     * Se reemplazan caracteres como “:” por “_” y se filtran otros que no acepta WebAssembly.
+     */
     private String limpiarNombre(String nombre) {
-        if (nombre == null) return "_";
-        String limpio = nombre
-                .replace(':', '_')
-                .replaceAll("[^A-Za-z0-9_@\\$\\-\\.]", "_");
-        if (limpio.isEmpty()) limpio = "_";
-        if (Character.isDigit(limpio.charAt(0))) limpio = "_" + limpio;
+        if (nombre == null) {
+            return "_";
+        }
+
+        // Reemplazar caracteres no válidos
+        String limpio = nombre.replace(':', '_')
+                .replace(',', '_')
+                .replace('.', '_')
+                .replace('-', '_')
+                .replace('+', '_');
+
+        // Quitar cualquier otro carácter raro
+        limpio = limpio.replaceAll("[^A-Za-z0-9_]", "_");
+
+        if (limpio.isEmpty()) {
+            limpio = "_";
+        }
+
+        // Si empieza con número, agregar guión bajo
+        if (Character.isDigit(limpio.charAt(0))) {
+            limpio = "_" + limpio;
+        }
+
         return limpio;
     }
 
-    private int registrarCadenaEnData(String literal) {
-        Integer off = offsetCadena.get(literal);
-        if (off != null) return off;
-        String sinComillas = literal.substring(1, literal.length() - 1);
-        byte[] bytes = sinComillas.getBytes(StandardCharsets.UTF_8);
-        int len = bytes.length;
-        int nuevoOffset = siguienteOffsetData;
-        siguienteOffsetData += len;
-        seccionData.append("  (data (i32.const ")
-                .append(nuevoOffset)
-                .append(") \"")
-                .append(escaparLiteralCadenaWasm(bytes))
-                .append("\")\n");
-        offsetCadena.put(literal, nuevoOffset);
-        longitudCadena.put(literal, len);
-        return nuevoOffset;
-    }
-
-    private String escaparLiteralCadenaWasm(byte[] bytes) {
-        StringBuilder out = new StringBuilder();
-        for (byte b : bytes) {
-            int v = b & 0xFF;
-            if (v >= 0x20 && v <= 0x7E && v != '"' && v != '\\') {
-                out.append((char) v);
-            } else {
-                String hex = Integer.toHexString(v);
-                if (hex.length() == 1) hex = "0" + hex;
-                out.append("\\").append(hex);
-            }
+    /**
+     * Verifica si un valor es un número ULONG (ej: "123UL")
+     */
+    private boolean esNumeroULONG(String valor) {
+        if (valor == null) {
+            return false;
         }
-        return out.toString();
+        return valor.trim().matches("\\d+UL");
     }
 
+    /**
+     * Verifica si un valor es un número flotante (ej: "1.5d+00")
+     */
+    private boolean esNumeroFlotante(String valor) {
+        if (valor == null) {
+            return false;
+        }
+        // Acepta formatos como: 1.5d+00, -7,887800e+00
+        return valor.trim().matches("[+\\-]?\\d+[,.]\\d+[dDeE][+\\-]?\\d+");
+    }
+
+    /**
+     * Verifica si un valor es una cadena (ej: "Hola")
+     */
+    private boolean esCadena(String valor) {
+        if (valor == null || valor.length() < 2) {
+            return false;
+        }
+        return valor.startsWith("\"") && valor.endsWith("\"");
+    }
+
+    /**
+     * Verifica si un valor es de tipo flotante
+     */
+    private boolean esFlotante(String valor) {
+        if (esNumeroFlotante(valor)) {
+            return true;
+        }
+
+        String nombreLimpio = limpiarNombre(valor);
+        return tiposVariable.getOrDefault(nombreLimpio, "i32").equals("f64");
+    }
+
+    /**
+     * Convierte un literal flotante a número
+     */
+    private double parsearFlotante(String literal) {
+        String normalizado = literal.trim()
+                .replace(',', '.')
+                .replace('d', 'E')
+                .replace('D', 'E');
+        return Double.parseDouble(normalizado);
+    }
+
+    /**
+     * Imprime el código WAT generado en consola
+     */
     public void imprimirAssembler() {
         System.out.println("===== CODIGO WAT =====");
-        System.out.print(assembler.toString());
+        System.out.print(codigoWAT.toString());
         System.out.println("======================");
     }
 
+    /**
+     * Guarda el código WAT en un archivo
+     */
     public void guardarArchivoWat() {
-        java.nio.file.Path destino = obtenerDirectorioSalida().resolve(nombrePrograma + ".wat");
         try {
-            java.nio.file.Files.writeString(destino, assembler.toString());
-            System.out.println("Archivo WAT generado en: " + destino);
+            String rutaProyecto = System.getProperty("user.dir");
+            java.nio.file.Path carpeta = java.nio.file.Paths.get(
+                    rutaProyecto, "src", "Compilador", "ModuloGC"
+            );
+
+            if (!java.nio.file.Files.isDirectory(carpeta)) {
+                java.nio.file.Files.createDirectories(carpeta);
+            }
+
+            java.nio.file.Path archivo = carpeta.resolve(nombrePrograma + ".wat");
+            java.nio.file.Files.writeString(archivo, codigoWAT.toString());
+
+            System.out.println("Archivo WAT generado en: " + archivo);
         } catch (Exception e) {
             System.err.println("Error al generar archivo WAT: " + e.getMessage());
-        }
-    }
-
-    private java.nio.file.Path obtenerDirectorioSalida() {
-        try {
-            String projectRoot = System.getProperty("user.dir");
-            java.nio.file.Path pkgPath =
-                    java.nio.file.Paths.get(projectRoot, "src", "Compilador", "ModuloGC");
-            if (!java.nio.file.Files.isDirectory(pkgPath)) {
-                java.nio.file.Files.createDirectories(pkgPath);
-            }
-            return pkgPath;
-        } catch (Exception e) {
-            return java.nio.file.Paths.get(System.getProperty("user.home"));
         }
     }
 }

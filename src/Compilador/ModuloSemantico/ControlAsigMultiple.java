@@ -1,6 +1,9 @@
 package Compilador.ModuloSemantico;
 
+import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloSintactico.Parser;
+import Compilador.Util.RecolectorDeErrores;
+
 import java.util.Stack;
 
 /*public class ControlAsigMultiple {
@@ -72,12 +75,12 @@ public class ControlAsigMultiple {
             String tipoDer = listaTiposDer.get(i);
             System.out.println("Comparando tipos: " + tipoIzq + " con " + tipoDer);
             if (!tipoIzq.equals(tipoDer)) {
-                System.err.println("Error de tipo en asignación múltiple: no se puede asignar " + tipoDer + " a " + tipoIzq);
+                RecolectorDeErrores.agregarError("Error de tipo en asignación múltiple: no se puede asignar " + tipoDer + " a " + tipoIzq, AnalizadorLexico.getNumeroDeLinea());
             }
         }
 
         if (cantElemsIzq > cantElemsDer) {
-            System.err.println("Error: número mayor de variables del lado izquierdo en asignación múltiple (cant_izq: " + cantElemsIzq + " cant_der: " + cantElemsDer + ")");
+            RecolectorDeErrores.agregarError("Error: número mayor de variables del lado izquierdo en asignación múltiple (cant_izq: " + cantElemsIzq + " cant_der: " + cantElemsDer + ")",AnalizadorLexico.getNumeroDeLinea());
         }
 
         // limpiar listas

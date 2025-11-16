@@ -11,13 +11,23 @@ public class RecolectorDeErrores {
     private static final String RESET = "\u001B[0m";
     private static final String RED = "\u001B[31m";
 
-    /** Agrega un error con su número de línea. */
+    /** Agrega un error con su número de línea evitando duplicados en la misma línea. */
     public static void agregarError(String mensaje, int linea) {
-        errores.add("Línea " + linea + ": " + mensaje);
+        String entrada = "Línea " + linea + ": " + mensaje;
+
+        // Evitar duplicado exacto
+        if (!errores.contains(entrada)) {
+            errores.add(entrada);
+        }
     }
 
+    /** Agrega warning evitando duplicados en la misma línea. */
     public static void agregarWarning(String mensaje, int linea) {
-        warnings.add("Línea " + linea + ": " + mensaje);
+        String entrada = "Línea " + linea + ": " + mensaje;
+
+        if (!warnings.contains(entrada)) {
+            warnings.add(entrada);
+        }
     }
 
     public static void imprimirMensajes() {
