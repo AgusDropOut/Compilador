@@ -1,17 +1,25 @@
 MAIN {
-    ulong C;
-    ulong B;
-    ulong I;
-    ulong O;
-    ulong U;
 
-   C := 0UL;
-   B := 5UL;
+  ulong F (ulong PRUEBA){
+    ulong G(ulong TEST){
+        TEST := TEST + 10UL;
+        print(TEST);
+        return (TEST);
+    };
 
-   I,O = 6UL, 7UL;
+    print(PRUEBA);
 
+    PRUEBA := G(PRUEBA -> TEST);
     print("Hola");
-    print(C+B); ##5##
-    print(I*O); ##42##
+    return (PRUEBA);
+  };
+
+    ulong C;
+    ulong D;
+
+  C := 78UL;
+  D := F(C -> PRUEBA) + 65UL - trunc(trunc(-788.78D-2) / 6UL);
+  print(D);
+
 
 }

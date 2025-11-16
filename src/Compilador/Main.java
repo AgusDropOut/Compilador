@@ -10,7 +10,6 @@ import Compilador.Util.RecolectorDeErrores;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -43,7 +42,7 @@ public class Main {
         GeneradorDeCodigo productorAssembler = new GeneradorDeCodigo(tercetosGenerados, "programita");
         productorAssembler.generarCodigo();
         productorAssembler.imprimirAssembler();
-        productorAssembler.producirArchivoWAT();
+        productorAssembler.guardarArchivoWat();
 
     }
 }
