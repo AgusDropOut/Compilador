@@ -628,26 +628,9 @@ public class GeneradorDeCodigo {
 
     private void procesarTrunc(Terceto terceto, StringBuilder codigo) {
         String operandoOriginal = terceto.getOp1();
-
-        // Si es un literal flotante, calcular en tiempo de compilación
-        if (esNumeroFlotante(operandoOriginal)) {
-            double valor = parsearFlotante(operandoOriginal);
-            long truncado = (long) Math.abs(Math.floor(valor));
-            codigo.append("    i32.const ").append(truncado).append("\n");
-        } else {
-            // Es una variable
-            String operando = obtenerValor(operandoOriginal);
-
-            if (esFlotante(operando)) {
-                ponerFlotanteEnPila(operando, codigo);
-                codigo.append("    f64.abs\n");
-                codigo.append("    f64.trunc\n");
-                codigo.append("    i32.trunc_f64_u\n");
-            } else {
-                ponerEnteroEnPila(operando, codigo);
-            }
-        }
-
+        double valor = parsearFlotante(operandoOriginal);
+        long truncado = (long) Math.abs(Math.floor(valor));
+        codigo.append("    i32.const ").append(truncado).append("\n");
         String temporal = crearTemporal();
         codigo.append("    global.set $").append(temporal).append("\n");
         terceto.setResultado(temporal);

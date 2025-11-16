@@ -18,6 +18,7 @@ MAIN {
     ulong D;
 
   C := 78UL;
-  D := F(C -> PRUEBA) + 65UL - trunc(-788.78D-2);
+  D := F(C -> PRUEBA) + 65UL - trunc(788.78D-2);
   print(D);
+
 }

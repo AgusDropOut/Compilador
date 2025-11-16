@@ -33,7 +33,7 @@
     i32.const 65
     i32.add
     global.set $_t3
-    i32.const 8
+    i32.const 7
     global.set $_t4
     global.get $_t3
     global.get $_t4
