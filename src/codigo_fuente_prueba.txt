@@ -1,10 +1,24 @@
-PROGRAM {
-    ulong X1, X2;
-    X1 := trunc(2UL);
-    X2 := X1;
-    ulong X;
-    X := 3UL
-    X, X1 = 3UL , 4UL;
+MAIN {
 
-  ##   X2 := 2UL (ulong X) { return (2UL); } (X1);##
+  ulong F (ulong PRUEBA){
+    ulong G(ulong TEST){
+        TEST := TEST + 10UL;
+        print(TEST);
+        return (TEST);
+    }
+
+    print(PRUEBA);
+
+    PRUEBA := G(PRUEBA -> TEST);
+    print("Hola");
+    return (PRUEBA);
+  }
+
+    ulong C;
+    ulong D;
+
+  C := 78UL;
+  D := F(C -> PRUEBA) + 65UL - trunc(788.78D-2);
+  print(D);
+
 }

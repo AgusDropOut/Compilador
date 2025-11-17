@@ -20,6 +20,7 @@ public class TablaDeSimbolos {
 
         return tablaSimbolos.getOrDefault(key,null);
     }
+
     public static int getSize() {
         return tablaSimbolos.size();
     }
@@ -33,6 +34,25 @@ public class TablaDeSimbolos {
 
     public static void eliminarSimbolo(String lexema) {
         tablaSimbolos.remove(lexema);
+    }
+
+   public static ArrayList<ElementoTablaDeSimbolos> getElementos(){
+       ArrayList<ElementoTablaDeSimbolos> elementos = new ArrayList<>();
+       for (Map.Entry<String, ElementoTablaDeSimbolos> entrada : tablaSimbolos.entrySet()) {
+           elementos.add(entrada.getValue());
+       }
+       return elementos;
+   }
+
+    public static String getLexema(ElementoTablaDeSimbolos e){
+      if(e == null) return null;
+      for (Map.Entry<String, ElementoTablaDeSimbolos> entry : tablaSimbolos.entrySet()) {
+          ElementoTablaDeSimbolos val = entry.getValue();
+          if (val == e || (val != null && val.equals(e))) {
+              return entry.getKey();
+          }
+      }
+      return null;
     }
 
 

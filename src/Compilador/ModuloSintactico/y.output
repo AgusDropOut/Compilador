@@ -171,10 +171,10 @@
  135         | ID '.' ID
  136         | inicio_llamado parametros_reales ')'
  137         | '-' CTE
- 138         | TRUNC '(' expresion ')'
- 139         | TRUNC '(' expresion error
- 140         | TRUNC error expresion ')'
- 141         | TRUNC error expresion error
+ 138         | TRUNC '(' CTE ')'
+ 139         | TRUNC '(' CTE error
+ 140         | TRUNC error CTE ')'
+ 141         | TRUNC error CTE error
 
  142  inicio_llamado : ID '('
 
@@ -708,10 +708,10 @@ state 39
 
 
 state 40
-	factor : TRUNC . '(' expresion ')'  (138)
-	factor : TRUNC . '(' expresion error  (139)
-	factor : TRUNC . error expresion ')'  (140)
-	factor : TRUNC . error expresion error  (141)
+	factor : TRUNC . '(' CTE ')'  (138)
+	factor : TRUNC . '(' CTE error  (139)
+	factor : TRUNC . error CTE ')'  (140)
+	factor : TRUNC . error CTE error  (141)
 
 	error  shift 84
 	'('  shift 85
@@ -1280,37 +1280,19 @@ state 83
 
 
 state 84
-	factor : TRUNC error . expresion ')'  (140)
-	factor : TRUNC error . expresion error  (141)
+	factor : TRUNC error . CTE ')'  (140)
+	factor : TRUNC error . CTE error  (141)
 
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
+	CTE  shift 149
 	.  error
-
-	expresion  goto 149
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
 
 
 state 85
-	factor : TRUNC '(' . expresion ')'  (138)
-	factor : TRUNC '(' . expresion error  (139)
+	factor : TRUNC '(' . CTE ')'  (138)
+	factor : TRUNC '(' . CTE error  (139)
 
-	error  shift 35
-	'-'  shift 36
-	CTE  shift 38
-	ID  shift 39
-	TRUNC  shift 40
+	CTE  shift 150
 	.  error
-
-	expresion  goto 150
-	termino  goto 44
-	factor  goto 45
-	inicio_llamado  goto 46
 
 
 state 86
@@ -2044,31 +2026,19 @@ state 148
 
 
 state 149
-	expresion : expresion . '+' termino  (115)
-	expresion : expresion . '-' termino  (116)
-	expresion : expresion . '+' error  (119)
-	expresion : expresion . '-' error  (121)
-	factor : TRUNC error expresion . ')'  (140)
-	factor : TRUNC error expresion . error  (141)
+	factor : TRUNC error CTE . ')'  (140)
+	factor : TRUNC error CTE . error  (141)
 
 	error  shift 193
-	'+'  shift 86
-	'-'  shift 87
 	')'  shift 194
 	.  error
 
 
 state 150
-	expresion : expresion . '+' termino  (115)
-	expresion : expresion . '-' termino  (116)
-	expresion : expresion . '+' error  (119)
-	expresion : expresion . '-' error  (121)
-	factor : TRUNC '(' expresion . ')'  (138)
-	factor : TRUNC '(' expresion . error  (139)
+	factor : TRUNC '(' CTE . ')'  (138)
+	factor : TRUNC '(' CTE . error  (139)
 
 	error  shift 195
-	'+'  shift 86
-	'-'  shift 87
 	')'  shift 196
 	.  error
 
@@ -2588,25 +2558,25 @@ state 192
 
 
 state 193
-	factor : TRUNC error expresion error .  (141)
+	factor : TRUNC error CTE error .  (141)
 
 	.  reduce 141
 
 
 state 194
-	factor : TRUNC error expresion ')' .  (140)
+	factor : TRUNC error CTE ')' .  (140)
 
 	.  reduce 140
 
 
 state 195
-	factor : TRUNC '(' expresion error .  (139)
+	factor : TRUNC '(' CTE error .  (139)
 
 	.  reduce 139
 
 
 state 196
-	factor : TRUNC '(' expresion ')' .  (138)
+	factor : TRUNC '(' CTE ')' .  (138)
 
 	.  reduce 138
 

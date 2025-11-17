@@ -120,7 +120,10 @@ sentencia_return      : RETURN '(' expresion ')'  {registrarReturn();
                                                           String varRetorno = "_ret_" + ambito;
 
                                                           // Generar terceto para asignar el valor de retorno
-                                                          ArregloTercetos.crearTerceto(":=", varRetorno, $2.sval);
+                                                          ArregloTercetos.crearTerceto(":=", varRetorno, $3.sval);
+
+                                                           // Generar terceto para asignar el valor de retorno
+                                                           ArregloTercetos.crearTerceto("RETURN", varRetorno, $3.sval);
 
                                                           // Generar terceto de salto al final de la función
                                                           ArregloTercetos.crearTerceto("JMP", "fin_" + ambito, null);
@@ -280,7 +283,7 @@ parametro_real        : expresion FLECHA ID {
                                                     String funcionActual = PilaDeFuncionesLlamadas.desapilarFuncion();
                                                     String paramFormal = $3.sval + ":" + funcionActual;
                                                     String tipoFormal = obtenerTipoDeSimbolo(paramFormal);
-                                                    $$.tipo = chequearTipos($1.tipo, tipoFormal);
+                                                    $$.tipo = chequearTipos($1.tipo, tipoFormal, "->");
                                                     realizarPasajeCopiaValor(paramFormal, $1.sval);
 
                                                     // ⚡ Nuevo: registrar vínculo si el parámetro es cr
@@ -292,12 +295,12 @@ parametro_real        : expresion FLECHA ID {
                       | expresion ID { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
                       ;
 
-condicion             : expresion COMP expresion {$$ = ArregloTercetos.crearTerceto("COMP", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo); }
+condicion             : expresion COMP expresion {$$ = ArregloTercetos.crearTerceto("COMP", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "comparador"); }
                       ;
 
 asignacion_simple     : var_asignacion_simple ASIG expresion { reportarEstructura("asignacion simple");
                                                                $$ = ArregloTercetos.crearTerceto(":=", $1.sval, $3.sval);
-                                                               $$.tipo = chequearTipos($1.tipo, $3.tipo);
+                                                               $$.tipo = chequearTipos($1.tipo, $3.tipo, ":=");
                                                                }
                       ;
 
@@ -352,7 +355,7 @@ expresion_lambda      : header_lambda '{' bloque_ejecutable '}'
                             {
                               // Chequeo de tipos: formal vs real
                               String tipoFormal = obtenerTipoDeSimbolo($1.tipo); // $1.tipo es la clave TS del parámetro formal
-                              chequearTipos(tipoFormal, $7.tipo);
+                              chequearTipos(tipoFormal, $7.tipo, ":=");
 
                               // Pasaje copia-valor: asignar real -> formal
                               ArregloTercetos.crearTerceto(":=", $1.tipo, $7.sval);
@@ -374,8 +377,8 @@ expresion_lambda      : header_lambda '{' bloque_ejecutable '}'
                       ;
 
 
-expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto("+", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo); }
-                      | expresion '-' termino {$$ = ArregloTercetos.crearTerceto("-", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo);}
+expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto("+", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "+"); }
+                      | expresion '-' termino {$$ = ArregloTercetos.crearTerceto("-", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "-");}
                       | termino {$$ = $1; $$.tipo = $1.tipo;}
                       | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion '+' error { yyerror("Error: operando a la derecha invalido"); }
@@ -388,8 +391,8 @@ expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto
 
 
 
-termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo); }
-                      | termino '/' factor {$$ = ArregloTercetos.crearTerceto("/", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo);}
+termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "*"); }
+                      | termino '/' factor {$$ = ArregloTercetos.crearTerceto("/", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "/");}
                       | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
                       | termino '*' error { yyerror("Error: operando a la derecha invalido"); }
                       | error '/' factor { yyerror("Error: operando a la izquierda invalido"); }
@@ -411,44 +414,40 @@ factor                : ID %prec LOWER_THAN_CALL {$$ = chequearAmbito("", ambito
                       | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
                       | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       | inicio_llamado parametros_reales ')' {
-                                           // ⚡ Generar terceto CALL usando el ID que guardó inicio_llamado
-                                                                  $$ = ArregloTercetos.crearTerceto("CALL", $1.sval, null);
+                                            // 1) Crear terceto CALL; su `sval` es el índice del terceto
+                                                       ParserValExt tCall = ArregloTercetos.crearTerceto("CALL", $1.sval, null);
 
-                                                                  // ⚡ Guardar el tipo de retorno de la función
-                                                                  $$.tipo = obtenerTipoDeSimbolo($1.sval);
+                                                       // 2) Guardar tipo de retorno de la función
+                                                       String tipoRet = obtenerTipoDeSimbolo($1.sval);
+                                                       $$.tipo = tipoRet;
 
-                                                                  // ⚡ Crear una temporal para almacenar el valor de retorno
-                                                                  String temp = "_t" + ArregloTercetos.declararTemporal($$.tipo,ambito); // nombre temporal único
-                                                                  declaracionDeVariable(temp, $$.tipo, ambito, "temporal");
+                                                       // 3) Crear temporal para almacenar el valor retornado
+                                                       String temp = "_t" + ArregloTercetos.declararTemporal(tipoRet, ambito);
+                                                       declaracionDeVariable(temp, tipoRet, ambito, "temporal");
 
-                                                                  // ⚡ Asignar el valor retornado (_ret_<funcion>) a la temporal
-                                                                  String retName = "_ret_" + obtenerAmbito($1.sval);
-                                                                  ArregloTercetos.crearTerceto(":=", temp, retName);
+                                                       // 4) Asignar el resultado del CALL (por índice de terceto) a la temporal
+                                                       ArregloTercetos.crearTerceto(":=", temp, tCall.sval);
 
-                                                                  // ⚡ Guardar temporal como valor semántico del factor
-                                                                  $$.sval = temp;
+                                                       // 5) El valor del factor es la temporal
+                                                       $$.sval = temp;
 
-                                                                  // ⚡ Finalizar la gestión de pila de funciones
-                                                                  PilaDeFuncionesLlamadas.finalizarLlamada();
+                                                       // 6) Finalizar gestión de pila de funciones
+                                                       PilaDeFuncionesLlamadas.finalizarLlamada();
 
-                                                                  // ⚡ Realizar pasajes de copia-resultado si hay CR
-                                                                   realizarPasajesCopiaResultado();
+                                                       // 7) Realizar pasajes copia\-resultado para parámetros `cr`
+                                                       realizarPasajesCopiaResultado();
                                          }
                       |'-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
-                      | TRUNC '(' expresion ')' {
-                                                  // Esta es la acción semántica correcta:
-                                                  // 1. Crea un terceto para la operación TRUNC.
-                                                  // 2. El resultado (temporal) es el sval de este factor.
-                                                  // 3. El tipo es ulong.
-                                                  if(! $3.tipo.equals("dfloat")){
+                      | TRUNC '(' CTE ')' {       String tipo = obtenerTipoDeSimbolo($3.sval);
+                                                  if(! tipo.equals("dfloat")){
                                                       RecolectorDeErrores.agregarError("Error: La funcion TRUNC solo acepta operandos de tipo dfloat.",AnalizadorLexico.getNumeroDeLinea());
                                                   }
                                                   $$ = ArregloTercetos.crearTerceto("TRUNC", $3.sval, null);
                                                   $$.tipo = "ulong";
                       }
-                      | TRUNC '(' expresion error { yyerror("Error: falta ')' en la expresion TRUNC"); }
-                      | TRUNC error  expresion ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
-                      | TRUNC error expresion error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
+                      | TRUNC '(' CTE error { yyerror("Error: falta ')' en la expresion TRUNC"); }
+                      | TRUNC error  CTE ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
+                      | TRUNC error CTE error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
 
                       ;
 
@@ -689,7 +688,7 @@ public void registrarReturn() {
         }
 }
 
-public String chequearTipos(String tipo1, String tipo2){
+public String chequearTipos(String tipo1, String tipo2, String operacion){
 
     // No permitir operaciones entre dfloat
     if(tipo1.equals("dfloat") && tipo2.equals("dfloat")){
@@ -704,7 +703,7 @@ public String chequearTipos(String tipo1, String tipo2){
 
     // Tipos distintos → error
     if(!tipo1.equals(tipo2)){
-        yyerror("Error: Tipos incompatibles (" + tipo1 + " y " + tipo2 + ").");
+        yyerror("Error: Tipos incompatibles para la operación (" + tipo1 + " " + operacion + " " + tipo2 + ").");
         return "error";
     }
 

@@ -1,12 +1,15 @@
 package Compilador;
 
+import Compilador.ModuloGC.GeneradorDeCodigo;
 import Compilador.ModuloLexico.*;
 import Compilador.ModuloSemantico.ArregloTercetos;
+import Compilador.ModuloSemantico.Terceto;
 import Compilador.ModuloSintactico.Parser;
 import Compilador.ModuloSintactico.ParserValExt;
 import Compilador.Util.RecolectorDeErrores;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -35,5 +38,11 @@ public class Main {
         TablaDeSimbolos.imprimirTabla();
         ArregloTercetos.imprimirTercetos();
         RecolectorDeErrores.imprimirMensajes();
+        ArrayList<Terceto> tercetosGenerados = new ArrayList<>(ArregloTercetos.obtenerTercetos());
+        GeneradorDeCodigo productorAssembler = new GeneradorDeCodigo(tercetosGenerados, "programita");
+        productorAssembler.generarCodigo();
+        productorAssembler.imprimirAssembler();
+        productorAssembler.guardarArchivoWat();
+
     }
 }

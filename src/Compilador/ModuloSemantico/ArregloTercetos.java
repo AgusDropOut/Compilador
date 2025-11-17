@@ -143,4 +143,8 @@ public class ArregloTercetos {
 
         return nombreCompleto;
     }
+
+    public static List<Terceto> obtenerTercetos() {
+        return new ArrayList<>(tercetos);
+    }
 }
