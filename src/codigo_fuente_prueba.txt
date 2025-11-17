@@ -1,9 +1,9 @@
 PROGRAM {
     ulong X1, X2;
-    X1 := trunc(2.1);
-    X2 := X1
+    X1 := trunc(2UL);
+    X2 := X1;
     ulong X;
-    X := 3UL;
+    X := 3UL
     X, X1 = 3UL , 4UL;
 
   ##   X2 := 2UL (ulong X) { return (2UL); } (X1);##

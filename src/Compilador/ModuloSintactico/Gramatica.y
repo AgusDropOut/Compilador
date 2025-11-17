@@ -75,6 +75,9 @@ sentencia
                       | declaracion_funcion
                       | declaracion_funcion ';' { yyerror("Error: No debe haber ';' después de la declaración de función"); }
                       /* Errores comunes mejorados */
+                      | error ';' {
+                                                yyerror("Error: Sentencia inválida detectada — se descartó hasta ';'");
+                                              }
                       | sentencia_declarativa error ';' {
                           yyerror("Error de sintaxis: declaración mal formada o faltante del ';'");
                         }
@@ -82,9 +85,7 @@ sentencia
                           yyerror("Error de sintaxis: sentencia ejecutable mal formada o faltante del ';'");
                         }
                       /* Captura genérica de errores en sentencias */
-                      | error ';' {
-                          yyerror("Error: Sentencia inválida detectada — se descartó hasta ';'");
-                        }
+
 
                       /* Error sin punto y coma: se muestra un mensaje menos confuso */
                       | error {
