@@ -1,24 +1,68 @@
-MAIN {
+PROGRAMAFUNCIONAL {
 
-  ulong F (ulong PRUEBA){
-    ulong G(ulong TEST){
-        TEST := TEST + 10UL;
-        print(TEST);
-        return (TEST);
+    ## DeclaraciOn de FunciOn ##
+    ulong CALCMODULO(ulong VALOR) {
+        return (VALOR - VALOR / 2UL * 2UL);
     }
 
-    print(PRUEBA);
+    ## Base vars ##
+    ulong X;
+    ulong Y;
+    ulong Z;
 
-    PRUEBA := G(PRUEBA -> TEST);
-    print("Hola");
-    return (PRUEBA);
-  }
+    ## Init ##
+    X := 10UL;
+    Y := 2UL;
+    Z := 0UL;
 
-    ulong C;
-    ulong D;
+    ## Main IF controlling nested loops ##
+    if (Y == 2UL) {
 
-  C := 78UL;
-  D := F(C -> PRUEBA) + 65UL - trunc(788.78D-2);
-  print(D);
+        ## First while: runs while Y < 5 ##
+        while (Y < 5UL) do {
+
+            ## If X is odd (CALC_MODULO returns 1), X = X + 1 ##
+            if (CALCMODULO(X -> VALOR) == 1UL) {
+                X := X + 1UL;
+            } endif;
+
+            ## Inner while: runs while Z < 3 ##
+            while (Z < 3UL) do {
+                X := X + 2UL;
+                Z := Z + 1UL;
+            } ;
+
+            ## Reset Z ##
+            Z := 0UL;
+
+            ## Increase Y ##
+            Y := Y + 1UL;
+
+        } ;
+
+    } else {
+        ## Unreachable branch ##
+        X := 999UL;
+    } endif;
+
+    ## Second IF testing final value of X ##
+    if (X > 30UL) {
+
+        ## Increase X until reaching >=60 ##
+        while (X < 60UL) do {
+
+
+            if (CALCMODULO(X-> VALOR) == 0UL) {
+                X := X + 5UL;
+            } else {
+                X := X + 3UL;
+            } endif;
+
+        };
+
+    } endif;
+
+    ## Output final reference value ##
+    print(X);
 
 }

@@ -26,12 +26,12 @@ public class MapaDeTokensAID {
         mapa.put("->", Parser.FLECHA);
         mapa.put("cr",Parser.CR);
 
-        mapa.put("<=", Parser.COMP);
-        mapa.put(">=", Parser.COMP);
-        mapa.put("!=", Parser.COMP);
-        mapa.put("==", Parser.COMP);
-        mapa.put("<", Parser.COMP);
-        mapa.put(">", Parser.COMP);
+        mapa.put("<=", Parser.LEQ);
+        mapa.put(">=", Parser.GEQ);
+        mapa.put("=!", Parser.NEQ);
+        mapa.put("==", Parser.EQ);
+        mapa.put("<", (short) '<');
+        mapa.put(">", (short) '>');
 
 
 

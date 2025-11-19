@@ -15,6 +15,7 @@ public class ArregloTercetos {
     private static List<Terceto> tercetos = new ArrayList<>();
     private static Stack<Integer> pilaIf = new Stack<>();
     private static Stack<Integer> pilaWhile = new Stack<>();
+    private static int numeroEtiqueta = 0;
 
     public static ParserValExt crearTerceto(String operador, String op1, String op2) {
         // Devolver numero del terceto
@@ -75,17 +76,24 @@ public class ArregloTercetos {
         return val;
     }
 
-    public static ParserValExt completarBackPatchingWHILE(){
-        int tercetoBF = pilaIf.pop(); // posición del BF
-        int inicioWhile = pilaWhile.pop(); // posición inicial del WHILE
-        tercetos.get(tercetoBF).setOp2(String.valueOf(tercetos.size()+1)); // El BF salta al siguiente terceto (después del WHILE)
-        // Creamos el BI (salto incondicional al inicio del WHILE)
+    public static ParserValExt completarBackPatchingWHILE() {
+        int tercetoBF = pilaIf.pop(); // guardaste la posición del BF al crear el WHILE
+        int inicioWhile = pilaWhile.pop(); // guardaste la posición al entrar al WHILE
+
+        // Calculamos el índice de salida
+        int salidaWHILE = tercetos.size(); // donde irá la siguiente instrucción luego del bl
+
+        // Parchamos el BF para que salte a la salida
+        tercetos.get(tercetoBF).setOp2(String.valueOf(salidaWHILE));
+
+
+        // Creamos el BI al inicio del WHILE
         Terceto nuevo = new Terceto("bl", String.valueOf(inicioWhile), null);
         tercetos.add(nuevo);
+
         ParserValExt val = new ParserValExt();
         val.sval = String.valueOf(tercetos.size() - 1);
         return val;
-
     }
 
 

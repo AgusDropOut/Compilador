@@ -1,5 +1,6 @@
 package Compilador;
 
+import Compilador.ModuloGC.AnalizadorDeBloques;
 import Compilador.ModuloGC.GeneradorDeCodigo;
 import Compilador.ModuloLexico.*;
 import Compilador.ModuloSemantico.ArregloTercetos;
@@ -43,6 +44,7 @@ public class Main {
         productorAssembler.generarCodigo();
         productorAssembler.imprimirAssembler();
         productorAssembler.guardarArchivoWat();
+
 
     }
 }
