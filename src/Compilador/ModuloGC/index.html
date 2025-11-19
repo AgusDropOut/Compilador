@@ -5,37 +5,41 @@
     <title>Programa WASM</title>
 </head>
 <body>
-<h3>Test WASM</h3>
+    <h3>Resultados ejecución WASM</h3>
+    <script>
+        let wasmInstance = null;
 
-<script>
-    let wasmInstance = null;
-
-    function alert_i32(x) {
-        alert("Valor recibido: " + x);
-    }
-
-    function alert_str(ptr, len) {
-        if (!wasmInstance) { console.error('wasmInstance no inicializada'); return; }
-        const memoryBuffer = wasmInstance.exports.memory.buffer;
-        const bytes = new Uint8Array(memoryBuffer, ptr, len);
-        const string = new TextDecoder('utf8').decode(bytes);
-        alert("Cadena recibida: " + string);
-    }
-
-    const importObject = {
-        env: {
-            alert_i32,
-            alert_str
+        function alert_i32(x) {
+            alert("Valor recibido --> " + x);
         }
-    };
 
-    WebAssembly.instantiateStreaming(fetch("programita.wasm"), importObject)
-        .then(obj => {
-            wasmInstance = obj.instance;    // <-- asignar antes de usar la memoria/imports
-            wasmInstance.exports.main();
-        })
-        .catch(err => console.error("Error cargando wasm:", err));
-</script>
+        function alert_str(ptr, len) {
+            if (!wasmInstance) { console.error('wasmInstance no inicializada'); return; }
+            const memoryBuffer = wasmInstance.exports.memory.buffer;
+            const bytes = new Uint8Array(memoryBuffer, ptr, len);
+            const string = new TextDecoder('utf8').decode(bytes);
+            if (string.startsWith("Error")){
+                alert(string);
+            }
+            else {
+                alert("Cadena recibida --> " + string);
+            }
+        }
 
-</body>
+        const importObject = {
+            env: {
+                alert_i32,
+                alert_str
+            }
+        };
+
+        WebAssembly.instantiateStreaming(fetch("programita.wasm"), importObject)
+            .then(obj => {
+                wasmInstance = obj.instance;    // <-- asignar antes de usar la memoria/imports
+                wasmInstance.exports.main();
+            })
+            .catch(err => console.error("Error cargando wasm:", err));
+    </script>
+
+    </body>
 </html>

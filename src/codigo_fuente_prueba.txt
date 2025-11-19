@@ -1,19 +1,50 @@
-PROGRAMAFUNCIONAL {
+TESTRECURSIVO {
+    ulong GLOBALA;
+    ulong GLOBALB;
 
+    GLOBALA := 10UL;
+    GLOBALB := 7UL;
 
+      ulong G (ulong CONT){
+            ulong LOCALG;
+            ulong TEMPVALOR;
 
-    ## Base vars ##
-    ulong X;
-    ulong Y;
-    ulong Z;
+            LOCALG := TESTRECURSIVO.GLOBALB;
+            (ulong A){A:= A + 1UL;print(A);}(34UL)
 
-    X := 5UL;
-    Y := 0UL;
-    Z := 4UL;
+            if (LOCALG < 45UL){
+              print("Hola");
+            }
+            else{
+                TEMPVALOR := CONT;
+            }
+            endif;
 
-    X := X-Z;
+            LOCALG := LOCALG + CONT;
 
-    print(X);
-    print("Fin del programa");
+            return (4UL);
+     }
 
+    ulong F (ulong VALOR){
+        ulong LOCALF;
+
+        if (VALOR < TESTRECURSIVO.GLOBALB) {
+            print("F: Caso Base");
+            return (VALOR);
+        }
+        endif;
+
+        LOCALF := TESTRECURSIVO.G(VALOR -> CONT);
+
+        LOCALF := LOCALF + VALOR;
+
+        return (LOCALF);
+    }
+
+    ulong RESULTADO;
+    RESULTADO := TESTRECURSIVO.F(GLOBALA -> VALOR);
+
+    print("Resultado de la recursividad:");
+    print(RESULTADO);
+    print("Fin del test");
 }

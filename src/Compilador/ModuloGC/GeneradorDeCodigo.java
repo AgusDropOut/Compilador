@@ -1,6 +1,5 @@
 package Compilador.ModuloGC;
 
-import Compilador.ModuloLexico.AnalizadorLexico;
 import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloSemantico.Terceto;
@@ -26,8 +25,11 @@ public class GeneradorDeCodigo {
     private int finPosErrorDivCero;
     private int iniPosErrorRestaNegativa;
     private int finPosErrorRestaNegativa;
+    private int iniPosErrorRecursion;
+    private int finPosErrorRecursion;
     private String errorDivCero = "'Error: Division por cero.'";
     private String errorRestaNegativa = "'Error: Resultado de resta negativo (underflow).'";
+    private String errorLlamadaInvalida = "'Error: Una función no puede llamarse a si misma'";
 
 
 
@@ -56,6 +58,8 @@ public class GeneradorDeCodigo {
         finPosErrorDivCero = largoCadena.get(errorDivCero);
         iniPosErrorRestaNegativa = registrarCadena(errorRestaNegativa);
         finPosErrorRestaNegativa = largoCadena.get(errorRestaNegativa);
+        iniPosErrorRecursion = registrarCadena(errorLlamadaInvalida);
+        finPosErrorRecursion = largoCadena.get(errorLlamadaInvalida);
 
         // 1. PASO PREVIO: Detectar estructuras IF/ELSE mirando los bf/bl
         AnalizadorDeBloques.analizarBloques(listaTercetos);
@@ -141,7 +145,7 @@ public class GeneradorDeCodigo {
             case "PRINT" -> procesarPrint(terceto, codigo);
             case "TRUNC" -> procesarTrunc(terceto, codigo);
             case "CALL"  -> procesarLlamadaFuncion(terceto, codigo);
-            case "LAMBDA" -> {}
+            case "LAMBDA" -> {}//Se resuelve en tiempo de compilación
         }
     }
 
@@ -161,7 +165,7 @@ public class GeneradorDeCodigo {
     private void procesarWhileEnd(Terceto t, StringBuilder codigo) {
         String lblLoop = pilaWhile.pop(); // o guardarlo en otra pila si lo necesitas
 
-        codigo.append("    br $").append(lblLoop).append("\n");  // 🔁 volver al inicio del loop
+        codigo.append("    br $").append(lblLoop).append("\n");  // volver al inicio del loop
         codigo.append("    ) ;; fin loop\n");
         codigo.append("    ) ;; fin block while\n");
 
@@ -193,6 +197,7 @@ public class GeneradorDeCodigo {
             String nombreFunc = entrada.getKey();
             codigoWAT.append("\n  (func $").append(nombreFunc);
             if (nombreFunc.equals("main")) codigoWAT.append(" (export \"main\")");
+            else if (nombreFunc.contains("_lambda")) codigoWAT.append(" ");
             else codigoWAT.append(" (result i32)");
             codigoWAT.append("\n").append(entrada.getValue()).append("  )\n");
         }
@@ -387,14 +392,17 @@ public class GeneradorDeCodigo {
         String funcTS = terceto.getOp1();
         if (funcTS != null && funcTS.contains("(")) funcTS = funcTS.substring(0, funcTS.indexOf('(')).trim();
         String funcWasm = limpiarNombre(funcTS);
-        if (funcTS != null && funcTS.contains(":")) {
+        if (funcTS != null && funcTS.contains(":") && !funcTS.startsWith("_lambda")) {
             String[] p = funcTS.split(":");
             if (p.length >= 2) funcWasm = limpiarNombre(p[1] + ":" + p[0]);
         }
+
         codigo.append("    call $").append(funcWasm).append("\n");
-        String temp = crearTemporal();
-        codigo.append("    global.set $").append(temp).append("\n");
-        terceto.setResultado(temp);
+        if(!funcTS.startsWith("_lambda")) {
+            String temp = crearTemporal();
+            codigo.append("    global.set $").append(temp).append("\n");
+            terceto.setResultado(temp);
+        }
     }
     private void iniciarFuncion(String nombreFunc) {
         pilaFunciones.push(funcionActual);
@@ -402,8 +410,47 @@ public class GeneradorDeCodigo {
         funcionActual = nombreLimpio;
         funciones.put(nombreLimpio, new StringBuilder());
         if (nombreFunc.contains(":")) scopeActual = nombreFunc.substring(nombreFunc.indexOf(':') + 1);
+
+        String candadoNombre = "$_lock_" + nombreLimpio;
+        if (!tiposVariable.containsKey(candadoNombre)) {
+            variablesGlobales.append("  (global ").append(candadoNombre).append(" (mut i32) (i32.const 0)) ;; Candado de Recursion\n");
+            tiposVariable.put(candadoNombre, "i32");
+        }
+
+        StringBuilder codigo = funciones.get(funcionActual);
+
+        // --- NUEVO: Control y set de candado en Runtime (Al inicio del cuerpo de la funcion) ---
+        codigo.append("    ;; Bloqueo de Recursion Directa (Runtime Check)\n");
+        codigo.append("    global.get ").append(candadoNombre).append("\n"); // Carga el valor actual (0 o 1)
+        codigo.append("    i32.const 1\n");
+        codigo.append("    i32.eq ;; Pila: [Candado == 1]\n");
+
+        codigo.append("    (if \n");
+        codigo.append("      (then\n");
+        codigo.append("        i32.const ").append(iniPosErrorRecursion).append("\n");
+        codigo.append("        i32.const ").append(finPosErrorRecursion).append("\n");
+        codigo.append("        call $alert_str ;; Muestra el error\n");
+        codigo.append("        unreachable ;; Termina el programa\n");
+        codigo.append("      )\n");
+        codigo.append("    ) ;; Fin IF de check\n");
+
+        // Pone el candado a 1 (Función activa)
+        codigo.append("    i32.const 1\n");
+        codigo.append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 1\n");
+        // ------------------------------------------------------------------------------------
     }
     private void finalizarFuncion() {
+        // --- NUEVO: Unset del candado de Recursion (Runtime) ---
+        String nombreLimpio = funcionActual;
+        String candadoNombre = "$_lock_" + nombreLimpio;
+        StringBuilder codigo = funciones.get(funcionActual);
+
+        // Pone el candado a 0 (Función inactiva)
+        codigo.append("    ;; Liberacion de Candado de Recursion\n");
+        codigo.append("    i32.const 0\n");
+        codigo.append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 0\n");
+        // -------------------------------------------------------
+
         if (!pilaFunciones.isEmpty()) funcionActual = pilaFunciones.pop();
         else funcionActual = "main";
     }

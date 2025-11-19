@@ -8,8 +8,7 @@ public class PilaDeFuncionesLlamadas {
     public static void iniciarLlamada(String funcion) {
         llamados.push(funcion);
     }
-
-    public static String desapilarFuncion() {
+    public static String getTopeActual() {
         return llamados.peek();
     }
 

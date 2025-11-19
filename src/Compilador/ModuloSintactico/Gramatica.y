@@ -20,8 +20,10 @@ import java.util.ArrayList;
 
 %left '+' '-'
 %left '*' '/'
+/*
 %nonassoc LOWER_THAN_CALL
 %nonassoc '('
+*/
 
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  CADENA FLECHA EQ GEQ LEQ NEQ
 
@@ -34,7 +36,7 @@ programa              : nombre_programa  '{' list_sentencia '}'{ reportarEstruct
                       | '{' list_sentencia '}' { yyerror("Error: Falta definir el nombre del programa"); }
                       ;
 
-nombre_programa       : ID  {ambito = $1.sval;}
+nombre_programa       : ID  {ambito = $1.sval; prog_principal = $1.sval;}
                       ;
 
 declaracion_funcion   : header_funcion  parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
@@ -62,6 +64,7 @@ list_sentencia        : /* empty */
 sentencia             : sentencia_declarativa ';'
                       | sentencia_ejecutable ';'
                       | declaracion_funcion
+                      | expresion_lambda
                       | declaracion_funcion ';' { yyerror("Error: No debe haber ';' después de la declaración de función"); }
                       | error ';' { yyerror("Error: Sentencia inválida detectada — se descartó hasta ';'"); }
                       | sentencia_declarativa error ';' { yyerror("Error de sintaxis: declaración mal formada o faltante del ';'"); }
@@ -130,7 +133,6 @@ sentencia_ejecutable  : /*1*/if condicion_if '{' bloque_ejecutable '}' else '{' 
                       | asignacion_simple
                       | asignacion_multiple
                       | sentencia_return
-                      | expresion_lambda
 
                       /* WHILE: Conservamos WHILE_START y WHILE_END para facilitar el (loop) */
                       | while condicion_while DO '{' bloque_ejecutable '}' {
@@ -209,14 +211,44 @@ parametros_reales     : parametro_real
                       ;
 
 parametro_real        : expresion FLECHA ID {
-                                                    String funcionActual = PilaDeFuncionesLlamadas.desapilarFuncion();
-                                                    String paramFormal = $3.sval + ":" + funcionActual;
-                                                    String tipoFormal = obtenerTipoDeSimbolo(paramFormal);
-                                                    $$.tipo = chequearTipos($1.tipo, tipoFormal, "->");
-                                                    realizarPasajeCopiaValor(paramFormal, $1.sval);
-                                                    if (esParametroCR(paramFormal)) {
-                                                        registrarVinculoCR(paramFormal, $1.sval);
-                                                    }
+                                                String claveFuncionSinCorregir = PilaDeFuncionesLlamadas.getTopeActual();
+
+                                                int primerSeparador = claveFuncionSinCorregir.indexOf(":");
+
+                                                String nombreFuncion;
+                                                String ambitoContenedor;
+                                                String ambitoDeclaracionParametro;
+
+                                                if (primerSeparador == -1) {
+                                                    // Caso de error: La pila contiene solo el nombre simple (ej: "C")
+                                                    // No se puede reconstruir el ámbito de declaración. Asumimos el ámbito actual como contenedor.
+
+                                                    nombreFuncion = claveFuncionSinCorregir; // "C"
+                                                    // Esta es la parte débil: ¿Cuál es el ámbito contenedor?
+                                                    // Si la llamada es C(...) desde el main, el ámbito es "PROGRAMAFUNCIONAL".
+                                                    // Usaremos la variable 'ambito' o un valor conocido:
+                                                    ambitoContenedor = prog_principal; // Reemplaza por la forma correcta de obtener el ámbito global si es diferente
+
+                                                    // Construimos el ámbito de declaración: PROGRAMAFUNCIONAL:C
+                                                    ambitoDeclaracionParametro = ambitoContenedor + ":" + nombreFuncion;
+                                                } else {
+                                                    // Caso normal: Clave canónica (ej: C:PROGRAMAFUNCIONAL)
+                                                    nombreFuncion = claveFuncionSinCorregir.substring(0, primerSeparador);
+                                                    ambitoContenedor = claveFuncionSinCorregir.substring(primerSeparador + 1);
+                                                    ambitoDeclaracionParametro = ambitoContenedor + ":" + nombreFuncion;
+                                                }
+                                                // ----------------------------------------------------------------------
+
+                                                // 4. Construir la clave de búsqueda del parámetro (Ej: TEST:PROGRAMAFUNCIONAL:C)
+                                                String paramFormal = val_peek(0).sval + ":" + ambitoDeclaracionParametro;
+
+                                                String tipoFormal = obtenerTipoDeSimbolo(paramFormal);
+
+                                                yyval.tipo = chequearTipos(val_peek(2).tipo, tipoFormal, "->");
+                                                realizarPasajeCopiaValor(paramFormal, val_peek(2).sval);
+                                                if (esParametroCR(paramFormal)) {
+                                                    registrarVinculoCR(paramFormal, val_peek(2).sval);
+                                                }
                                             }
                       | expresion FLECHA error { yyerror("Error: Falta definir el nombre del parametro formal"); }
                       | expresion ID { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
@@ -310,7 +342,7 @@ termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*
                       | factor {$$ = $1; $$.tipo = $1.tipo;}
                       ;
 
-factor                : ID %prec LOWER_THAN_CALL {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
                       | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       | inicio_llamado parametros_reales ')' {
@@ -324,6 +356,7 @@ factor                : ID %prec LOWER_THAN_CALL {$$ = chequearAmbito("", ambito
                                                        PilaDeFuncionesLlamadas.finalizarLlamada();
                                                        realizarPasajesCopiaResultado();
                                          }
+
                       |'-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
                       | TRUNC '(' CTE ')' {       String tipo = obtenerTipoDeSimbolo($3.sval);
                                                   if(! tipo.equals("dfloat")){
@@ -338,14 +371,24 @@ factor                : ID %prec LOWER_THAN_CALL {$$ = chequearAmbito("", ambito
                       ;
 
 inicio_llamado        : ID '(' {
+                             // $$ obtiene la clave canónica (ej: C:PROGRAMAFUNCIONAL)
                              $$ = chequearAmbito("", ambito, $1.sval);
-                             PilaDeFuncionesLlamadas.iniciarLlamada(ambito+":"+$1.sval);
+                             // CORRECCIÓN 1: Usar $$.sval
+                             PilaDeFuncionesLlamadas.iniciarLlamada($$.sval);
                            }
+                      | ID '.' ID '(' {
+                             // $$ obtiene la clave canónica (ej: C:PROGRAMAFUNCIONAL)
+                             $$ = chequearAmbito($1.sval, ambito, $3.sval);
+                             // CORRECCIÓN 2: Usar $$.sval
+                             PilaDeFuncionesLlamadas.iniciarLlamada($$.sval);
+                                      }
+
+
 
 %%
-// ... resto del código Java (sin cambios) ...
 public static final Set<String> erroresEmitidos = new HashSet<>();
 public static int ultimaLineaError;
+public static String prog_principal;
 
 public void resetErrores() {
     erroresEmitidos.clear();
