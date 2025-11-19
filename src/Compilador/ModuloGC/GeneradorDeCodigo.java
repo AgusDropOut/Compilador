@@ -21,9 +21,17 @@ public class GeneradorDeCodigo {
     private String funcionActual = "main";
     private String scopeActual = null;
 
+    // Variables para almacenar la referencia al mensaje de error
+    private int iniPosErrorDivCero;
+    private int finPosErrorDivCero;
+    private int iniPosErrorRestaNegativa;
+    private int finPosErrorRestaNegativa;
+    private String errorDivCero = "'Error: Division por cero.'";
+    private String errorRestaNegativa = "'Error: Resultado de resta negativo (underflow).'";
 
 
-    // Control de Whiles (usando tus etiquetas manuales)
+
+    // Control de Whiles (usando etiquetas manuales)
     private Stack<String> pilaWhile = new Stack<>();
     private int contadorWhile = 0;
     private Stack<String>pilaWhileBfs = new Stack<>();
@@ -43,6 +51,12 @@ public class GeneradorDeCodigo {
     }
 
     public void generarCodigo() {
+
+        iniPosErrorDivCero = registrarCadena(errorDivCero);
+        finPosErrorDivCero = largoCadena.get(errorDivCero);
+        iniPosErrorRestaNegativa = registrarCadena(errorRestaNegativa);
+        finPosErrorRestaNegativa = largoCadena.get(errorRestaNegativa);
+
         // 1. PASO PREVIO: Detectar estructuras IF/ELSE mirando los bf/bl
         AnalizadorDeBloques.analizarBloques(listaTercetos);
         AnalizadorDeBloques.imprimirBloques();
@@ -61,31 +75,10 @@ public class GeneradorDeCodigo {
         for (int i = 0; i < listaTercetos.size(); i++) {
             StringBuilder codigo = funciones.get(funcionActual);
             System.out.println(i + ": " + listaTercetos.get(i).toString() + "Es un bloque if else? " + AnalizadorDeBloques.esUnBloqueIfElse(i));
-            if (AnalizadorDeBloques.tieneBloqueFinAsignado(i)) {
-                for(int j = AnalizadorDeBloques.getNumeroDeFinAsignados(i); j>0; j--) {
 
-                        codigo.append("br ").append(0);
-                        codigo.append(") ;; fin block\n");
-
-                }
-            }
-            if(AnalizadorDeBloques.tieneBloqueInicioAsignado(i)){
-                codigo.append("(block").append("\n");
-                if(AnalizadorDeBloques.esUnBloqueIfElse(i)){
-                    codigo.append("(block").append("\n");
-                }
-            }
-
-            if(AnalizadorDeBloques.tieneBloqueElseAsignado(i)){
-                codigo.append("br ").append(1);
-                codigo.append(") ;; fin block else\n");
-            }
-
+            procesarBloque(i, codigo);
             // B) Traducir instrucción
             procesarTerceto(listaTercetos.get(i), i);
-
-
-
 
         }
 
@@ -93,6 +86,28 @@ public class GeneradorDeCodigo {
         codigoWAT.append(seccionDatos);
         escribirFunciones();
         codigoWAT.append(")\n");
+    }
+
+    private void procesarBloque(int i, StringBuilder codigo){
+        if (AnalizadorDeBloques.tieneBloqueFinAsignado(i)) {
+            for(int j = AnalizadorDeBloques.getNumeroDeFinAsignados(i); j>0; j--) {
+
+                codigo.append("br ").append(0);
+                codigo.append(") ;; fin block\n");
+
+            }
+        }
+        if(AnalizadorDeBloques.tieneBloqueInicioAsignado(i)){
+            codigo.append("(block").append("\n");
+            if(AnalizadorDeBloques.esUnBloqueIfElse(i)){
+                codigo.append("(block").append("\n");
+            }
+        }
+
+        if(AnalizadorDeBloques.tieneBloqueElseAsignado(i)){
+            codigo.append("br ").append(1);
+            codigo.append(") ;; fin block else\n");
+        }
     }
 
 
@@ -169,8 +184,8 @@ public class GeneradorDeCodigo {
             }
         }
     }
-    private void procesarSaltoIncondicional(Terceto t, StringBuilder codigo, int i) {
 
+    private void procesarSaltoIncondicional(Terceto t, StringBuilder codigo, int i) {
     }
 
     private void escribirFunciones() {
@@ -203,11 +218,49 @@ public class GeneradorDeCodigo {
         terceto.setResultado(temp);
     }
     private void procesarResta(Terceto terceto, StringBuilder codigo) {
-        String op1 = obtenerValor(terceto.getOp1());
-        String op2 = obtenerValor(terceto.getOp2());
+        String op1 = obtenerValor(terceto.getOp1()); // Minuendo (A)
+        String op2 = obtenerValor(terceto.getOp2()); // Sustraendo (B)
+
+        // --- 1. VALIDACIÓN DE UNDERFLOW (A < B) ---
+
+        // Cargar A y B para la comparación
         ponerEnteroEnPila(op1, codigo);
         ponerEnteroEnPila(op2, codigo);
+
+        // Compara A < B (i32.lt_u es "less than unsigned")
+        codigo.append("    i32.lt_u ;; Verifica si A < B (Underflow)\n");
+
+        // Estructura IF (solo THEN)
+        codigo.append("    (if \n");
+
+        // --- THEN (ERROR: A < B) ---
+        codigo.append("      (then\n");
+
+
+
+
+        // Asume que posErrorRestaNegativa y lenErrorRestaNegativa están definidos.
+        codigo.append("        i32.const ").append(iniPosErrorRestaNegativa).append("\n");
+        codigo.append("        i32.const ").append(finPosErrorRestaNegativa).append("\n");
+        codigo.append("        call $alert_str ;; Muestra el mensaje de error\n");
+
+        // Detener la ejecución
+        codigo.append("        unreachable ;; Termina el programa\n");
+        codigo.append("      )\n");
+
+        codigo.append("    ) ;; Fin del IF. La pila queda vacía si hubo error, o inalterada si no.\n");
+
+        // --- 2. EJECUCIÓN NORMAL (Si no hubo underflow) ---
+
+        // Si llegamos aquí, A >= B. Recargamos A y B para la operación real,
+        // ya que fueron consumidos por la comparación.
+        ponerEnteroEnPila(op1, codigo);
+        ponerEnteroEnPila(op2, codigo);
+
+        // Ejecutar la resta
         codigo.append("    i32.sub\n");
+
+        // 3. Almacenar resultado
         String temp = crearTemporal();
         codigo.append("    global.set $").append(temp).append("\n");
         terceto.setResultado(temp);
@@ -242,9 +295,36 @@ public class GeneradorDeCodigo {
             codigo.append("    global.set $").append(temp).append("\n");
             terceto.setResultado(temp);
         } else {
-            ponerEnteroEnPila(op1, codigo);
+            // 1. CARGA y VALIDACIÓN DEL DENOMINADOR (B)
+            // El divisor (Op2) es el que debemos chequear.
             ponerEnteroEnPila(op2, codigo);
-            codigo.append("    i32.div_u\n");
+            codigo.append("    i32.const 0\n");
+            codigo.append("    i32.eq ;; Pila: [B == 0] (0 o 1)\n");
+
+            // 2. ESTRUCTURA IF
+            codigo.append("    (if (result i32) \n");
+
+            // --- THEN (RAMA INALCANZABLE: B es 0) ---
+            codigo.append("      (then\n");
+            codigo.append("        i32.const ").append(iniPosErrorDivCero).append("\n");
+            codigo.append("        i32.const ").append(finPosErrorDivCero).append("\n");
+            codigo.append("        call $alert_str ;; Muestra el mensaje\n");
+            codigo.append("        unreachable ;; Termina el programa\n");
+            codigo.append("      )\n");
+
+            // --- ELSE (RAMA DE EJECUCIÓN NORMAL: B != 0) ---
+            codigo.append("      (else\n");
+
+            // 3. RE-CARGAR OPERANDOS y DIVIDIR
+            // Los valores de Op1 y Op2 fueron consumidos por la validación, ¡debemos cargarlos de nuevo!
+            ponerEnteroEnPila(op1, codigo); // Cargar A (Numerador)
+            ponerEnteroEnPila(op2, codigo); // Cargar B (Denominador)
+            codigo.append("        i32.div_u ;; Ejecutar A / B\n");
+            codigo.append("      )\n");
+
+            codigo.append("    ) ;; Fin del IF. El resultado (A/B) está en la pila.\n");
+
+            // 4. GUARDAR RESULTADO
             String temp = crearTemporal();
             codigo.append("    global.set $").append(temp).append("\n");
             terceto.setResultado(temp);

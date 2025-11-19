@@ -44,11 +44,11 @@ public class AnalizadorDeBloques {
                     //if-else
                     if(tercetos.get(Integer.parseInt(t.getOp2())-1).getOperador().equals("bl")) {
                         b.setEsIfElse(true);
-                        b.setFin(Integer.parseInt(tercetos.get(Integer.parseInt(t.getOp2())-1).getOp2()));
+                        setFin(i,Integer.parseInt(tercetos.get(Integer.parseInt(t.getOp2())-1).getOp2()), tercetos, b);
                         b.setInicioElse(Integer.parseInt(t.getOp2()));
                     } else { //if solitario
                         b.setEsIfElse(false);
-                        b.setFin(Integer.parseInt(t.getOp2()));
+                        setFin(i,Integer.parseInt(t.getOp2()), tercetos, b);
                         b.setInicioElse(-1); // no tiene else
                     }
                     bloques.add(b);
@@ -66,6 +66,17 @@ public class AnalizadorDeBloques {
 
     }
 
+    private static void setFin(int indice, int fin, List<Terceto> tercetos, Bloque b) {
+        int maxIndex = tercetos.size() - 1;
+
+        // Si 'fin' es un índice válido (<= maxIndex), lo usamos.
+        // Si 'fin' es tercetos.size() (fuera de límites), usamos maxIndex.
+        if (fin > maxIndex) {
+            b.setFin(maxIndex);
+        } else {
+            b.setFin(fin);
+        }
+    }
 
 
     public static void imprimirBloques() {
