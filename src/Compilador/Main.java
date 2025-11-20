@@ -39,6 +39,10 @@ public class Main {
         TablaDeSimbolos.imprimirTabla();
         ArregloTercetos.imprimirTercetos();
         RecolectorDeErrores.imprimirMensajes();
+        if(RecolectorDeErrores.hayErrores()) {
+            System.out.println("No se puede generar código debido a errores previos.");
+            System.exit(1);
+        }
         ArrayList<Terceto> tercetosGenerados = new ArrayList<>(ArregloTercetos.obtenerTercetos());
         GeneradorDeCodigo productorAssembler = new GeneradorDeCodigo(tercetosGenerados, "programita");
         productorAssembler.generarCodigo();

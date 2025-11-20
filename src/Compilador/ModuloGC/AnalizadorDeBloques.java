@@ -39,7 +39,6 @@ public class AnalizadorDeBloques {
                     } else {
                         inicioIf = getInicioIf(i, tercetos);
                     }
-                    System.out.println("indice bf de IF: " + inicioIf);
                     b.setInicio(inicioIf);
                     //if-else
                     if(tercetos.get(Integer.parseInt(t.getOp2())-1).getOperador().equals("bl")) {

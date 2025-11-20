@@ -51,9 +51,9 @@ public class RecolectorDeErrores {
         System.out.println("====================");
     }
 
-    public boolean hayErrores() { return !errores.isEmpty(); }
+    public static boolean hayErrores() { return !errores.isEmpty(); }
 
-    public void limpiar() {
+    public static void limpiar() {
         errores.clear();
         warnings.clear();
     }

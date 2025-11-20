@@ -10,7 +10,7 @@ TESTRECURSIVO {
             ulong TEMPVALOR;
 
             LOCALG := TESTRECURSIVO.GLOBALB;
-            (ulong A){A:= A + 1UL;print(A);}(34UL)
+            (ulong A){A:= A + 1UL;print(A);}(34UL);
 
             if (LOCALG < 45UL){
               print("Hola");

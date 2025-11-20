@@ -63,7 +63,7 @@ public class GeneradorDeCodigo {
 
         // 1. PASO PREVIO: Detectar estructuras IF/ELSE mirando los bf/bl
         AnalizadorDeBloques.analizarBloques(listaTercetos);
-        AnalizadorDeBloques.imprimirBloques();
+
 
         // 2. Encabezado
         codigoWAT.append("(module\n");
@@ -78,8 +78,7 @@ public class GeneradorDeCodigo {
         // 3. BUCLE PRINCIPAL
         for (int i = 0; i < listaTercetos.size(); i++) {
             StringBuilder codigo = funciones.get(funcionActual);
-            System.out.println(i + ": " + listaTercetos.get(i).toString() + "Es un bloque if else? " + AnalizadorDeBloques.esUnBloqueIfElse(i));
-
+            // A) Hay que insertar bloques antes de procesar la instrucción?
             procesarBloque(i, codigo);
             // B) Traducir instrucción
             procesarTerceto(listaTercetos.get(i), i);
