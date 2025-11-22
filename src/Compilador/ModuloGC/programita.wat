@@ -3,10 +3,13 @@
   (import "env" "alert_str" (func $alert_str (param i32 i32)))
   (memory (export "memory") 1)
   (global $CONT_TESTRECURSIVO_G (mut i32) (i32.const 0))
+  (global $X_TESTRECURSIVO (mut i32) (i32.const 0))
   (global $RESULTADO_TESTRECURSIVO (mut i32) (i32.const 0))
+  (global $Y_TESTRECURSIVO (mut i32) (i32.const 0))
   (global $_t2_TESTRECURSIVO (mut i32) (i32.const 0))
   (global $TEMPVALOR_TESTRECURSIVO_G (mut i32) (i32.const 0))
   (global $GLOBALB_TESTRECURSIVO (mut i32) (i32.const 0))
+  (global $Z_TESTRECURSIVO (mut i32) (i32.const 0))
   (global $LOCALF_TESTRECURSIVO_F (mut i32) (i32.const 0))
   (global $VALOR_TESTRECURSIVO_F (mut i32) (i32.const 0))
   (global $LOCALG_TESTRECURSIVO_G (mut i32) (i32.const 0))
@@ -36,6 +39,8 @@
   (data (i32.const 165) "Fin del test")
 
   (func $main (export "main")
+    global.get $X_TESTRECURSIVO
+    call $alert_i32
     i32.const 10
     global.set $GLOBALA_TESTRECURSIVO
     i32.const 7

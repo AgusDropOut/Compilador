@@ -35,7 +35,7 @@ programa              : nombre_programa  '{' list_sentencia '}'{ reportarEstruct
 nombre_programa       : ID  {ambito = $1.sval; prog_principal = $1.sval;}
                       ;
 
-declaracion_funcion   : header_funcion  parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
+declaracion_funcion   : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' { reportarEstructura("declaracion de funcion");
                                                                                             String etiquetaFin = "fin_" + ambito;
                                                                                             ArregloTercetos.crearTerceto(etiquetaFin, "_", "_");
                                                                                             salirAmbito();
@@ -43,14 +43,14 @@ declaracion_funcion   : header_funcion  parametros_formales ')' '{' list_sentenc
                                                                                           }
                       ;
 
-header_funcion        : tipo ID '(' {
+header_funcion        : tipo ID  {
                                  declaracionDeFuncion($2.sval, ambito, "Función");
                                  entrarAmbito($2.sval);
                                  pilaReturns.push($2.sval + ":" + "false");
                                  String etiquetaInicio = "ini_" + ambito ;
                                  ArregloTercetos.crearTerceto(etiquetaInicio, "_", "_");
                                 }
-                      | tipo error { yyerror("Error: Falta definir un nombre a la función"); }
+                      | tipo  { yyerror("Error: Falta definir un nombre a la función"); }
                       ;
 
 list_sentencia        : /* empty */
@@ -60,6 +60,7 @@ list_sentencia        : /* empty */
 sentencia             : sentencia_declarativa punto_y_coma
                       | sentencia_ejecutable punto_y_coma
                       | declaracion_funcion
+                      | error punto_y_coma { yyerror("Error: sentencia invalida escrita"); }
                       ;
 
 punto_y_coma          : ';'
@@ -74,15 +75,13 @@ parametros_formales   : parametro_formal
                       | parametros_formales ',' parametro_formal
                       ;
 
-parametro_formal      : semantica tipo ID {registrarParametroFuncion($3.sval,"cr");}
-                      | tipo ID {registrarParametroFuncion($2.sval,"cv");}
-                      | semantica tipo error { yyerror("Error: Falta definir el nombre del parametro formal"); }
-                      | tipo error { yyerror("Error: Falta definir el nombre del parametro formal"); }
-                      | semantica error ID { yyerror("Error: Falta definir el tipo del parametro formal"); }
-                      | error ID { yyerror("Error: Falta definir el tipo del parametro formal"); }
+parametro_formal      : semantica tipo ID {registrarParametroFuncion($3.sval,$1.sval);}
+                      | semantica ID { yyerror("Error: Falta definir el tipo del parametro formal"); }
+                      | semantica tipo { yyerror("Error: Falta definir un nombre al parametro formal"); }
                       ;
 
-semantica             : CR
+semantica             : CR {$$.sval = "cr";}
+                      | /* empty */ { $$.sval = "cv"; }
                       ;
 
 sentencia_return      : RETURN '(' expresion ')'  {registrarReturn();
@@ -101,12 +100,11 @@ list_ctes             : CTE { $$.tipo = obtenerTipoDeSimbolo($1.sval); ControlAs
                       | list_ctes CTE { yyerror("Error: se esperaba ',' entre constantes"); $$ = $1; }
                       ;
 
-list_vars_mix         : ID { String clave = chequearAmbito("", ambito, $1.sval).sval; $$.sval = clave; $$.tipo = obtenerTipoDeSimbolo(clave); ControlAsigMultiple.pushTipoIzq($$.tipo); }
-                      | list_vars_mix ',' ID { String clave = chequearAmbito("", ambito, $3.sval).sval; $$.tipo = $1.tipo; ControlAsigMultiple.pushTipoIzq(obtenerTipoDeSimbolo(clave)); $$.sval = $1.sval + "," + clave; }
-                      | ID '.' ID { String clave = chequearAmbito($1.sval, ambito, $3.sval).sval; $$.sval = clave; $$.tipo = obtenerTipoDeSimbolo(clave); ControlAsigMultiple.pushTipoIzq($$.tipo); }
-                      | list_vars_mix ',' ID '.' ID { String clave = chequearAmbito($3.sval, ambito, $5.sval).sval; $$.tipo = $1.tipo; ControlAsigMultiple.pushTipoIzq(obtenerTipoDeSimbolo(clave)); $$.sval = $1.sval + "," + clave; }
-                      | list_vars_mix ID { yyerror("Error: se esperaba ',' entre variables"); $$ = $1; }
-                      | list_vars_mix ID '.' ID { yyerror("Error: se esperaba ',' entre variables"); $$ = $1; }
+
+
+list_vars_mix         : identificador {ControlAsigMultiple.pushTipoIzq($$.tipo); }
+                      | list_vars_mix ',' identificador { ControlAsigMultiple.pushTipoIzq(obtenerTipoDeSimbolo($3.sval)); $$.sval = $1.sval + "," + $3.sval; }
+                      | list_vars_mix  identificador { yyerror("Error: se esperaba ',' entre variables"); $$ = $1; }
                       ;
 
 list_vars             : ID {$$ = declaracionDeVariable($1.sval, tipo, ambito, "Variable");}
@@ -244,12 +242,12 @@ parametro_real        : expresion FLECHA ID {
                                                     registrarVinculoCR(paramFormal, val_peek(2).sval);
                                                 }
                                             }
-                      | expresion FLECHA error { yyerror("Error: Falta definir el nombre del parametro formal"); }
+                      | expresion FLECHA  { yyerror("Error: Falta definir el nombre del parametro formal"); }
                       | expresion ID { yyerror("Error: Falta '->' en la especificacion de parametro real"); }
                       ;
 
 condicion            : expresion comp expresion {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval); }
-                     | expresion error expresion ')' { yyerror("Error: falta operador de comparacion en la condicion"); }
+                     | expresion factor_simple  { yyerror("Error: falta operador de comparacion en la condicion"); }
                      ;
 
 comp                 : EQ  { $$.sval = "=="; }
@@ -258,10 +256,10 @@ comp                 : EQ  { $$.sval = "=="; }
                      | NEQ { $$.sval = "=!"; }
                      | '>' { $$.sval = ">"; }
                      | '<' { $$.sval = "<"; }
-                     | '=' {RecolectorDeErrores.agregarError("Error: Operador invalido",AnalizadorLexico.getNumeroDeLinea());}
-                     | '=' '<' {RecolectorDeErrores.agregarError("Error: Operador invalido",AnalizadorLexico.getNumeroDeLinea());}
-                     | '=' '>' {RecolectorDeErrores.agregarError("Error: Operador invalido",AnalizadorLexico.getNumeroDeLinea());}
-                     | '!' '=' {RecolectorDeErrores.agregarError("Error: Operador invalido",AnalizadorLexico.getNumeroDeLinea());}
+                     | '=' {yyerror("Error: Operador invalido");}
+                     | '=' '<' {yyerror("Error: Operador invalido");}
+                     | '=' '>' {yyerror("Error: Operador invalido");}
+                     | '!' '=' {yyerror("Error: Operador invalido");}
 
                      ;
 
@@ -271,8 +269,7 @@ asignacion_simple     : var_asignacion_simple ASIG expresion { reportarEstructur
                                                                }
                       ;
 
-var_asignacion_simple : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
-                      | ID '.' ID {$$ = chequearAmbito($1.sval, ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+var_asignacion_simple : identificador { $$ = $1; $$.tipo = $1.tipo; }
                       ;
 
 asignacion_multiple   : list_vars_mix '=' list_ctes
@@ -310,36 +307,38 @@ expresion_lambda      : header_lambda bloque_ejecutable
 
                       ;
 
-    factor_lambda     : ID      { $$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+factor_lambda         : identificador { $$ = $1; $$.tipo = $1.tipo; }
                       | CTE     { $$ = $1; $$.tipo = obtenerTipoDeSimbolo($1.sval); }
                       | '-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       ;
 
-expresion             : expresion '+' termino {$$ = ArregloTercetos.crearTerceto("+", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "+"); }
-                      | expresion '-' termino {$$ = ArregloTercetos.crearTerceto("-", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "-");}
+expresion             : expresion operador_expresion termino {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval); }
                       | termino {$$ = $1; $$.tipo = $1.tipo;}
-                      | error '+' termino { yyerror("Error: operando a la izquierda invalido"); }
-                      | expresion '+' error { yyerror("Error: operando a la derecha invalido"); }
-                      | error '-' termino { yyerror("Error: operando a la izquierda invalido"); }
-                      | expresion '-' error { yyerror("Error: operando a la derecha invalido"); }
-                      | error '+' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | error '-' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
+                      | error operador_expresion termino { yyerror("Error: operando a la izquierda invalido"); }
+                      | expresion operador_expresion error { yyerror("Error: operando a la derecha invalido"); }
+                      | error operador_expresion error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
+                      | error ';' { yyerror("Error: error en expresion, revisar '+' '-'"); }
                       ;
 
-termino               : termino '*' factor {$$ = ArregloTercetos.crearTerceto("*", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "*"); }
-                      | termino '/' factor {$$ = ArregloTercetos.crearTerceto("/", $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, "/");}
-                      | error '*' factor { yyerror("Error: operando a la izquierda invalido"); }
-                      | termino '*' error { yyerror("Error: operando a la derecha invalido"); }
-                      | error '/' factor { yyerror("Error: operando a la izquierda invalido"); }
-                      | termino '/' error { yyerror("Error: operando a la derecha invalido"); }
-                      | error '*' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
-                      | error '/' error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
+operador_expresion    : '+' { $$.sval = "+"; }
+                      | '-' { $$.sval = "-"; }
+                      ;
+
+
+termino               : termino operador_termino factor {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval); }
                       | factor {$$ = $1; $$.tipo = $1.tipo;}
+                      | error operador_termino factor { yyerror("Error: operando a la izquierda invalido"); }
+                      | termino operador_termino error { yyerror("Error: operando a la derecha invalido"); }
+                      | error operador_termino error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       ;
 
-factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+operador_termino      : '*' { $$.sval = "*"; }
+                      | '/' { $$.sval = "/"; }
+                      ;
+
+
+factor                : identificador {$$ = $1; $$.tipo = $1.tipo; }
                       | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
-                      | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       | inicio_llamado parametros_reales ')' {
                                                        ParserValExt tCall = ArregloTercetos.crearTerceto("CALL", $1.sval, null);
                                                        String tipoRet = obtenerTipoDeSimbolo($1.sval);
@@ -353,30 +352,51 @@ factor                : ID {$$ = chequearAmbito("", ambito, $1.sval); $$.tipo = 
                                          }
 
                       |'-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval);}
-                      | TRUNC '(' CTE ')' {       String tipo = obtenerTipoDeSimbolo($3.sval);
-                                                  if(! tipo.equals("dfloat")){
-                                                      RecolectorDeErrores.agregarError("Error: La funcion TRUNC solo acepta operandos de tipo dfloat.",AnalizadorLexico.getNumeroDeLinea());
-                                                  }
-                                                  $$ = ArregloTercetos.crearTerceto("TRUNC", $3.sval, null);
-                                                  $$.tipo = "ulong";
-                      }
+                      | trunc { $$ = $1; $$.tipo = "ulong"; }
+                      ;
+
+/* factor_simple es una version de factor sin el manejo de constantes negativas -> Sirve para algunos manejos de errores */
+factor_simple         : identificador {$$ = $1; $$.tipo = $1.tipo; }
+                      | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
+                      | inicio_llamado parametros_reales ')' {
+                                                                             ParserValExt tCall = ArregloTercetos.crearTerceto("CALL", $1.sval, null);
+                                                                             String tipoRet = obtenerTipoDeSimbolo($1.sval);
+                                                                             $$.tipo = tipoRet;
+                                                                             String temp = "_t" + ArregloTercetos.declararTemporal(tipoRet, ambito);
+                                                                             declaracionDeVariable(temp, tipoRet, ambito, "temporal");
+                                                                             ArregloTercetos.crearTerceto(":=", temp, tCall.sval);
+                                                                             $$.sval = temp;
+                                                                             PilaDeFuncionesLlamadas.finalizarLlamada();
+                                                                             realizarPasajesCopiaResultado();
+                                                               }
+
+                      | trunc { $$ = $1; $$.tipo = "ulong"; }
+                      ;
+
+trunc                 :TRUNC '(' CTE ')' {String tipo = obtenerTipoDeSimbolo($3.sval);
+                                          if(! tipo.equals("dfloat")){
+                                             yyerror("Error: La funcion TRUNC solo acepta operandos de tipo dfloat.");
+                                          }
+                                          $$ = ArregloTercetos.crearTerceto("TRUNC", $3.sval, null);
+                                          $$.tipo = "ulong";}
+
                       | TRUNC '(' CTE error { yyerror("Error: falta ')' en la expresion TRUNC"); }
                       | TRUNC error  CTE ')' { yyerror("Error: falta '(' en la expresion TRUNC"); }
                       | TRUNC error CTE error { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
                       ;
 
-inicio_llamado        : ID '(' {
-                             // $$ obtiene la clave canónica (ej: C:PROGRAMAFUNCIONAL)
-                             $$ = chequearAmbito("", ambito, $1.sval);
+
+
+
+inicio_llamado        : identificador '(' {
                              // CORRECCIÓN 1: Usar $$.sval
                              PilaDeFuncionesLlamadas.iniciarLlamada($$.sval);
                            }
-                      | ID '.' ID '(' {
-                             // $$ obtiene la clave canónica (ej: C:PROGRAMAFUNCIONAL)
-                             $$ = chequearAmbito($1.sval, ambito, $3.sval);
-                             // CORRECCIÓN 2: Usar $$.sval
-                             PilaDeFuncionesLlamadas.iniciarLlamada($$.sval);
-                                      }
+                      ;
+
+identificador        : ID { $$ = chequearAmbito("", ambito, $1.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+                     | ID '.' ID { $$ = chequearAmbito($1.sval, ambito, $3.sval); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
+                     ;
 
 
 

@@ -1,6 +1,11 @@
 TESTRECURSIVO {
     ulong GLOBALA;
     ulong GLOBALB;
+    ulong X , Y , Z;
+
+
+
+    print(X);
 
     GLOBALA := 10UL;
     GLOBALB := 7UL;
