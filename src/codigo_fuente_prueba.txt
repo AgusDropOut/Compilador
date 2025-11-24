@@ -19,8 +19,6 @@ PRUEBARIGUROSA {
 
             CALCULO2 := SEMILLA2 * 20UL;
 
-
-
             return (CALCULO2);
         }
             CONTENEDOR := GENERARVALOR2(CONTENEDOR -> CONTENEDOR2, SEMILLA -> SEMILLA2) + 15UL;
@@ -43,4 +41,15 @@ PRUEBARIGUROSA {
     DESCARTE := GENERARVALOR(SALIDA -> CONTENEDOR, INICIO -> SEMILLA);
 
     print(SALIDA);
+
+    ulong A;
+
+    ulong H (ulong C){
+        C := PRUEBARIGUROSA.H(67UL -> C);
+        return (0UL);
+    }
+
+    A := H(56UL -> C);
+
+
 }

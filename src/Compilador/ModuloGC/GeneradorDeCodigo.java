@@ -452,23 +452,25 @@ public class GeneradorDeCodigo {
 
         // --- NUEVO: Control y set de candado en Runtime (Al inicio del cuerpo de la funcion) ---
         codigo.append(Identador.obtenerIndentacion()).append("    ;; Bloqueo de Recursion Directa (Runtime Check)\n");
-        codigo.append(Identador.obtenerIndentacion()).append("    global.get ").append(candadoNombre).append("\n"); // Carga el valor actual (0 o 1)
+        codigo.append(Identador.obtenerIndentacion()).append("    (block\n");
+        Identador.aumentarIndentacion();
+
+        codigo.append(Identador.obtenerIndentacion()).append("    global.get ").append(candadoNombre).append("\n");
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const 1\n");
         codigo.append(Identador.obtenerIndentacion()).append("    i32.eq ;; Pila: [Candado == 1]\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    br_if 0 ;; Si candado != 1, saltar (continuar normalmente)\n");
 
-        codigo.append(Identador.obtenerIndentacion()).append("    (if \n");
-        codigo.append(Identador.obtenerIndentacion()).append("      (then\n");
-        codigo.append(Identador.obtenerIndentacion()).append("        i32.const ").append(iniPosErrorRecursion).append("\n");
-        codigo.append(Identador.obtenerIndentacion()).append("        i32.const ").append(finPosErrorRecursion).append("\n");
-        codigo.append(Identador.obtenerIndentacion()).append("        call $alert_str ;; Muestra el error\n");
-        codigo.append(Identador.obtenerIndentacion()).append("        unreachable ;; Termina el programa\n");
-        codigo.append(Identador.obtenerIndentacion()).append("      )\n");
-        codigo.append(Identador.obtenerIndentacion()).append("    ) ;; Fin IF de check\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(iniPosErrorRecursion).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(finPosErrorRecursion).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    call $alert_str ;; Muestra el error\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    unreachable ;; Termina el programa\n");
+
+        Identador.disminuirIndentacion();
+        codigo.append(Identador.obtenerIndentacion()).append("    )\n");
 
         // Pone el candado a 1 (Función activa)
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const 1\n");
         codigo.append(Identador.obtenerIndentacion()).append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 1\n");
-        // ------------------------------------------------------------------------------------
     }
     private void finalizarFuncion() {
 

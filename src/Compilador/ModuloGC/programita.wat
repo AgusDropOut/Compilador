@@ -3,10 +3,15 @@
   (import "env" "alert_str" (func $alert_str (param i32 i32)))
   (memory (export "memory") 1)
   (global $_t_t1_PRUEBARIGUROSA_GENERARVALOR_PRUEBARIGUROSA_GENERARVALOR (mut i32) (i32.const 0))
+  (global $_t_t5_PRUEBARIGUROSA_PRUEBARIGUROSA (mut i32) (i32.const 0))
+  (global $_t_t4_PRUEBARIGUROSA_H_PRUEBARIGUROSA_H (mut i32) (i32.const 0))
   (global $CALCULO2_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2 (mut i32) (i32.const 0))
   (global $DESCARTE_PRUEBARIGUROSA (mut i32) (i32.const 0))
+  (global $A_PRUEBARIGUROSA (mut i32) (i32.const 0))
+  (global $C_PRUEBARIGUROSA_H (mut i32) (i32.const 0))
   (global $_t3_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (global $_t_t2_PRUEBARIGUROSA_PRUEBARIGUROSA (mut i32) (i32.const 0))
+  (global $_t4_PRUEBARIGUROSA_H (mut i32) (i32.const 0))
   (global $_t2_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (global $_t1_PRUEBARIGUROSA_GENERARVALOR (mut i32) (i32.const 0))
   (global $SEMILLA_PRUEBARIGUROSA_GENERARVALOR (mut i32) (i32.const 0))
@@ -16,6 +21,7 @@
   (global $SEMILLA2_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2 (mut i32) (i32.const 0))
   (global $CERO_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (global $CONTENEDOR2_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2 (mut i32) (i32.const 0))
+  (global $_t5_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (global $_t_t3_PRUEBARIGUROSA_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (global $SALIDA_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (global $_lock_PRUEBARIGUROSA_GENERARVALOR (mut i32) (i32.const 0)) ;; Candado de Recursion
@@ -32,6 +38,11 @@
   (global $_t_t2_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (global $_t8 (mut i32) (i32.const 0))
   (global $_t_t3_PRUEBARIGUROSA (mut i32) (i32.const 0))
+  (global $_lock_PRUEBARIGUROSA_H (mut i32) (i32.const 0)) ;; Candado de Recursion
+  (global $_t9 (mut i32) (i32.const 0))
+  (global $_t_t4_PRUEBARIGUROSA_H (mut i32) (i32.const 0))
+  (global $_t10 (mut i32) (i32.const 0))
+  (global $_t_t5_PRUEBARIGUROSA (mut i32) (i32.const 0))
   (data (i32.const 0) "Error: Division por cero.")
   (data (i32.const 25) "Error: Resultado de resta negativo (underflow).")
   (data (i32.const 72) "Error: Una funci\c3\b3n no puede llamarse a si misma")
@@ -90,21 +101,28 @@
     global.set $DESCARTE_PRUEBARIGUROSA
     global.get $SALIDA_PRUEBARIGUROSA
     call $alert_i32
+    i32.const 56
+    global.set $C_PRUEBARIGUROSA_H
+    call $PRUEBARIGUROSA_H
+    global.set $_t10
+    global.get $_t10
+    global.set $_t_t5_PRUEBARIGUROSA
+    global.get $_t_t5_PRUEBARIGUROSA
+    global.set $A_PRUEBARIGUROSA
   )
 
   (func $PRUEBARIGUROSA_GENERARVALOR (result i32)
     ;; Bloqueo de Recursion Directa (Runtime Check)
-    global.get $_lock_PRUEBARIGUROSA_GENERARVALOR
-    i32.const 1
-    i32.eq ;; Pila: [Candado == 1]
-    (if 
-      (then
+    (block
+        global.get $_lock_PRUEBARIGUROSA_GENERARVALOR
+        i32.const 1
+        i32.eq ;; Pila: [Candado == 1]
+        br_if 0 ;; Si candado != 1, saltar (continuar normalmente)
         i32.const 72
         i32.const 48
         call $alert_str ;; Muestra el error
         unreachable ;; Termina el programa
-      )
-    ) ;; Fin IF de check
+    )
     i32.const 1
     global.set $_lock_PRUEBARIGUROSA_GENERARVALOR ;; Set Candado a 1
     global.get $SEMILLA_PRUEBARIGUROSA_GENERARVALOR
@@ -154,17 +172,16 @@
 
   (func $PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2 (result i32)
     ;; Bloqueo de Recursion Directa (Runtime Check)
-    global.get $_lock_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2
-    i32.const 1
-    i32.eq ;; Pila: [Candado == 1]
-    (if 
-      (then
+    (block
+        global.get $_lock_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2
+        i32.const 1
+        i32.eq ;; Pila: [Candado == 1]
+        br_if 0 ;; Si candado != 1, saltar (continuar normalmente)
         i32.const 72
         i32.const 48
         call $alert_str ;; Muestra el error
         unreachable ;; Termina el programa
-      )
-    ) ;; Fin IF de check
+    )
     i32.const 1
     global.set $_lock_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2 ;; Set Candado a 1
     global.get $SEMILLA2_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2
@@ -177,6 +194,35 @@
     ;; Liberacion de Candado de Recursion
     i32.const 0
     global.set $_lock_PRUEBARIGUROSA_GENERARVALOR_GENERARVALOR2 ;; Set Candado a 0
+    return
+  )
+
+  (func $PRUEBARIGUROSA_H (result i32)
+    ;; Bloqueo de Recursion Directa (Runtime Check)
+    (block
+        global.get $_lock_PRUEBARIGUROSA_H
+        i32.const 1
+        i32.eq ;; Pila: [Candado == 1]
+        br_if 0 ;; Si candado != 1, saltar (continuar normalmente)
+        i32.const 72
+        i32.const 48
+        call $alert_str ;; Muestra el error
+        unreachable ;; Termina el programa
+    )
+    i32.const 1
+    global.set $_lock_PRUEBARIGUROSA_H ;; Set Candado a 1
+    i32.const 67
+    global.set $C_PRUEBARIGUROSA_H
+    call $PRUEBARIGUROSA_H
+    global.set $_t9
+    global.get $_t9
+    global.set $_t_t4_PRUEBARIGUROSA_H
+    global.get $_t_t4_PRUEBARIGUROSA_H
+    global.set $C_PRUEBARIGUROSA_H
+    i32.const 0
+    ;; Liberacion de Candado de Recursion
+    i32.const 0
+    global.set $_lock_PRUEBARIGUROSA_H ;; Set Candado a 0
     return
   )
 )
