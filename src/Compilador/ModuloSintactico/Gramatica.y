@@ -60,11 +60,17 @@ list_sentencia        : /* empty */
 sentencia             : sentencia_declarativa punto_y_coma
                       | sentencia_ejecutable punto_y_coma
                       | declaracion_funcion
-                      | error punto_y_coma { yyerror("Error: sentencia invalida escrita"); }
+                      | declaracion_funcion ';' { yyerror("Error: ';' de mas despues de declaracion de funcion"); }
+                      | error ';' { yyerror("Error: sentencia invalida escrita"); }
                       ;
 
+/* Busca sincronizarse con el final de una sentencia ejecutable o declarativa */
 punto_y_coma          : ';'
-                      | error { yyerror("Error: falta ';' al final de la sentencia o sentencia invalida escrita"); }
+                      | error ';' { yyerror("Error: falta ';' al final de la sentencia o sentencia invalida escrita"); }
+                      ;
+/* Busca sincronizarse con el final del cuerpo de una funcion o estructura */
+punto_y_coma_cuerpo   : ';'
+                      | error '}' { yyerror("Error: falta ';' al final de la sentencia o sentencia invalida escrita"); }
                       ;
 
 
@@ -139,11 +145,12 @@ sentencia_ejecutable  : sentencia_if
 
 bloque_ejecutable     : '{' lista_sentencias_ejecutable '}'
                       | '{' '}' {yyerror("Error: Cuerpo ejecutable vacio");}
+                      | '{' error '}' {yyerror("Error: sentencia invalida dentro del cuerpo ejecutable");}
                       ;
 
-lista_sentencias_ejecutable  : lista_sentencias_ejecutable sentencia_ejecutable punto_y_coma
-                             | sentencia_ejecutable punto_y_coma
-                            ;
+lista_sentencias_ejecutable  : lista_sentencias_ejecutable sentencia_ejecutable punto_y_coma_cuerpo
+                             | sentencia_ejecutable punto_y_coma_cuerpo
+                             ;
 
 sentencia_if          : if condicion_if cuerpo_ejecutable else cuerpo_ejecutable end_if { reportarEstructura("IF"); }
                       | if condicion_if cuerpo_ejecutable end_if { reportarEstructura("IF"); }
