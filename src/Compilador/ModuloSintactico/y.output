@@ -156,14 +156,14 @@
  111            | error operador_expresion error
  112            | error ';'
 
- 113  operador_expresion : '+'
- 114                     | '-'
+ 113  termino : termino operador_termino factor
+ 114          | factor
+ 115          | error operador_termino factor
+ 116          | termino operador_termino error
+ 117          | error operador_termino error
 
- 115  termino : termino operador_termino factor
- 116          | factor
- 117          | error operador_termino factor
- 118          | termino operador_termino error
- 119          | error operador_termino error
+ 118  operador_expresion : '+'
+ 119                     | '-'
 
  120  operador_termino : '*'
  121                   | '/'
@@ -802,8 +802,8 @@ state 54
 	expresion : error . operador_expresion termino  (109)
 	expresion : error . operador_expresion error  (111)
 	expresion : error . ';'  (112)
-	termino : error . operador_termino factor  (117)
-	termino : error . operador_termino error  (119)
+	termino : error . operador_termino factor  (115)
+	termino : error . operador_termino error  (117)
 
 	'+'  shift 90
 	'-'  shift 91
@@ -956,8 +956,8 @@ state 62
 
 state 63
 	expresion : termino .  (108)
-	termino : termino . operador_termino factor  (115)
-	termino : termino . operador_termino error  (118)
+	termino : termino . operador_termino factor  (113)
+	termino : termino . operador_termino error  (116)
 
 	'*'  shift 92
 	'/'  shift 93
@@ -989,9 +989,9 @@ state 63
 
 
 state 64
-	termino : factor .  (116)
+	termino : factor .  (114)
 
-	.  reduce 116
+	.  reduce 114
 
 
 state 65
@@ -1262,15 +1262,15 @@ state 89
 
 
 state 90
-	operador_expresion : '+' .  (113)
+	operador_expresion : '+' .  (118)
 
-	.  reduce 113
+	.  reduce 118
 
 
 state 91
-	operador_expresion : '-' .  (114)
+	operador_expresion : '-' .  (119)
 
-	.  reduce 114
+	.  reduce 119
 
 
 state 92
@@ -1310,8 +1310,8 @@ state 95
 
 
 state 96
-	termino : error operador_termino . factor  (117)
-	termino : error operador_termino . error  (119)
+	termino : error operador_termino . factor  (115)
+	termino : error operador_termino . error  (117)
 
 	error  shift 154
 	'-'  shift 55
@@ -1566,8 +1566,8 @@ state 124
 
 
 state 125
-	termino : termino operador_termino . factor  (115)
-	termino : termino operador_termino . error  (118)
+	termino : termino operador_termino . factor  (113)
+	termino : termino operador_termino . error  (116)
 
 	error  shift 170
 	'-'  shift 55
@@ -1587,8 +1587,8 @@ state 126
 	expresion : error . operador_expresion termino  (109)
 	expresion : error . operador_expresion error  (111)
 	expresion : error . ';'  (112)
-	termino : error . operador_termino factor  (117)
-	termino : error . operador_termino error  (119)
+	termino : error . operador_termino factor  (115)
+	termino : error . operador_termino error  (117)
 
 	'+'  shift 90
 	'-'  shift 91
@@ -1837,8 +1837,8 @@ state 151
 
 state 152
 	expresion : error operador_expresion error .  (111)
-	termino : error . operador_termino factor  (117)
-	termino : error . operador_termino error  (119)
+	termino : error . operador_termino factor  (115)
+	termino : error . operador_termino error  (117)
 
 	'*'  shift 92
 	'/'  shift 93
@@ -1871,8 +1871,8 @@ state 152
 
 state 153
 	expresion : error operador_expresion termino .  (109)
-	termino : termino . operador_termino factor  (115)
-	termino : termino . operador_termino error  (118)
+	termino : termino . operador_termino factor  (113)
+	termino : termino . operador_termino error  (116)
 
 	'*'  shift 92
 	'/'  shift 93
@@ -1904,15 +1904,15 @@ state 153
 
 
 state 154
-	termino : error operador_termino error .  (119)
+	termino : error operador_termino error .  (117)
 
-	.  reduce 119
+	.  reduce 117
 
 
 state 155
-	termino : error operador_termino factor .  (117)
+	termino : error operador_termino factor .  (115)
 
-	.  reduce 117
+	.  reduce 115
 
 
 state 156
@@ -1976,8 +1976,8 @@ state 162
 
 state 163
 	expresion : expresion operador_expresion error .  (110)
-	termino : error . operador_termino factor  (117)
-	termino : error . operador_termino error  (119)
+	termino : error . operador_termino factor  (115)
+	termino : error . operador_termino error  (117)
 
 	'*'  shift 92
 	'/'  shift 93
@@ -2010,8 +2010,8 @@ state 163
 
 state 164
 	expresion : expresion operador_expresion termino .  (107)
-	termino : termino . operador_termino factor  (115)
-	termino : termino . operador_termino error  (118)
+	termino : termino . operador_termino factor  (113)
+	termino : termino . operador_termino error  (116)
 
 	'*'  shift 92
 	'/'  shift 93
@@ -2091,15 +2091,15 @@ state 169
 
 
 state 170
-	termino : termino operador_termino error .  (118)
+	termino : termino operador_termino error .  (116)
 
-	.  reduce 118
+	.  reduce 116
 
 
 state 171
-	termino : termino operador_termino factor .  (115)
+	termino : termino operador_termino factor .  (113)
 
-	.  reduce 115
+	.  reduce 113
 
 
 state 172

@@ -95,21 +95,26 @@ public class GeneradorDeCodigo {
         if (AnalizadorDeBloques.tieneBloqueFinAsignado(i)) {
             for(int j = AnalizadorDeBloques.getNumeroDeFinAsignados(i); j>0; j--) {
 
-                codigo.append("br ").append(0);
-                codigo.append(") ;; fin block\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    br ").append(0).append("\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block\n");
+                Identador.disminuirIndentacion();
 
             }
         }
         if(AnalizadorDeBloques.tieneBloqueInicioAsignado(i)){
-            codigo.append("(block").append("\n");
+
+            codigo.append(Identador.obtenerIndentacion()).append("    (block").append("\n");
+            Identador.aumentarIndentacion();
             if(AnalizadorDeBloques.esUnBloqueIfElse(i)){
-                codigo.append("(block").append("\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    (block").append("\n");
+                Identador.aumentarIndentacion();
             }
         }
 
         if(AnalizadorDeBloques.tieneBloqueElseAsignado(i)){
-            codigo.append("br ").append(1);
-            codigo.append(") ;; fin block else\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    br ").append(1).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block else\n");
+            Identador.disminuirIndentacion();
         }
     }
 
@@ -158,15 +163,15 @@ public class GeneradorDeCodigo {
         pilaWhile.push(lblLoop);
         pilaWhileBfs.push(lblBreak);
 
-        codigo.append("    (block $").append(lblBreak).append("\n");
-        codigo.append("    (loop $").append(lblLoop).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    (block $").append(lblBreak).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    (loop $").append(lblLoop).append("\n");
     }
     private void procesarWhileEnd(Terceto t, StringBuilder codigo) {
         String lblLoop = pilaWhile.pop(); // o guardarlo en otra pila si lo necesitas
 
-        codigo.append("    br $").append(lblLoop).append("\n");  // volver al inicio del loop
-        codigo.append("    ) ;; fin loop\n");
-        codigo.append("    ) ;; fin block while\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    br $").append(lblLoop).append("\n");  // volver al inicio del loop
+        codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin loop\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block while\n");
 
     }
 
@@ -175,15 +180,15 @@ public class GeneradorDeCodigo {
             String lblBreak = pilaWhileBfs.pop();
             String op1 = obtenerValor(t.getOp1());
             ponerEnteroEnPila(op1, codigo);
-            codigo.append("    i32.eqz\n");
-            codigo.append("    br_if $").append(lblBreak).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.eqz\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    br_if $").append(lblBreak).append("\n");
         } else {
             String op1 = obtenerValor(t.getOp1());
             ponerEnteroEnPila(op1, codigo);
-            codigo.append("    i32.eqz\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.eqz\n");
             int destino = obtenerDestino(t.getOp2());
             if (destino != -1) {
-                codigo.append("    br_if ").append(profundidadDeBloques).append("\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    br_if 0").append("\n");
             }
         }
     }
@@ -206,9 +211,9 @@ public class GeneradorDeCodigo {
         String op2 = obtenerValor(t.getOp2());
         ponerEnteroEnPila(op1, codigo);
         ponerEnteroEnPila(op2, codigo);
-        codigo.append("    ").append(instruccion).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    ").append(instruccion).append("\n");
         String temp = crearTemporal();
-        codigo.append("    global.set $").append(temp).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
         t.setResultado(temp);
     }
     private void procesarSuma(Terceto terceto, StringBuilder codigo) {
@@ -216,9 +221,9 @@ public class GeneradorDeCodigo {
         String op2 = obtenerValor(terceto.getOp2());
         ponerEnteroEnPila(op1, codigo);
         ponerEnteroEnPila(op2, codigo);
-        codigo.append("    i32.add\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.add\n");
         String temp = crearTemporal();
-        codigo.append("    global.set $").append(temp).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
         terceto.setResultado(temp);
     }
     private void procesarResta(Terceto terceto, StringBuilder codigo) {
@@ -227,32 +232,29 @@ public class GeneradorDeCodigo {
 
         // --- 1. VALIDACIÓN DE UNDERFLOW (A < B) ---
 
+
+        codigo.append(Identador.obtenerIndentacion()).append("    (block \n");
+        Identador.aumentarIndentacion();
         // Cargar A y B para la comparación
         ponerEnteroEnPila(op1, codigo);
         ponerEnteroEnPila(op2, codigo);
-
         // Compara A < B (i32.lt_u es "less than unsigned")
-        codigo.append("    i32.lt_u ;; Verifica si A < B (Underflow)\n");
-
-        // Estructura IF (solo THEN)
-        codigo.append("    (if \n");
-
-        // --- THEN (ERROR: A < B) ---
-        codigo.append("      (then\n");
-
-
-
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.lt_u ;; Verifica si A < B (Underflow)\n");
+        //invertir el resultado para el br_if
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.eqz \n");
+        codigo.append(Identador.obtenerIndentacion()).append("    br_if 0 \n");
 
         // Asume que posErrorRestaNegativa y lenErrorRestaNegativa están definidos.
-        codigo.append("        i32.const ").append(iniPosErrorRestaNegativa).append("\n");
-        codigo.append("        i32.const ").append(finPosErrorRestaNegativa).append("\n");
-        codigo.append("        call $alert_str ;; Muestra el mensaje de error\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(iniPosErrorRestaNegativa).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(finPosErrorRestaNegativa).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    call $alert_str ;; Muestra el mensaje de error\n");
 
         // Detener la ejecución
-        codigo.append("        unreachable ;; Termina el programa\n");
-        codigo.append("      )\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    unreachable ;; Termina el programa\n");
+        Identador.disminuirIndentacion();
+        codigo.append(Identador.obtenerIndentacion()).append("    )\n");
 
-        codigo.append("    ) ;; Fin del IF. La pila queda vacía si hubo error, o inalterada si no.\n");
+
 
         // --- 2. EJECUCIÓN NORMAL (Si no hubo underflow) ---
 
@@ -262,11 +264,11 @@ public class GeneradorDeCodigo {
         ponerEnteroEnPila(op2, codigo);
 
         // Ejecutar la resta
-        codigo.append("    i32.sub\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.sub\n");
 
         // 3. Almacenar resultado
         String temp = crearTemporal();
-        codigo.append("    global.set $").append(temp).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
         terceto.setResultado(temp);
     }
     private void procesarMultiplicacion(Terceto terceto, StringBuilder codigo) {
@@ -275,93 +277,93 @@ public class GeneradorDeCodigo {
         if (esFlotante(op1) || esFlotante(op2)) {
             ponerFlotanteEnPila(op1, codigo);
             ponerFlotanteEnPila(op2, codigo);
-            codigo.append("    f64.mul\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    f64.mul\n");
             String temp = crearTemporalFlotante();
-            codigo.append("    global.set $").append(temp).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
             terceto.setResultado(temp);
         } else {
             ponerEnteroEnPila(op1, codigo);
             ponerEnteroEnPila(op2, codigo);
-            codigo.append("    i32.mul\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.mul\n");
             String temp = crearTemporal();
-            codigo.append("    global.set $").append(temp).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
             terceto.setResultado(temp);
         }
     }
     private void procesarDivision(Terceto terceto, StringBuilder codigo) {
-        String op1 = obtenerValor(terceto.getOp1());
-        String op2 = obtenerValor(terceto.getOp2());
-        if (esFlotante(op1) || esFlotante(op2)) {
-            ponerFlotanteEnPila(op1, codigo);
-            ponerFlotanteEnPila(op2, codigo);
-            codigo.append("    f64.div\n");
-            String temp = crearTemporalFlotante();
-            codigo.append("    global.set $").append(temp).append("\n");
-            terceto.setResultado(temp);
-        } else {
+            String op1 = obtenerValor(terceto.getOp1());
+            String op2 = obtenerValor(terceto.getOp2());
+
             // 1. CARGA y VALIDACIÓN DEL DENOMINADOR (B)
             // El divisor (Op2) es el que debemos chequear.
+            codigo.append(Identador.obtenerIndentacion()).append("    (block \n");
+            Identador.aumentarIndentacion();
             ponerEnteroEnPila(op2, codigo);
-            codigo.append("    i32.const 0\n");
-            codigo.append("    i32.eq ;; Pila: [B == 0] (0 o 1)\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.const 0\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.eq ;; Pila: [B == 0] (0 o 1)\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.eqz ;;Invertir condicion\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    br_if 0 ;; Si B == 0, salta al IF\n");
 
-            // 2. ESTRUCTURA IF
-            codigo.append("    (if (result i32) \n");
 
-            // --- THEN (RAMA INALCANZABLE: B es 0) ---
-            codigo.append("      (then\n");
-            codigo.append("        i32.const ").append(iniPosErrorDivCero).append("\n");
-            codigo.append("        i32.const ").append(finPosErrorDivCero).append("\n");
-            codigo.append("        call $alert_str ;; Muestra el mensaje\n");
-            codigo.append("        unreachable ;; Termina el programa\n");
-            codigo.append("      )\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(iniPosErrorDivCero).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(finPosErrorDivCero).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    call $alert_str ;; Muestra el mensaje\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    unreachable ;; Termina el programa\n");
+            Identador.disminuirIndentacion();
+            codigo.append(Identador.obtenerIndentacion()).append("    )\n");
+
 
             // --- ELSE (RAMA DE EJECUCIÓN NORMAL: B != 0) ---
-            codigo.append("      (else\n");
+
 
             // 3. RE-CARGAR OPERANDOS y DIVIDIR
             // Los valores de Op1 y Op2 fueron consumidos por la validación, ¡debemos cargarlos de nuevo!
             ponerEnteroEnPila(op1, codigo); // Cargar A (Numerador)
             ponerEnteroEnPila(op2, codigo); // Cargar B (Denominador)
-            codigo.append("        i32.div_u ;; Ejecutar A / B\n");
-            codigo.append("      )\n");
+            codigo.append(Identador.obtenerIndentacion()).append("        i32.div_u ;; Ejecutar A / B\n");
 
-            codigo.append("    ) ;; Fin del IF. El resultado (A/B) está en la pila.\n");
 
             // 4. GUARDAR RESULTADO
             String temp = crearTemporal();
-            codigo.append("    global.set $").append(temp).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
             terceto.setResultado(temp);
-        }
+
     }
     private void procesarAsignacion(Terceto terceto, StringBuilder codigo) {
         String destino = obtenerValor(terceto.getOp1());
         String origen = obtenerValor(terceto.getOp2());
         if (destino.startsWith("_ret_")) {
             if (origen == null || origen.isEmpty()) {
-                codigo.append("    i32.const 0\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    i32.const 0\n");
             } else if (esNumeroULONG(origen)) {
                 String numero = origen.substring(0, origen.length() - 2);
-                codigo.append("    i32.const ").append(numero).append("\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(numero).append("\n");
             } else if (esFlotante(origen)) {
                 ponerFlotanteEnPila(origen, codigo);
-                codigo.append("    i32.trunc_f64_u\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    i32.trunc_f64_u\n");
             } else {
                 String nombreVar = asegurarVariableEntera(origen);
-                codigo.append("    global.get $").append(nombreVar).append("\n");
+                codigo.append(Identador.obtenerIndentacion()).append("    global.get $").append(nombreVar).append("\n");
             }
-            codigo.append("    return\n");
+            // Pone el candado a 0 (Función inactiva)
+            String nombreLimpio = funcionActual;
+            String candadoNombre = "$_lock_" + nombreLimpio;
+            // --- NUEVO: Unset del candado de Recursion (Runtime) ---
+            codigo.append(Identador.obtenerIndentacion()).append("    ;; Liberacion de Candado de Recursion\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.const 0\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 0\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    return\n");
             terceto.setResultado(origen);
             return;
         }
         String nombreDestino = asegurarVariableEntera(destino);
         if (esFlotante(origen)) {
             ponerFlotanteEnPila(origen, codigo);
-            codigo.append("    i32.trunc_f64_u\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.trunc_f64_u\n");
         } else {
             ponerEnteroEnPila(origen, codigo);
         }
-        codigo.append("    global.set $").append(nombreDestino).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(nombreDestino).append("\n");
         terceto.setResultado(nombreDestino);
     }
     private void procesarPrint(Terceto terceto, StringBuilder codigo) {
@@ -370,36 +372,66 @@ public class GeneradorDeCodigo {
         if (original != null && esCadena(original)) {
             int pos = registrarCadena(original);
             int len = largoCadena.get(original);
-            codigo.append("    i32.const ").append(pos).append("\n");
-            codigo.append("    i32.const ").append(len).append("\n");
-            codigo.append("    call $alert_str\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(pos).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(len).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    call $alert_str\n");
         } else {
             ponerEnteroEnPila(valor, codigo);
-            codigo.append("    call $alert_i32\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    call $alert_i32\n");
         }
         terceto.setResultado("");
     }
     private void procesarTrunc(Terceto terceto, StringBuilder codigo) {
         String original = terceto.getOp1();
-        codigo.append("    f64.const ").append(original).append("\n");
-        codigo.append("    i32.trunc_f64_u\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    f64.const ").append(original).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.trunc_f64_u\n");
         String temp = crearTemporal();
-        codigo.append("    global.set $").append(temp).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
         terceto.setResultado(temp);
     }
     private void procesarLlamadaFuncion(Terceto terceto, StringBuilder codigo) {
         String funcTS = terceto.getOp1();
-        if (funcTS != null && funcTS.contains("(")) funcTS = funcTS.substring(0, funcTS.indexOf('(')).trim();
-        String funcWasm = limpiarNombre(funcTS);
-        if (funcTS != null && funcTS.contains(":") && !funcTS.startsWith("_lambda")) {
-            String[] p = funcTS.split(":");
-            if (p.length >= 2) funcWasm = limpiarNombre(p[1] + ":" + p[0]);
+
+        // 1. Limpieza básica: quitar argumentos si vienen en el string (ej: "FUNC(arg)" -> "FUNC")
+        if (funcTS != null && funcTS.contains("(")) {
+            funcTS = funcTS.substring(0, funcTS.indexOf('(')).trim();
         }
 
-        codigo.append("    call $").append(funcWasm).append("\n");
-        if(!funcTS.startsWith("_lambda")) {
+        String funcWasm = limpiarNombre(funcTS);
+
+        // 2. Reconstrucción del nombre con Scope (Manejo de anidamiento infinito)
+        // Formato esperado en TS: "NOMBRE:SCOPE_RAIZ:SCOPE_PADRE:..."
+        // Formato deseado en WAT: "$SCOPE_RAIZ_SCOPE_PADRE_NOMBRE"
+        if (funcTS != null && funcTS.contains(":") && !funcTS.startsWith("_lambda")) {
+            String[] p = funcTS.split(":");
+
+            // Verificamos que tenga al menos Nombre y un Scope
+            if (p.length >= 2) {
+                StringBuilder nombreCompleto = new StringBuilder();
+
+                // Recorremos todos los scopes (del índice 1 en adelante)
+                // Esto concatena "SCOPE_RAIZ:SCOPE_PADRE:..." en el orden correcto
+                for (int i = 1; i < p.length; i++) {
+                    nombreCompleto.append(p[i]).append(":");
+                }
+
+                // Al final agregamos el nombre de la función (índice 0)
+                nombreCompleto.append(p[0]);
+
+                // Convertimos los ':' en '_' usando tu función auxiliar
+                funcWasm = limpiarNombre(nombreCompleto.toString());
+            }
+        }
+
+        // 3. Generación del Call
+        codigo.append(Identador.obtenerIndentacion()).append("    call $").append(funcWasm).append("\n");
+
+        // 4. Manejo del valor de retorno (si no es lambda/procedimiento void)
+        if (funcTS != null && !funcTS.startsWith("_lambda")) {
             String temp = crearTemporal();
-            codigo.append("    global.set $").append(temp).append("\n");
+            // Guardamos el resultado que quedó en la pila en una temporal global
+            codigo.append(Identador.obtenerIndentacion()).append("    global.set $").append(temp).append("\n");
+            // Actualizamos el terceto para que quien use este resultado sepa dónde está
             terceto.setResultado(temp);
         }
     }
@@ -412,63 +444,55 @@ public class GeneradorDeCodigo {
 
         String candadoNombre = "$_lock_" + nombreLimpio;
         if (!tiposVariable.containsKey(candadoNombre)) {
-            variablesGlobales.append("  (global ").append(candadoNombre).append(" (mut i32) (i32.const 0)) ;; Candado de Recursion\n");
+            variablesGlobales.append(Identador.obtenerIndentacion()).append("  (global ").append(candadoNombre).append(" (mut i32) (i32.const 0)) ;; Candado de Recursion\n");
             tiposVariable.put(candadoNombre, "i32");
         }
 
         StringBuilder codigo = funciones.get(funcionActual);
 
         // --- NUEVO: Control y set de candado en Runtime (Al inicio del cuerpo de la funcion) ---
-        codigo.append("    ;; Bloqueo de Recursion Directa (Runtime Check)\n");
-        codigo.append("    global.get ").append(candadoNombre).append("\n"); // Carga el valor actual (0 o 1)
-        codigo.append("    i32.const 1\n");
-        codigo.append("    i32.eq ;; Pila: [Candado == 1]\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    ;; Bloqueo de Recursion Directa (Runtime Check)\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    global.get ").append(candadoNombre).append("\n"); // Carga el valor actual (0 o 1)
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.const 1\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.eq ;; Pila: [Candado == 1]\n");
 
-        codigo.append("    (if \n");
-        codigo.append("      (then\n");
-        codigo.append("        i32.const ").append(iniPosErrorRecursion).append("\n");
-        codigo.append("        i32.const ").append(finPosErrorRecursion).append("\n");
-        codigo.append("        call $alert_str ;; Muestra el error\n");
-        codigo.append("        unreachable ;; Termina el programa\n");
-        codigo.append("      )\n");
-        codigo.append("    ) ;; Fin IF de check\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    (if \n");
+        codigo.append(Identador.obtenerIndentacion()).append("      (then\n");
+        codigo.append(Identador.obtenerIndentacion()).append("        i32.const ").append(iniPosErrorRecursion).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("        i32.const ").append(finPosErrorRecursion).append("\n");
+        codigo.append(Identador.obtenerIndentacion()).append("        call $alert_str ;; Muestra el error\n");
+        codigo.append(Identador.obtenerIndentacion()).append("        unreachable ;; Termina el programa\n");
+        codigo.append(Identador.obtenerIndentacion()).append("      )\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    ) ;; Fin IF de check\n");
 
         // Pone el candado a 1 (Función activa)
-        codigo.append("    i32.const 1\n");
-        codigo.append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 1\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.const 1\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 1\n");
         // ------------------------------------------------------------------------------------
     }
     private void finalizarFuncion() {
-        // --- NUEVO: Unset del candado de Recursion (Runtime) ---
-        String nombreLimpio = funcionActual;
-        String candadoNombre = "$_lock_" + nombreLimpio;
-        StringBuilder codigo = funciones.get(funcionActual);
 
-        // Pone el candado a 0 (Función inactiva)
-        codigo.append("    ;; Liberacion de Candado de Recursion\n");
-        codigo.append("    i32.const 0\n");
-        codigo.append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 0\n");
         // -------------------------------------------------------
 
         if (!pilaFunciones.isEmpty()) funcionActual = pilaFunciones.pop();
         else funcionActual = "main";
     }
     private void ponerEnteroEnPila(String valor, StringBuilder codigo) {
-        if (valor == null || valor.isEmpty()) { codigo.append("    i32.const 0\n"); return; }
-        if (esNumeroULONG(valor)) codigo.append("    i32.const ").append(valor.substring(0, valor.length() - 2)).append("\n");
-        else codigo.append("    global.get $").append(asegurarVariableEntera(valor)).append("\n");
+        if (valor == null || valor.isEmpty()) { codigo.append(Identador.obtenerIndentacion()).append("    i32.const 0\n"); return; }
+        if (esNumeroULONG(valor)) codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(valor.substring(0, valor.length() - 2)).append("\n");
+        else codigo.append(Identador.obtenerIndentacion()).append("    global.get $").append(asegurarVariableEntera(valor)).append("\n");
     }
     private void ponerFlotanteEnPila(String valor, StringBuilder codigo) {
         if (valor == null || valor.isEmpty()) { codigo.append("    f64.const 0\n"); return; }
         if (esNumeroFlotante(valor)) {
             String valW = valor.replace(',', '.').replace('d', 'E').replace('D', 'E');
-            codigo.append("    f64.const ").append(valW).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    f64.const ").append(valW).append("\n");
         } else if (esNumeroULONG(valor)) {
-            codigo.append("    i32.const ").append(valor.substring(0, valor.length() - 2)).append("\n");
-            codigo.append("    f64.convert_i32_u\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(valor.substring(0, valor.length() - 2)).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    f64.convert_i32_u\n");
         } else {
             String nombreVar = limpiarNombre(valor);
-            codigo.append("    global.get $").append(nombreVar).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    global.get $").append(nombreVar).append("\n");
             if (!tiposVariable.getOrDefault(nombreVar, "i32").equals("f64")) codigo.append("    f64.convert_i32_u\n");
         }
     }

@@ -1,10 +1,46 @@
-TESTRECURSIVO {
-    ulong X;
-    X := 6UL + 6UL - 6UL * 1UL / 1UL;
-    if(X == 5UL){
-        print("X es igual a 5");
-    }else{
-        print("X no es igual a 5");
-    }endif;
-    print ("fin del programa");
+PRUEBARIGUROSA {
+    ulong INICIO;
+    ulong SALIDA;
+    ulong DESCARTE;
+
+    ulong GENERARVALOR(cr ulong CONTENEDOR, ulong SEMILLA) {
+        ulong CALCULO;
+
+        CALCULO := SEMILLA * 10UL;
+
+        CONTENEDOR := CALCULO + 5UL;
+
+        if (CONTENEDOR > 100UL) {
+            CONTENEDOR := 100UL;
+        } endif;
+
+        ulong GENERARVALOR2(cr ulong CONTENEDOR2, ulong SEMILLA2) {
+            ulong CALCULO2;
+
+            CALCULO2 := SEMILLA2 * 20UL;
+
+
+
+            return (CALCULO2);
+        }
+            CONTENEDOR := GENERARVALOR2(CONTENEDOR -> CONTENEDOR2, SEMILLA -> SEMILLA2) + 15UL;
+        return (CALCULO);
+    }
+
+    INICIO := 8UL;
+    SALIDA := 9999UL;
+    ulong CERO;
+    CERO := 9999UL;
+    CERO := CERO;
+    SALIDA := SALIDA / CERO;
+    DESCARTE := GENERARVALOR(SALIDA -> CONTENEDOR, INICIO -> SEMILLA);
+
+    print(SALIDA);
+    print(DESCARTE);
+
+    INICIO := 20UL;
+
+    DESCARTE := GENERARVALOR(SALIDA -> CONTENEDOR, INICIO -> SEMILLA);
+
+    print(SALIDA);
 }

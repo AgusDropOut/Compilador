@@ -195,7 +195,7 @@ final static short yylhs[] = {                           -1,
    38,   38,   39,   39,   39,   37,   37,   40,   40,   40,
    40,   40,   40,   40,   40,   40,   40,   23,   42,   24,
    43,   44,   27,   45,   45,   45,   16,   16,   16,   16,
-   16,   16,   46,   46,   47,   47,   47,   47,   47,   48,
+   16,   16,   47,   47,   47,   47,   47,   46,   46,   48,
    48,   49,   49,   49,   49,   49,   41,   41,   41,   41,
    51,   51,   51,   51,   50,   19,   19,
 };
@@ -211,7 +211,7 @@ final static short yylen[] = {                            2,
     3,    1,    3,    2,    2,    3,    2,    1,    1,    1,
     1,    1,    1,    1,    2,    2,    2,    3,    1,    3,
     4,    0,    6,    1,    1,    2,    3,    1,    3,    3,
-    3,    2,    1,    1,    3,    1,    3,    3,    3,    1,
+    3,    2,    3,    1,    3,    3,    3,    1,    1,    1,
     1,    1,    1,    3,    2,    1,    1,    1,    3,    1,
     4,    4,    4,    4,    2,    1,    3,
 };
@@ -222,18 +222,18 @@ final static short yydefred[] = {                         0,
    52,    0,    0,    0,    0,    0,    3,   17,    0,    0,
     0,    0,   16,    0,    0,    0,    0,   18,   13,   14,
     0,    0,   37,    0,    0,  123,    0,    0,    0,    0,
-    0,    0,    0,  116,    0,  126,    0,    0,    0,    0,
+    0,    0,    0,  114,    0,  126,    0,    0,    0,    0,
     0,  102,    0,    0,   63,    0,    0,  137,    0,   28,
-    0,   23,    0,   40,    0,   19,   36,   32,    0,  113,
-  114,  120,  121,  112,    0,    0,  125,    0,    0,    0,
+    0,   23,    0,   40,    0,   19,   36,   32,    0,  118,
+  119,  120,  121,  112,    0,    0,  125,    0,    0,    0,
   128,   88,   89,   90,   91,   92,   93,    0,    0,    0,
     0,   87,    0,    0,  130,  135,   45,    0,   41,   42,
    43,   44,   46,   73,    0,    0,    0,    0,   80,    0,
    65,    0,   77,    0,    0,   55,    0,    0,    0,    2,
    61,   62,   30,  101,    0,    0,   26,    0,   39,   34,
-    0,    0,    0,  119,  117,    0,    0,   72,   96,   95,
-   97,    0,    0,    0,    0,   67,   70,    0,   60,  118,
-  115,   85,    0,  124,    0,   76,   64,   56,    0,   20,
+    0,    0,    0,  117,  115,    0,    0,   72,   96,   95,
+   97,    0,    0,    0,    0,   67,   70,    0,   60,  116,
+  113,   85,    0,  124,    0,   76,   64,   56,    0,   20,
    58,   54,    0,    0,   11,   24,   25,   33,  134,  133,
   132,  131,  129,    0,   83,   81,   21,   57,    0,  105,
   104,    0,    0,   59,  106,  103,    8,
@@ -594,13 +594,13 @@ final static String yyrule[] = {
 "expresion : expresion operador_expresion error",
 "expresion : error operador_expresion error",
 "expresion : error ';'",
-"operador_expresion : '+'",
-"operador_expresion : '-'",
 "termino : termino operador_termino factor",
 "termino : factor",
 "termino : error operador_termino factor",
 "termino : termino operador_termino error",
 "termino : error operador_termino error",
+"operador_expresion : '+'",
+"operador_expresion : '-'",
 "operador_termino : '*'",
 "operador_termino : '/'",
 "factor : identificador",
@@ -621,7 +621,7 @@ final static String yyrule[] = {
 "identificador : ID '.' ID",
 };
 
-//#line 411 "Gramatica.y"
+//#line 428 "Gramatica.y"
 public static final Set<String> erroresEmitidos = new HashSet<>();
 public static int ultimaLineaError;
 public static String prog_principal;
@@ -904,7 +904,7 @@ public void registrarVinculoCR(String formal, String real) {
         return;
     }
 
-    if (!"Variable".equals(elem.getUso())) {
+    if (!"Variable".equals(elem.getUso()) && !"parametro".equals(elem.getUso())) {
         yyerror("Error: el parámetro de copia-resultado debe ser una variable" );
         return;
     }
@@ -1514,74 +1514,87 @@ case 106:
 break;
 case 107:
 //#line 322 "Gramatica.y"
-{yyval = ArregloTercetos.crearTerceto(val_peek(1).sval, val_peek(2).sval, val_peek(0).sval); yyval.tipo = chequearTipos(val_peek(2).tipo, val_peek(0).tipo, val_peek(1).sval); }
+{yyval = ArregloTercetos.crearTerceto(val_peek(1).sval, val_peek(2).sval, val_peek(0).sval); yyval.tipo = chequearTipos(val_peek(2).tipo, val_peek(0).tipo, val_peek(1).sval);
+                        System.out.println("$1: "+ val_peek(2).sval + " $2: " + val_peek(1).sval + " $3: " + val_peek(0).sval + " -> $$: " + yyval.sval);}
 break;
 case 108:
-//#line 323 "Gramatica.y"
+//#line 324 "Gramatica.y"
 {yyval = val_peek(0); yyval.tipo = val_peek(0).tipo;}
 break;
 case 109:
-//#line 324 "Gramatica.y"
+//#line 325 "Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
 case 110:
-//#line 325 "Gramatica.y"
+//#line 326 "Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
 case 111:
-//#line 326 "Gramatica.y"
+//#line 327 "Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
 case 112:
-//#line 327 "Gramatica.y"
+//#line 328 "Gramatica.y"
 { yyerror("Error: error en expresion, revisar '+' '-'"); }
 break;
 case 113:
-//#line 330 "Gramatica.y"
-{ yyval.sval = "+"; }
-break;
-case 114:
-//#line 331 "Gramatica.y"
-{ yyval.sval = "-"; }
-break;
-case 115:
-//#line 335 "Gramatica.y"
+//#line 334 "Gramatica.y"
 {yyval = ArregloTercetos.crearTerceto(val_peek(1).sval, val_peek(2).sval, val_peek(0).sval); yyval.tipo = chequearTipos(val_peek(2).tipo, val_peek(0).tipo, val_peek(1).sval); }
 break;
-case 116:
-//#line 336 "Gramatica.y"
+case 114:
+//#line 335 "Gramatica.y"
 {yyval = val_peek(0); yyval.tipo = val_peek(0).tipo;}
 break;
-case 117:
-//#line 337 "Gramatica.y"
+case 115:
+//#line 336 "Gramatica.y"
 { yyerror("Error: operando a la izquierda invalido"); }
 break;
-case 118:
-//#line 338 "Gramatica.y"
+case 116:
+//#line 337 "Gramatica.y"
 { yyerror("Error: operando a la derecha invalido"); }
 break;
-case 119:
-//#line 339 "Gramatica.y"
+case 117:
+//#line 338 "Gramatica.y"
 { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
 break;
+case 118:
+//#line 343 "Gramatica.y"
+{
+                          yyval = new ParserValExt(); /* Nuevo objeto*/
+                          yyval.sval = "+";
+                        }
+break;
+case 119:
+//#line 347 "Gramatica.y"
+{
+                          yyval = new ParserValExt(); /* Nuevo objeto*/
+                          yyval.sval = "-";
+                        }
+break;
 case 120:
-//#line 342 "Gramatica.y"
-{ yyval.sval = "*"; }
+//#line 353 "Gramatica.y"
+{
+                          yyval = new ParserValExt();
+                          yyval.sval = "*";
+                        }
 break;
 case 121:
-//#line 343 "Gramatica.y"
-{ yyval.sval = "/"; }
+//#line 357 "Gramatica.y"
+{
+                          yyval = new ParserValExt();
+                          yyval.sval = "/";
+                        }
 break;
 case 122:
-//#line 347 "Gramatica.y"
+//#line 364 "Gramatica.y"
 {yyval = val_peek(0); yyval.tipo = val_peek(0).tipo; }
 break;
 case 123:
-//#line 348 "Gramatica.y"
+//#line 365 "Gramatica.y"
 {yyval.tipo = obtenerTipoDeSimbolo(val_peek(0).sval); yyval = val_peek(0); }
 break;
 case 124:
-//#line 349 "Gramatica.y"
+//#line 366 "Gramatica.y"
 {
                                                        ParserValExt tCall = ArregloTercetos.crearTerceto("CALL", val_peek(2).sval, null);
                                                        String tipoRet = obtenerTipoDeSimbolo(val_peek(2).sval);
@@ -1595,23 +1608,23 @@ case 124:
                                          }
 break;
 case 125:
-//#line 361 "Gramatica.y"
+//#line 378 "Gramatica.y"
 { yyval = constanteNegativa(val_peek(0)); yyval.tipo = obtenerTipoDeSimbolo(yyval.sval);}
 break;
 case 126:
-//#line 362 "Gramatica.y"
+//#line 379 "Gramatica.y"
 { yyval = val_peek(0); yyval.tipo = "ulong"; }
 break;
 case 127:
-//#line 366 "Gramatica.y"
+//#line 383 "Gramatica.y"
 {yyval = val_peek(0); yyval.tipo = val_peek(0).tipo; }
 break;
 case 128:
-//#line 367 "Gramatica.y"
-{yyval.tipo = obtenerTipoDeSimbolo(val_peek(0).sval); yyval = val_peek(0); }
+//#line 384 "Gramatica.y"
+{yyval.tipo = obtenerTipoDeSimbolo(val_peek(0).sval); yyval.sval = val_peek(0).sval; }
 break;
 case 129:
-//#line 368 "Gramatica.y"
+//#line 385 "Gramatica.y"
 {
                                                                              ParserValExt tCall = ArregloTercetos.crearTerceto("CALL", val_peek(2).sval, null);
                                                                              String tipoRet = obtenerTipoDeSimbolo(val_peek(2).sval);
@@ -1625,11 +1638,11 @@ case 129:
                                                                }
 break;
 case 130:
-//#line 380 "Gramatica.y"
+//#line 397 "Gramatica.y"
 { yyval = val_peek(0); yyval.tipo = "ulong"; }
 break;
 case 131:
-//#line 383 "Gramatica.y"
+//#line 400 "Gramatica.y"
 {String tipo = obtenerTipoDeSimbolo(val_peek(1).sval);
                                           if(! tipo.equals("dfloat")){
                                              yyerror("Error: La funcion TRUNC solo acepta operandos de tipo dfloat.");
@@ -1638,33 +1651,33 @@ case 131:
                                           yyval.tipo = "ulong";}
 break;
 case 132:
-//#line 390 "Gramatica.y"
+//#line 407 "Gramatica.y"
 { yyerror("Error: falta ')' en la expresion TRUNC"); }
 break;
 case 133:
-//#line 391 "Gramatica.y"
+//#line 408 "Gramatica.y"
 { yyerror("Error: falta '(' en la expresion TRUNC"); }
 break;
 case 134:
-//#line 392 "Gramatica.y"
+//#line 409 "Gramatica.y"
 { yyerror("Error: faltan '(' y ')' en la expresion TRUNC"); }
 break;
 case 135:
-//#line 398 "Gramatica.y"
+//#line 415 "Gramatica.y"
 {
                              /* CORRECCIÓN 1: Usar $$.sval*/
                              PilaDeFuncionesLlamadas.iniciarLlamada(yyval.sval);
                            }
 break;
 case 136:
-//#line 404 "Gramatica.y"
+//#line 421 "Gramatica.y"
 { yyval = chequearAmbito("", ambito, val_peek(0).sval); yyval.tipo = obtenerTipoDeSimbolo(yyval.sval); }
 break;
 case 137:
-//#line 405 "Gramatica.y"
+//#line 422 "Gramatica.y"
 { yyval = chequearAmbito(val_peek(2).sval, ambito, val_peek(0).sval); yyval.tipo = obtenerTipoDeSimbolo(yyval.sval); }
 break;
-//#line 1600 "Parser.java"
+//#line 1613 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

@@ -319,7 +319,8 @@ factor_lambda         : identificador { $$ = $1; $$.tipo = $1.tipo; }
                       | '-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       ;
 
-expresion             : expresion operador_expresion termino {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval); }
+expresion             : expresion operador_expresion termino {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval);
+                        System.out.println("$1: "+ $1.sval + " $2: " + $2.sval + " $3: " + $3.sval + " -> $$: " + $$.sval);}
                       | termino {$$ = $1; $$.tipo = $1.tipo;}
                       | error operador_expresion termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion operador_expresion error { yyerror("Error: operando a la derecha invalido"); }
@@ -327,9 +328,7 @@ expresion             : expresion operador_expresion termino {$$ = ArregloTercet
                       | error ';' { yyerror("Error: error en expresion, revisar '+' '-'"); }
                       ;
 
-operador_expresion    : '+' { $$.sval = "+"; }
-                      | '-' { $$.sval = "-"; }
-                      ;
+
 
 
 termino               : termino operador_termino factor {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval); }
@@ -339,8 +338,26 @@ termino               : termino operador_termino factor {$$ = ArregloTercetos.cr
                       | error operador_termino error { yyerror("Error: operandos a la izquierda y derecha invalidos"); }
                       ;
 
-operador_termino      : '*' { $$.sval = "*"; }
-                      | '/' { $$.sval = "/"; }
+
+
+operador_expresion    : '+' {
+                          $$ = new ParserValExt(); // Nuevo objeto
+                          $$.sval = "+";
+                        }
+                      | '-' {
+                          $$ = new ParserValExt(); // Nuevo objeto
+                          $$.sval = "-";
+                        }
+                      ;
+
+operador_termino      : '*' {
+                          $$ = new ParserValExt();
+                          $$.sval = "*";
+                        }
+                      | '/' {
+                          $$ = new ParserValExt();
+                          $$.sval = "/";
+                        }
                       ;
 
 
@@ -364,7 +381,7 @@ factor                : identificador {$$ = $1; $$.tipo = $1.tipo; }
 
 /* factor_simple es una version de factor sin el manejo de constantes negativas -> Sirve para algunos manejos de errores */
 factor_simple         : identificador {$$ = $1; $$.tipo = $1.tipo; }
-                      | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$ = $1; }
+                      | CTE {$$.tipo = obtenerTipoDeSimbolo($1.sval); $$.sval = $1.sval; }
                       | inicio_llamado parametros_reales ')' {
                                                                              ParserValExt tCall = ArregloTercetos.crearTerceto("CALL", $1.sval, null);
                                                                              String tipoRet = obtenerTipoDeSimbolo($1.sval);
@@ -690,7 +707,7 @@ public void registrarVinculoCR(String formal, String real) {
         return;
     }
 
-    if (!"Variable".equals(elem.getUso())) {
+    if (!"Variable".equals(elem.getUso()) && !"parametro".equals(elem.getUso())) {
         yyerror("Error: el parámetro de copia-resultado debe ser una variable" );
         return;
     }
