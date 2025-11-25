@@ -1,55 +1,39 @@
-PRUEBARIGUROSA {
-    ulong INICIO;
-    ulong SALIDA;
-    ulong DESCARTE;
+PRUEBADEFUEGO {
+    ulong TOTAL;
+    ulong I;
+    ulong J;
 
-    ulong GENERARVALOR(cr ulong CONTENEDOR, ulong SEMILLA) {
-        ulong CALCULO;
+    TOTAL := 0UL;
+    I := 0UL;
 
-        CALCULO := SEMILLA * 10UL;
-
-        CONTENEDOR := CALCULO + 5UL;
-
-        if (CONTENEDOR > 100UL) {
-            CONTENEDOR := 100UL;
+    while (I < 6UL) do {
+        if (I < 3UL) {
+            if (I == 0UL) {
+                TOTAL := TOTAL + 1UL;
+            } else {
+                J := 0UL;
+                while (J < I) do {
+                    TOTAL := TOTAL + 10UL;
+                    J := J + 1UL;
+                };
+            } endif;
+        } else {
+            J := I;
+            while (J > 0UL) do {
+                if (J == 4UL) {
+                    TOTAL := TOTAL + 100UL;
+                } else {
+                    TOTAL := TOTAL + 2UL;
+                } endif;
+                J := J - 1UL;
+            };
+            if (I == 5UL) {
+                TOTAL := TOTAL + 1000UL;
+            } else {
+                TOTAL := TOTAL + 0UL;
+            } endif;
         } endif;
-
-        ulong GENERARVALOR2(cr ulong CONTENEDOR2, ulong SEMILLA2) {
-            ulong CALCULO2;
-
-            CALCULO2 := SEMILLA2 * 20UL;
-
-            return (CALCULO2);
-        }
-            CONTENEDOR := GENERARVALOR2(CONTENEDOR -> CONTENEDOR2, SEMILLA -> SEMILLA2) + 15UL;
-        return (CALCULO);
-    }
-
-    INICIO := 8UL;
-    SALIDA := 9999UL;
-    ulong CERO;
-    CERO := 9999UL;
-    CERO := CERO;
-    SALIDA := SALIDA / CERO;
-    DESCARTE := GENERARVALOR(SALIDA -> CONTENEDOR, INICIO -> SEMILLA);
-
-    print(SALIDA);
-    print(DESCARTE);
-
-    INICIO := 20UL;
-
-    DESCARTE := GENERARVALOR(SALIDA -> CONTENEDOR, INICIO -> SEMILLA);
-
-    print(SALIDA);
-
-    ulong A;
-
-    ulong H (ulong C){
-        C := PRUEBARIGUROSA.H(67UL -> C);
-        return (0UL);
-    }
-
-    A := H(56UL -> C);
-
-
+        I := I + 1UL;
+    };
+    print(TOTAL);
 }

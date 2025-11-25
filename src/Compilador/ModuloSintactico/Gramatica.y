@@ -164,7 +164,6 @@ sentencia_print       : PRINT '(' CADENA ')' { reportarEstructura("PRINT"); Arre
 sentencia_while       : while condicion_while do cuerpo_ejecutable {
                             reportarEstructura("WHILE");
                             $$ = ArregloTercetos.completarBackPatchingWHILE();
-                            ArregloTercetos.crearTerceto("WHILE_END", "_", "_");
                       }
                       ;
 

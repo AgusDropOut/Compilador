@@ -12,13 +12,14 @@ public class AnalizadorDeBloques {
     private static Stack<Boolean> esBfWhile = new Stack<>();
     private static List<Integer> tercetosbfWhile = new Stack<>();
     private static Stack<Integer> ifStartStack = new Stack<>(); // new: track IF_START indices
+    private static List<Integer> whileEndList = new Stack<>();
 
     public static void analizarBloques(List<Terceto> tercetos) {
         // limpiar estado si se vuelve a llamar
         bloques.clear();
         esBfWhile.clear();
         tercetosbfWhile.clear();
-
+        whileEndList.clear();
         ifStartStack.clear();
 
         for (int i = 0; i < tercetos.size(); i++) {
@@ -54,6 +55,7 @@ public class AnalizadorDeBloques {
                 } else {
                     tercetosbfWhile.add(i);
                     esBfWhile.pop();
+                    whileEndList.add(Integer.parseInt(tercetos.get(i).getOp2()));
                 }
             } else if (t.getOperador().equals("bl")) {
 
@@ -148,5 +150,14 @@ public class AnalizadorDeBloques {
             }
         }
         return false;
+    }
+    public static int getNumeroDeFinWhileAsignados(int indice) {
+        int contador = 0;
+        for (Integer finWhile : whileEndList) {
+            if (finWhile == indice) {
+                contador++;
+            }
+        }
+        return contador;
     }
 }

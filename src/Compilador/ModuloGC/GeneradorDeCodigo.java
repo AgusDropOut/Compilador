@@ -64,6 +64,8 @@ public class GeneradorDeCodigo {
         // 1. PASO PREVIO: Detectar estructuras IF/ELSE mirando los bf/bl
         AnalizadorDeBloques.analizarBloques(listaTercetos);
 
+        AnalizadorDeBloques.imprimirBloques();
+
 
         // 2. Encabezado
         codigoWAT.append("(module\n");
@@ -92,6 +94,13 @@ public class GeneradorDeCodigo {
     }
 
     private void procesarBloque(int i, StringBuilder codigo){
+
+        if(AnalizadorDeBloques.tieneBloqueElseAsignado(i)){
+            codigo.append(Identador.obtenerIndentacion()).append("    br ").append(1).append("\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block else\n");
+            Identador.disminuirIndentacion();
+        }
+
         if (AnalizadorDeBloques.tieneBloqueFinAsignado(i)) {
             for(int j = AnalizadorDeBloques.getNumeroDeFinAsignados(i); j>0; j--) {
 
@@ -101,6 +110,8 @@ public class GeneradorDeCodigo {
 
             }
         }
+
+
         if(AnalizadorDeBloques.tieneBloqueInicioAsignado(i)){
 
             codigo.append(Identador.obtenerIndentacion()).append("    (block").append("\n");
@@ -111,10 +122,15 @@ public class GeneradorDeCodigo {
             }
         }
 
-        if(AnalizadorDeBloques.tieneBloqueElseAsignado(i)){
-            codigo.append(Identador.obtenerIndentacion()).append("    br ").append(1).append("\n");
-            codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block else\n");
-            Identador.disminuirIndentacion();
+
+
+        for (int j = 0; j < AnalizadorDeBloques.getNumeroDeFinWhileAsignados(i); j++) {
+            String lblLoop = pilaWhile.pop();
+            Identador.aumentarIndentacion();
+            codigo.append(Identador.obtenerIndentacion()).append("    br $").append(lblLoop).append("\n");  // volver al inicio del loop
+            codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin loop\n");
+            codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block while\n");
+
         }
     }
 
@@ -131,7 +147,6 @@ public class GeneradorDeCodigo {
 
         switch (operador) {
             case "WHILE_START" -> procesarWhileStart(terceto, codigo);
-            case "WHILE_END" -> procesarWhileEnd(terceto, codigo);
             case "bf" -> procesarBf(terceto, codigo, i);
             case "bl", "JMP" -> procesarSaltoIncondicional(terceto, codigo, i);
             // ... Operaciones comunes ...
@@ -166,14 +181,7 @@ public class GeneradorDeCodigo {
         codigo.append(Identador.obtenerIndentacion()).append("    (block $").append(lblBreak).append("\n");
         codigo.append(Identador.obtenerIndentacion()).append("    (loop $").append(lblLoop).append("\n");
     }
-    private void procesarWhileEnd(Terceto t, StringBuilder codigo) {
-        String lblLoop = pilaWhile.pop(); // o guardarlo en otra pila si lo necesitas
 
-        codigo.append(Identador.obtenerIndentacion()).append("    br $").append(lblLoop).append("\n");  // volver al inicio del loop
-        codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin loop\n");
-        codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block while\n");
-
-    }
 
     private void procesarBf(Terceto t, StringBuilder codigo, int i) {
         if(AnalizadorDeBloques.esTercetoBfWhile(i)){
