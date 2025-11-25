@@ -472,9 +472,8 @@ public class GeneradorDeCodigo {
 
         codigo.append(Identador.obtenerIndentacion()).append("    global.get ").append(candadoNombre).append("\n");
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const 1\n");
-        codigo.append(Identador.obtenerIndentacion()).append("    i32.eq ;; Pila: [Candado == 1]\n");
-        codigo.append(Identador.obtenerIndentacion()).append("    i32.eqz \n");
-        codigo.append(Identador.obtenerIndentacion()).append("    br_if 0 ;; Si candado != 1, saltar (continuar normalmente)\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.ne ;; Compara candado != 1\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    br_if 0 ;; Si candado != 1, saltar (función inactiva, OK)\n");
 
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(iniPosErrorRecursion).append("\n");
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(finPosErrorRecursion).append("\n");
