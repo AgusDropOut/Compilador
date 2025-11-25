@@ -4,7 +4,12 @@ import Compilador.ModuloLexico.ElementoTablaDeSimbolos;
 import Compilador.ModuloLexico.TablaDeSimbolos;
 import Compilador.ModuloSemantico.Terceto;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class GeneradorDeCodigo {
@@ -628,16 +633,39 @@ public class GeneradorDeCodigo {
         System.out.print(codigoWAT.toString());
         System.out.println("======================");
     }
-    public void guardarArchivoWat() {
+    public Path guardarArchivoWat() {
+        Path rutaOutputDebug = null;
+        String contenido = codigoWAT.toString(); // Convertimos una sola vez
+        String rutaBase = System.getProperty("user.dir"); // Directorio actual (.jar o proyecto)
+
         try {
-            String rutaProyecto = System.getProperty("user.dir");
-            java.nio.file.Path carpeta = java.nio.file.Paths.get(rutaProyecto, "src", "Compilador", "ModuloGC");
-            if (!java.nio.file.Files.isDirectory(carpeta)) java.nio.file.Files.createDirectories(carpeta);
-            java.nio.file.Path archivo = carpeta.resolve(nombrePrograma + ".wat");
-            java.nio.file.Files.writeString(archivo, codigoWAT.toString());
-            System.out.println("Archivo WAT generado en: " + archivo);
-        } catch (Exception e) {
-            System.err.println("Error al generar archivo WAT: " + e.getMessage());
+            // --- 1. GUARDADO INTERNO (Tu lógica original para src) ---
+            // Esto es útil mientras desarrollas en el IDE para tener historial
+            Path carpetaInterna = Paths.get(rutaBase, "src", "Compilador", "ModuloGC");
+            if (!Files.exists(carpetaInterna)) {
+                Files.createDirectories(carpetaInterna);
+            }
+            Path archivoInterno = carpetaInterna.resolve(nombrePrograma + ".wat");
+            Files.writeString(archivoInterno, contenido,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            System.out.println("Archivo WAT interno guardado en: " + archivoInterno);
+
+            // --- 2. GUARDADO EXTERNO (Para Debug y WasmRunner) ---
+            // Guardamos 'out.wat' en la misma carpeta donde corre el JAR
+            rutaOutputDebug = Paths.get(rutaBase, "out.wat");
+
+            // CREATE: Lo crea si no existe
+            // TRUNCATE_EXISTING: Lo sobreescribe si ya existe (lo vacía primero)
+            Files.writeString(rutaOutputDebug, contenido,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+            System.out.println("Archivo debug generado en: " + rutaOutputDebug);
+
+        } catch (IOException e) {
+            System.err.println("Error crítico al guardar archivos WAT: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        return rutaOutputDebug;
     }
 }

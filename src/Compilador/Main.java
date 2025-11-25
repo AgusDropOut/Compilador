@@ -2,6 +2,7 @@ package Compilador;
 
 import Compilador.ModuloGC.AnalizadorDeBloques;
 import Compilador.ModuloGC.GeneradorDeCodigo;
+import Compilador.ModuloGC.WasmRunner;
 import Compilador.ModuloLexico.*;
 import Compilador.ModuloSemantico.ArregloTercetos;
 import Compilador.ModuloSemantico.Terceto;
@@ -10,6 +11,9 @@ import Compilador.ModuloSintactico.ParserValExt;
 import Compilador.Util.RecolectorDeErrores;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class Main {
@@ -49,6 +53,12 @@ public class Main {
         productorAssembler.imprimirAssembler();
         productorAssembler.guardarArchivoWat();
 
+        // 2. Generar el WAT (guardalo donde quieras, ej: "out.wat" en user.dir)
+        Path rutaWatGenerado = productorAssembler.guardarArchivoWat(); // Asegúrate que devuelva el Path
 
+        // 3. ¡Ejecutar! (Sin configurar rutas ni tools)
+        if (rutaWatGenerado != null) {
+            WasmRunner.ejecutar(rutaWatGenerado);
+        }
     }
 }

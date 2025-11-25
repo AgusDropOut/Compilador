@@ -35,5 +35,6 @@ PRUEBADEFUEGO {
         } endif;
         I := I + 1UL;
     };
+    ##Imprime 1251##
     print(TOTAL);
 }
