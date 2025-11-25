@@ -1,39 +1,43 @@
-PRUEBADEFUEGO {
-    ulong TOTAL;
-    ulong I;
-    ulong J;
+PROGRAMAPAR {
+    ## Devuelve 1 si es Par, 0 si es Impar ##
 
-    TOTAL := 0UL;
-    I := 0UL;
 
-    while (I < 6UL) do {
-        if (I < 3UL) {
-            if (I == 0UL) {
-                TOTAL := TOTAL + 1UL;
-            } else {
-                J := 0UL;
-                while (J < I) do {
-                    TOTAL := TOTAL + 10UL;
-                    J := J + 1UL;
-                };
-            } endif;
+    ulong ESPAR(ulong NUM, cr ulong ESPAR2) {
+        ulong MITAD;
+        ulong RECONSTRUIDO;
+
+        ulong H (ulong X){
+           print(X);
+           return(0UL);
+        }
+
+        MITAD := NUM / 2UL;
+        RECONSTRUIDO := MITAD * 2UL + H(45UL -> X); ##Llamada a funcion H, llamada valida, imprime 45##
+
+        RECONSTRUIDO := PROGRAMAPAR.ESPAR(67UL -> NUM, MITAD -> ESPAR2); ##Llamada a funcion ESPAR, llamada invalida, da error##
+
+        if (RECONSTRUIDO == NUM) {
+            ESPAR2 := 1UL;
         } else {
-            J := I;
-            while (J > 0UL) do {
-                if (J == 4UL) {
-                    TOTAL := TOTAL + 100UL;
-                } else {
-                    TOTAL := TOTAL + 2UL;
-                } endif;
-                J := J - 1UL;
-            };
-            if (I == 5UL) {
-                TOTAL := TOTAL + 1000UL;
-            } else {
-                TOTAL := TOTAL + 0UL;
-            } endif;
+            ESPAR2 := 0UL;
         } endif;
-        I := I + 1UL;
-    };
-    print(TOTAL);
+
+        return (0UL);
+    }
+
+    ulong X;
+    ulong CHECK;
+    ulong DUMMY;
+    X := 10UL;
+    CHECK := 0UL;
+
+    DUMMY := ESPAR(X->NUM, CHECK->ESPAR2);
+
+    ## Imprime 1 si es par, 0 si impar ##
+    if(CHECK == 1UL) {
+        print("Es par");
+    } else {
+        print("Es impar");
+    } endif;
+
 }
