@@ -24,7 +24,7 @@ import java.util.ArrayList;
 %token WHILE  IF  ELSE  ENDIF  PRINT  RETURN  DO  CTE  ID  ASIG  TRUNC  CR  ULONG  CADENA FLECHA EQ GEQ LEQ NEQ
 
 %%
-programa              : nombre_programa  '{' list_sentencia '}'{ reportarEstructura("Fin del programa");}
+programa              : nombre_programa  '{' list_sentencia '}'{ reportarEstructura("Fin del programa"); ArregloTercetos.crearTerceto("END", "_", "_"); }
                       | nombre_programa  '{' list_sentencia '}' '}'{ yyerror("Error: '}' de mas al final de programa");}
                       | nombre_programa  list_sentencia '}' { yyerror("Error: Falta delimitador del programa '{' al inicio"); }
                       | nombre_programa '{' list_sentencia  { yyerror("Error: Falta delimitador del programa '}' al final"); }
@@ -318,8 +318,7 @@ factor_lambda         : identificador { $$ = $1; $$.tipo = $1.tipo; }
                       | '-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       ;
 
-expresion             : expresion operador_expresion termino {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval);
-                        System.out.println("$1: "+ $1.sval + " $2: " + $2.sval + " $3: " + $3.sval + " -> $$: " + $$.sval);}
+expresion             : expresion operador_expresion termino {$$ = ArregloTercetos.crearTerceto($2.sval, $1.sval, $3.sval); $$.tipo = chequearTipos($1.tipo, $3.tipo, $2.sval);}
                       | termino {$$ = $1; $$.tipo = $1.tipo;}
                       | error operador_expresion termino { yyerror("Error: operando a la izquierda invalido"); }
                       | expresion operador_expresion error { yyerror("Error: operando a la derecha invalido"); }

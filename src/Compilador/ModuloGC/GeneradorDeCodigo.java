@@ -138,6 +138,8 @@ public class GeneradorDeCodigo {
 
 
 
+
+
     private void procesarTerceto(Terceto terceto, int i) {
         String operador = terceto.getOperador();
         StringBuilder codigo = funciones.get(funcionActual);
@@ -466,6 +468,7 @@ public class GeneradorDeCodigo {
         codigo.append(Identador.obtenerIndentacion()).append("    global.get ").append(candadoNombre).append("\n");
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const 1\n");
         codigo.append(Identador.obtenerIndentacion()).append("    i32.eq ;; Pila: [Candado == 1]\n");
+        codigo.append(Identador.obtenerIndentacion()).append("    i32.eqz \n");
         codigo.append(Identador.obtenerIndentacion()).append("    br_if 0 ;; Si candado != 1, saltar (continuar normalmente)\n");
 
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(iniPosErrorRecursion).append("\n");
