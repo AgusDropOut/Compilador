@@ -1,40 +1,93 @@
-PRUEBADEFUEGO {
-    ulong TOTAL;
-    ulong I;
-    ulong J;
+PROGRAMAMAE {
+    ## SALIDA ESPERADA
+    -> 1111
+    -> 25
+    -> 25
+    -> 20
+    -> 15
+    -> 10
+    -> 5
+    -> 9999
+    -> 75 ##
 
-    TOTAL := 0UL;
-    I := 0UL;
+    ## VARIABLE GLOBAL: La Lambda la modificara directamente ##
+    ulong BOLSAGLOBAL;
+    BOLSAGLOBAL := 0UL;
 
-    while (I < 6UL) do {
-        if (I < 3UL) {
-            if (I == 0UL) {
-                TOTAL := TOTAL + 1UL;
-            } else {
-                J := 0UL;
-                while (J < I) do {
-                    TOTAL := TOTAL + 10UL;
-                    J := J + 1UL;
-                };
-            } endif;
-        } else {
-            J := I;
-            while (J > 0UL) do {
-                if (J == 4UL) {
-                    TOTAL := TOTAL + 100UL;
-                } else {
-                    TOTAL := TOTAL + 2UL;
+    ## 1. Funcion simple para probar retornos ##
+    ulong CUADRADO(ulong N) {
+        return (N * N);
+    }
+
+    ## 2. Funcion receptora para probar anidamiento de llamados ##
+    ulong SUMAR(ulong A, ulong B) {
+        return (A + B);
+    }
+
+    ## 3. Funcion compleja: CR, While, If y Lambda ##
+    ulong PROCESAR(ulong LIMITE, cr ulong SALIDA) {
+        ulong CONTADOR;
+
+        CONTADOR := LIMITE;
+
+        while (CONTADOR > 0UL) do {
+
+            ## LAMBDA: Se ejecuta en cada vuelta ##
+            ## Regla: Sin declaraciones, solo sentencias ejecutables ##
+            ## Tarea: Si el numero es multiplo de 5, sumarlo a la global ##
+
+            (ulong VAL) {
+                ## Truco aritmetico para saber si es multiplo de 5 ##
+                ## Si N/5*5 == N entonces es exacto ##
+
+                if ( VAL / 5UL * 5UL == VAL ) {
+
+                    ## Acceso a Global con PREFIJADO (Scope hermetico) ##
+                    PROGRAMAMAE.BOLSAGLOBAL := PROGRAMAMAE.BOLSAGLOBAL + VAL;
+
+                    ## Efecto secundario visual ##
+                    print(VAL);
                 } endif;
-                J := J - 1UL;
-            };
-            if (I == 5UL) {
-                TOTAL := TOTAL + 1000UL;
-            } else {
-                TOTAL := TOTAL + 0UL;
-            } endif;
-        } endif;
-        I := I + 1UL;
-    };
-    ##Imprime 1251##
-    print(TOTAL);
+
+            }(CONTADOR);  ## Invocacion inmediata con variable local ##
+
+            CONTADOR := CONTADOR - 1UL;
+        };
+
+        ## Retornamos el valor final de la global en el parametro CR ##
+        SALIDA := PROGRAMAMAE.BOLSAGLOBAL;
+        return (0UL);
+    }
+
+    ulong BASEUNA;
+    ulong BASEDOS;
+    ulong TOPE;
+    ulong RESFINAL;
+    ulong DUMMY;
+
+    BASEUNA := 3UL;
+    BASEDOS := 4UL;
+    RESFINAL := 0UL;
+
+    print(1111UL); ## Inicio del Test ##
+
+    ## TEST 1: LLAMADOS ANIDADOS COMO PARAMETROS ##
+    ## Calculamos: TOPE = (3*3) + (4*4) = 9 + 16 = 25 ##
+    ## Pasamos dos llamados a CUADRADO dentro de SUMAR ##
+
+    TOPE := SUMAR( CUADRADO(BASEUNA->N)->A, CUADRADO(BASEDOS->N)->B );
+
+    print(TOPE); ## Debe imprimir 25 ##
+
+    ## TEST 2: PROCESO COMPLEJO CON LAMBDA Y CR ##
+    ## Vamos a recorrer desde 25 hasta 1 ##
+    ## La lambda sumara los multiplos de 5: 25, 20, 15, 10, 5 ##
+    ## Suma esperada: 75 ##
+
+    DUMMY := PROCESAR(TOPE->LIMITE, RESFINAL->SALIDA);
+
+    print(9999UL); ## Fin del proceso ##
+
+    ## Verificamos el resultado que volvio por CR ##
+    print(RESFINAL);
 }

@@ -79,6 +79,7 @@ sentencia_declarativa : tipo list_vars { reportarEstructura("declaracion de vari
 
 parametros_formales   : parametro_formal
                       | parametros_formales ',' parametro_formal
+                      | /* empty */  { RecolectorDeErrores.agregarError("Error: Falta definir parametros formales en la declaracion de funcion", AnalizadorLexico.getNumeroDeLinea()); }
                       ;
 
 parametro_formal      : semantica tipo ID {registrarParametroFuncion($3.sval,$1.sval);}
@@ -292,6 +293,7 @@ header_lambda         : '(' tipo ID ')'
                              contadorLambda++;
                              String nombreLambda = "_lambda" + contadorLambda;
                              String claveLambda  = nombreLambda + ":" + ambito;
+                             entrarAmbito(nombreLambda);
                              ParserValExt paramFormal = registrarParametroFuncion($3.sval, "cv");
                              ArregloTercetos.crearTerceto("ini_" + claveLambda, "_", "_");
                              $$.sval = claveLambda;
@@ -302,18 +304,19 @@ header_lambda         : '(' tipo ID ')'
 expresion_lambda      : header_lambda bloque_ejecutable
                             {
                               ArregloTercetos.crearTerceto("fin_" + $1.sval, "_", "_");
+                              salirAmbito();
                             }
                             '(' factor_lambda ')'
                             {
                               String tipoFormal = obtenerTipoDeSimbolo($1.tipo);
-                              chequearTipos(tipoFormal, $6.tipo, ":=");
+                              chequearTipos(tipoFormal, $5.tipo, ":=");
                               ArregloTercetos.crearTerceto(":=", $1.tipo, $6.sval);
                               ArregloTercetos.crearTerceto("CALL", $1.sval, null);
                             }
 
                       ;
 
-factor_lambda         : identificador { $$ = $1; $$.tipo = $1.tipo; }
+factor_lambda         : identificador { $$ = $1; $$.tipo = obtenerTipoDeSimbolo($1.sval); }
                       | CTE     { $$ = $1; $$.tipo = obtenerTipoDeSimbolo($1.sval); }
                       | '-' CTE { $$ = constanteNegativa($2); $$.tipo = obtenerTipoDeSimbolo($$.sval); }
                       ;

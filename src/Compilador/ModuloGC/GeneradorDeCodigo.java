@@ -456,7 +456,8 @@ public class GeneradorDeCodigo {
         funcionActual = nombreLimpio;
         funciones.put(nombreLimpio, new StringBuilder());
         if (nombreFunc.contains(":")) scopeActual = nombreFunc.substring(nombreFunc.indexOf(':') + 1);
-
+        System.out.println(nombreFunc);
+        if(nombreFunc.startsWith("_lambda")) return;
         String candadoNombre = "$_lock_" + nombreLimpio;
         if (!tiposVariable.containsKey(candadoNombre)) {
             variablesGlobales.append(Identador.obtenerIndentacion()).append("  (global ").append(candadoNombre).append(" (mut i32) (i32.const 0)) ;; Candado de Recursion\n");
