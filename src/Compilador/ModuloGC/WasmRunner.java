@@ -61,15 +61,20 @@ public class WasmRunner {
             }
 
             // 4. LEVANTAR SERVIDOR
-            // Servimos el directorio temporal donde están el index.html y el .wasm juntos
+            // Usamos puerto 0 para que el sistema asigne uno libre automáticamente
             server = SimpleFileServer.createFileServer(
-                    new InetSocketAddress(8080),
+                    new InetSocketAddress(0), // <--- CAMBIO CLAVE: 0 en vez de 8080
                     tempDir,
                     SimpleFileServer.OutputLevel.NONE
             );
             server.start();
 
-            String url = "http://localhost:8080/index.html";
+            // Obtenemos qué puerto nos regaló el sistema
+            int port = server.getAddress().getPort();
+
+            // Construimos la URL con ese puerto
+            String url = "http://localhost:" + port + "/index.html";
+
             System.out.println("2. Servidor listo en: " + url);
 
             // 5. ABRIR NAVEGADOR
