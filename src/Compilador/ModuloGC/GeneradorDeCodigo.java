@@ -131,10 +131,18 @@ public class GeneradorDeCodigo {
 
         for (int j = 0; j < AnalizadorDeBloques.getNumeroDeFinWhileAsignados(i); j++) {
             String lblLoop = pilaWhile.pop();
+            // Esta línea "aumentar" estaba bien para la instrucción br, PERO...
             Identador.aumentarIndentacion();
-            codigo.append(Identador.obtenerIndentacion()).append("    br $").append(lblLoop).append("\n");  // volver al inicio del loop
+            codigo.append(Identador.obtenerIndentacion()).append("    br $").append(lblLoop).append("\n");
+            Identador.disminuirIndentacion(); // <--- AGREGAR: Volver al nivel normal tras el br
+
+            // Cierras el loop
             codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin loop\n");
+            Identador.disminuirIndentacion(); // <--- AGREGAR: Cerrar scope del loop
+
+            // Cierras el block
             codigo.append(Identador.obtenerIndentacion()).append("    ) ;; fin block while\n");
+            Identador.disminuirIndentacion(); // <--- AGREGAR: Cerrar scope del block
 
         }
     }
@@ -186,7 +194,9 @@ public class GeneradorDeCodigo {
         pilaWhileBfs.push(lblBreak);
 
         codigo.append(Identador.obtenerIndentacion()).append("    (block $").append(lblBreak).append("\n");
+        Identador.aumentarIndentacion();
         codigo.append(Identador.obtenerIndentacion()).append("    (loop $").append(lblLoop).append("\n");
+        Identador.aumentarIndentacion();
     }
 
 
@@ -451,6 +461,7 @@ public class GeneradorDeCodigo {
         }
     }
     private void iniciarFuncion(String nombreFunc) {
+        Identador.aumentarIndentacion();
         pilaFunciones.push(funcionActual);
         String nombreLimpio = limpiarNombre(nombreFunc);
         funcionActual = nombreLimpio;
@@ -487,9 +498,10 @@ public class GeneradorDeCodigo {
         // Pone el candado a 1 (Función activa)
         codigo.append(Identador.obtenerIndentacion()).append("    i32.const 1\n");
         codigo.append(Identador.obtenerIndentacion()).append("    global.set ").append(candadoNombre).append(" ;; Set Candado a 1\n");
+
     }
     private void finalizarFuncion() {
-
+        Identador.disminuirIndentacion();
         // -------------------------------------------------------
 
         if (!pilaFunciones.isEmpty()) funcionActual = pilaFunciones.pop();
