@@ -83,6 +83,10 @@ public class ControlAsigMultiple {
             RecolectorDeErrores.agregarError("Error: número mayor de variables del lado izquierdo en asignación múltiple (cant_izq: " + cantElemsIzq + " cant_der: " + cantElemsDer + ")",AnalizadorLexico.getNumeroDeLinea());
         }
 
+        if (cantElemsIzq < cantElemsDer) {
+            RecolectorDeErrores.agregarWarning("Warning: menor cantidad de elementos del lado izquierdo en asignación multiple, se descartaran los elementos adicionales del lado derecho.", AnalizadorLexico.getNumeroDeLinea());
+        }
+
         // limpiar listas
         listaTiposIzq.clear();
         listaTiposDer.clear();
