@@ -75,6 +75,7 @@ public class GeneradorDeCodigo {
         // 2. Encabezado
         codigoWAT.append("(module\n");
         codigoWAT.append("  (import \"env\" \"alert_i32\" (func $alert_i32 (param i32)))\n");
+        codigoWAT.append("  (import \"env\" \"alert_float\" (func $alert_float (param f64)))\n");
         codigoWAT.append("  (import \"env\" \"alert_str\" (func $alert_str (param i32 i32)))\n");
         codigoWAT.append("  (memory (export \"memory\") 1)\n");
 
@@ -394,16 +395,26 @@ public class GeneradorDeCodigo {
     private void procesarPrint(Terceto terceto, StringBuilder codigo) {
         String original = terceto.getOp1();
         String valor = obtenerValor(original);
+
         if (original != null && esCadena(original)) {
+            // 1. Es Cadena
             int pos = registrarCadena(original);
             int len = largoCadena.get(original);
             codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(pos).append("\n");
             codigo.append(Identador.obtenerIndentacion()).append("    i32.const ").append(len).append("\n");
             codigo.append(Identador.obtenerIndentacion()).append("    call $alert_str\n");
+
+        } else if (esFlotante(valor)) {
+            // 2. NUEVO: Es Flotante (Literal float o Variable f64)
+            ponerFlotanteEnPila(valor, codigo);
+            codigo.append(Identador.obtenerIndentacion()).append("    call $alert_float\n");
+
         } else {
+            // 3. Es Entero (Literal ulong o Variable i32)
             ponerEnteroEnPila(valor, codigo);
             codigo.append(Identador.obtenerIndentacion()).append("    call $alert_i32\n");
         }
+
         terceto.setResultado("");
     }
     private void procesarTrunc(Terceto terceto, StringBuilder codigo) {
@@ -633,7 +644,7 @@ public class GeneradorDeCodigo {
         return limpio;
     }
     private boolean esNumeroULONG(String valor) { return valor != null && valor.trim().matches("\\d+UL"); }
-    private boolean esNumeroFlotante(String valor) { return valor != null && valor.trim().matches("[+\\-]?\\d+[,.]\\d+[dDeE][+\\-]?\\d+"); }
+    private boolean esNumeroFlotante(String valor) { return valor != null && valor.trim().matches("[+\\-]?\\d+[,.]\\d+([dDeE][+\\-]?\\d+)?");}
     private boolean esCadena(String valor) { return valor != null && valor.startsWith("\"") && valor.endsWith("\""); }
     private boolean esFlotante(String valor) {
         if (esNumeroFlotante(valor)) return true;

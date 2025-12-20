@@ -13,6 +13,10 @@
             alert("Valor recibido --> " + x);
         }
 
+        function alert_float(x) {
+            alert("Valor recibido --> " + x);
+        }
+
         function alert_str(ptr, len) {
             if (!wasmInstance) { console.error('wasmInstance no inicializada'); return; }
             const memoryBuffer = wasmInstance.exports.memory.buffer;
@@ -29,7 +33,8 @@
         const importObject = {
             env: {
                 alert_i32,
-                alert_str
+                alert_str,
+                alert_float
             }
         };
 

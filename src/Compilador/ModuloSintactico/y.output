@@ -184,11 +184,12 @@
  133        | TRUNC '(' CTE error
  134        | TRUNC error CTE ')'
  135        | TRUNC error CTE error
+ 136        | TRUNC '(' '-' CTE ')'
 
- 136  inicio_llamado : identificador '('
+ 137  inicio_llamado : identificador '('
 
- 137  identificador : ID
- 138                | ID '.' ID
+ 138  identificador : ID
+ 139                | ID '.' ID
 
 state 0
 	$accept : . programa $end  (0)
@@ -365,38 +366,38 @@ state 12
 
 
 state 13
-	identificador : ID .  (137)
-	identificador : ID . '.' ID  (138)
+	identificador : ID .  (138)
+	identificador : ID . '.' ID  (139)
 
 	'.'  shift 41
-	error  reduce 137
-	'+'  reduce 137
-	'-'  reduce 137
-	'*'  reduce 137
-	'/'  reduce 137
-	ELSE  reduce 137
-	ENDIF  reduce 137
-	PRINT  reduce 137
-	RETURN  reduce 137
-	DO  reduce 137
-	CTE  reduce 137
-	ID  reduce 137
-	ASIG  reduce 137
-	TRUNC  reduce 137
-	FLECHA  reduce 137
-	EQ  reduce 137
-	GEQ  reduce 137
-	LEQ  reduce 137
-	NEQ  reduce 137
-	'{'  reduce 137
-	'('  reduce 137
-	')'  reduce 137
-	';'  reduce 137
-	','  reduce 137
-	'>'  reduce 137
-	'<'  reduce 137
-	'='  reduce 137
-	'!'  reduce 137
+	error  reduce 138
+	'+'  reduce 138
+	'-'  reduce 138
+	'*'  reduce 138
+	'/'  reduce 138
+	ELSE  reduce 138
+	ENDIF  reduce 138
+	PRINT  reduce 138
+	RETURN  reduce 138
+	DO  reduce 138
+	CTE  reduce 138
+	ID  reduce 138
+	ASIG  reduce 138
+	TRUNC  reduce 138
+	FLECHA  reduce 138
+	EQ  reduce 138
+	GEQ  reduce 138
+	LEQ  reduce 138
+	NEQ  reduce 138
+	'{'  reduce 138
+	'('  reduce 138
+	')'  reduce 138
+	';'  reduce 138
+	','  reduce 138
+	'>'  reduce 138
+	'<'  reduce 138
+	'='  reduce 138
+	'!'  reduce 138
 
 
 state 14
@@ -696,7 +697,7 @@ state 40
 
 
 state 41
-	identificador : ID '.' . ID  (138)
+	identificador : ID '.' . ID  (139)
 
 	ID  shift 78
 	.  error
@@ -838,6 +839,7 @@ state 57
 	trunc : TRUNC . '(' CTE error  (133)
 	trunc : TRUNC . error CTE ')'  (134)
 	trunc : TRUNC . error CTE error  (135)
+	trunc : TRUNC . '(' '-' CTE ')'  (136)
 
 	error  shift 98
 	'('  shift 99
@@ -895,7 +897,7 @@ state 59
 
 state 60
 	factor : identificador .  (123)
-	inicio_llamado : identificador . '('  (136)
+	inicio_llamado : identificador . '('  (137)
 
 	'('  shift 116
 	error  reduce 123
@@ -1176,9 +1178,9 @@ state 77
 
 
 state 78
-	identificador : ID '.' ID .  (138)
+	identificador : ID '.' ID .  (139)
 
-	.  reduce 138
+	.  reduce 139
 
 
 state 79
@@ -1347,8 +1349,10 @@ state 98
 state 99
 	trunc : TRUNC '(' . CTE ')'  (132)
 	trunc : TRUNC '(' . CTE error  (133)
+	trunc : TRUNC '(' . '-' CTE ')'  (136)
 
-	CTE  shift 157
+	'-'  shift 157
+	CTE  shift 158
 	.  error
 
 
@@ -1356,7 +1360,7 @@ state 100
 	condicion_if : '(' condicion . ')'  (73)
 	condicion_if : '(' condicion .  (75)
 
-	')'  shift 158
+	')'  shift 159
 	PRINT  reduce 75
 	RETURN  reduce 75
 	ID  reduce 75
@@ -1410,8 +1414,8 @@ state 108
 	comp : '=' . '<'  (96)
 	comp : '=' . '>'  (97)
 
-	'>'  shift 159
-	'<'  shift 160
+	'>'  shift 160
+	'<'  shift 161
 	error  reduce 95
 	'-'  reduce 95
 	CTE  reduce 95
@@ -1422,13 +1426,13 @@ state 108
 state 109
 	comp : '!' . '='  (98)
 
-	'='  shift 161
+	'='  shift 162
 	.  error
 
 
 state 110
 	factor_simple : identificador .  (128)
-	inicio_llamado : identificador . '('  (136)
+	inicio_llamado : identificador . '('  (137)
 
 	'('  shift 116
 	PRINT  reduce 128
@@ -1449,7 +1453,7 @@ state 111
 	TRUNC  shift 57
 	.  error
 
-	expresion  goto 162
+	expresion  goto 163
 	identificador  goto 60
 	termino  goto 63
 	factor  goto 64
@@ -1467,7 +1471,7 @@ state 113
 	expresion : expresion operador_expresion . termino  (108)
 	expresion : expresion operador_expresion . error  (111)
 
-	error  shift 163
+	error  shift 164
 	'-'  shift 55
 	CTE  shift 56
 	ID  shift 13
@@ -1475,7 +1479,7 @@ state 113
 	.  error
 
 	identificador  goto 60
-	termino  goto 164
+	termino  goto 165
 	factor  goto 64
 	inicio_llamado  goto 65
 	trunc  goto 66
@@ -1493,7 +1497,7 @@ state 114
 
 	expresion  goto 127
 	identificador  goto 60
-	parametros_reales  goto 165
+	parametros_reales  goto 166
 	parametro_real  goto 129
 	termino  goto 63
 	factor  goto 64
@@ -1508,9 +1512,9 @@ state 115
 
 
 state 116
-	inicio_llamado : identificador '(' .  (136)
+	inicio_llamado : identificador '(' .  (137)
 
-	.  reduce 136
+	.  reduce 137
 
 
 state 117
@@ -1524,13 +1528,13 @@ state 118
 	sentencia_if : if condicion_if cuerpo_ejecutable . end_if  (61)
 	end_if : .  (72)
 
-	ELSE  shift 166
-	ENDIF  shift 167
+	ELSE  shift 167
+	ENDIF  shift 168
 	error  reduce 72
 	';'  reduce 72
 
-	else  goto 168
-	end_if  goto 169
+	else  goto 169
+	end_if  goto 170
 
 
 state 119
@@ -1573,7 +1577,7 @@ state 125
 	termino : termino operador_termino . factor  (114)
 	termino : termino operador_termino . error  (117)
 
-	error  shift 170
+	error  shift 171
 	'-'  shift 55
 	CTE  shift 56
 	ID  shift 13
@@ -1581,7 +1585,7 @@ state 125
 	.  error
 
 	identificador  goto 60
-	factor  goto 171
+	factor  goto 172
 	inicio_llamado  goto 65
 	trunc  goto 66
 
@@ -1615,8 +1619,8 @@ state 127
 
 	'+'  shift 90
 	'-'  shift 91
-	ID  shift 172
-	FLECHA  shift 173
+	ID  shift 173
+	FLECHA  shift 174
 	.  error
 
 	operador_expresion  goto 113
@@ -1626,8 +1630,8 @@ state 128
 	parametros_reales : parametros_reales . ',' parametro_real  (82)
 	factor : inicio_llamado parametros_reales . ')'  (125)
 
-	')'  shift 174
-	','  shift 175
+	')'  shift 175
+	','  shift 176
 	.  error
 
 
@@ -1641,7 +1645,7 @@ state 130
 	condicion_while : '(' condicion . ')'  (77)
 	condicion_while : '(' condicion .  (79)
 
-	')'  shift 176
+	')'  shift 177
 	PRINT  reduce 79
 	RETURN  reduce 79
 	DO  reduce 79
@@ -1667,7 +1671,7 @@ state 132
 	sentencia_return  goto 117
 	list_vars_mix  goto 24
 	identificador  goto 25
-	cuerpo_ejecutable  goto 177
+	cuerpo_ejecutable  goto 178
 	bloque_ejecutable  goto 119
 	sentencia_ejecutable_simple  goto 120
 	asignacion_simple  goto 121
@@ -1700,7 +1704,7 @@ state 134
 state 135
 	bloque_ejecutable : '{' error . '}'  (57)
 
-	'}'  shift 178
+	'}'  shift 179
 	.  error
 
 
@@ -1713,11 +1717,11 @@ state 136
 state 137
 	lista_sentencias_ejecutable : sentencia_ejecutable . punto_y_coma_cuerpo  (59)
 
-	error  shift 179
-	';'  shift 180
+	error  shift 180
+	';'  shift 181
 	.  error
 
-	punto_y_coma_cuerpo  goto 181
+	punto_y_coma_cuerpo  goto 182
 
 
 state 138
@@ -1729,11 +1733,11 @@ state 138
 	PRINT  shift 11
 	RETURN  shift 12
 	ID  shift 13
-	'}'  shift 182
+	'}'  shift 183
 	'('  shift 16
 	.  error
 
-	sentencia_ejecutable  goto 183
+	sentencia_ejecutable  goto 184
 	sentencia_return  goto 23
 	list_vars_mix  goto 24
 	identificador  goto 25
@@ -1752,7 +1756,7 @@ state 138
 state 139
 	expresion_lambda : header_lambda bloque_ejecutable $$1 . '(' factor_lambda ')'  (104)
 
-	'('  shift 184
+	'('  shift 185
 	.  error
 
 
@@ -1789,7 +1793,7 @@ state 144
 state 145
 	declaracion_funcion : header_funcion '(' parametros_formales ')' . '{' list_sentencia '}'  (8)
 
-	'{'  shift 185
+	'{'  shift 186
 	.  error
 
 
@@ -1801,7 +1805,7 @@ state 146
 	ID  reduce 30
 	ULONG  reduce 30
 
-	parametro_formal  goto 186
+	parametro_formal  goto 187
 	semantica  goto 83
 
 
@@ -1815,7 +1819,7 @@ state 148
 	parametro_formal : semantica tipo . ID  (26)
 	parametro_formal : semantica tipo .  (28)
 
-	ID  shift 187
+	ID  shift 188
 	')'  reduce 28
 	','  reduce 28
 
@@ -1835,7 +1839,7 @@ state 150
 state 151
 	list_ctes : list_ctes ',' . CTE  (34)
 
-	CTE  shift 188
+	CTE  shift 189
 	.  error
 
 
@@ -1923,45 +1927,52 @@ state 156
 	trunc : TRUNC error CTE . ')'  (134)
 	trunc : TRUNC error CTE . error  (135)
 
-	error  shift 189
-	')'  shift 190
+	error  shift 190
+	')'  shift 191
 	.  error
 
 
 state 157
-	trunc : TRUNC '(' CTE . ')'  (132)
-	trunc : TRUNC '(' CTE . error  (133)
+	trunc : TRUNC '(' '-' . CTE ')'  (136)
 
-	error  shift 191
-	')'  shift 192
+	CTE  shift 192
 	.  error
 
 
 state 158
+	trunc : TRUNC '(' CTE . ')'  (132)
+	trunc : TRUNC '(' CTE . error  (133)
+
+	error  shift 193
+	')'  shift 194
+	.  error
+
+
+state 159
 	condicion_if : '(' condicion ')' .  (73)
 
 	.  reduce 73
 
 
-state 159
+state 160
 	comp : '=' '>' .  (97)
 
 	.  reduce 97
 
 
-state 160
+state 161
 	comp : '=' '<' .  (96)
 
 	.  reduce 96
 
 
-state 161
+state 162
 	comp : '!' '=' .  (98)
 
 	.  reduce 98
 
 
-state 162
+state 163
 	condicion : expresion comp expresion .  (87)
 	expresion : expresion . operador_expresion termino  (108)
 	expresion : expresion . operador_expresion error  (111)
@@ -1978,7 +1989,7 @@ state 162
 	operador_expresion  goto 113
 
 
-state 163
+state 164
 	expresion : expresion operador_expresion error .  (111)
 	termino : error . operador_termino factor  (116)
 	termino : error . operador_termino error  (118)
@@ -2012,7 +2023,7 @@ state 163
 	operador_termino  goto 96
 
 
-state 164
+state 165
 	expresion : expresion operador_expresion termino .  (108)
 	termino : termino . operador_termino factor  (114)
 	termino : termino . operador_termino error  (117)
@@ -2046,28 +2057,28 @@ state 164
 	operador_termino  goto 125
 
 
-state 165
+state 166
 	parametros_reales : parametros_reales . ',' parametro_real  (82)
 	factor_simple : inicio_llamado parametros_reales . ')'  (130)
 
-	')'  shift 193
-	','  shift 175
+	')'  shift 195
+	','  shift 176
 	.  error
 
 
-state 166
+state 167
 	else : ELSE .  (68)
 
 	.  reduce 68
 
 
-state 167
+state 168
 	end_if : ENDIF .  (71)
 
 	.  reduce 71
 
 
-state 168
+state 169
 	sentencia_if : if condicion_if cuerpo_ejecutable else . cuerpo_ejecutable end_if  (60)
 
 	PRINT  shift 11
@@ -2079,7 +2090,7 @@ state 168
 	sentencia_return  goto 117
 	list_vars_mix  goto 24
 	identificador  goto 25
-	cuerpo_ejecutable  goto 194
+	cuerpo_ejecutable  goto 196
 	bloque_ejecutable  goto 119
 	sentencia_ejecutable_simple  goto 120
 	asignacion_simple  goto 121
@@ -2088,46 +2099,46 @@ state 168
 	var_asignacion_simple  goto 34
 
 
-state 169
+state 170
 	sentencia_if : if condicion_if cuerpo_ejecutable end_if .  (61)
 
 	.  reduce 61
 
 
-state 170
+state 171
 	termino : termino operador_termino error .  (117)
 
 	.  reduce 117
 
 
-state 171
+state 172
 	termino : termino operador_termino factor .  (114)
 
 	.  reduce 114
 
 
-state 172
+state 173
 	parametro_real : expresion ID .  (86)
 
 	.  reduce 86
 
 
-state 173
+state 174
 	parametro_real : expresion FLECHA . ID  (84)
 	parametro_real : expresion FLECHA .  (85)
 
-	ID  shift 195
+	ID  shift 197
 	')'  reduce 85
 	','  reduce 85
 
 
-state 174
+state 175
 	factor : inicio_llamado parametros_reales ')' .  (125)
 
 	.  reduce 125
 
 
-state 175
+state 176
 	parametros_reales : parametros_reales ',' . parametro_real  (82)
 
 	error  shift 54
@@ -2139,197 +2150,204 @@ state 175
 
 	expresion  goto 127
 	identificador  goto 60
-	parametro_real  goto 196
+	parametro_real  goto 198
 	termino  goto 63
 	factor  goto 64
 	inicio_llamado  goto 65
 	trunc  goto 66
 
 
-state 176
+state 177
 	condicion_while : '(' condicion ')' .  (77)
 
 	.  reduce 77
 
 
-state 177
+state 178
 	sentencia_while : while condicion_while do cuerpo_ejecutable .  (65)
 
 	.  reduce 65
 
 
-state 178
+state 179
 	bloque_ejecutable : '{' error '}' .  (57)
 
 	.  reduce 57
 
 
-state 179
+state 180
 	punto_y_coma_cuerpo : error . '}'  (21)
 
-	'}'  shift 197
+	'}'  shift 199
 	.  error
 
 
-state 180
+state 181
 	punto_y_coma_cuerpo : ';' .  (20)
 
 	.  reduce 20
 
 
-state 181
+state 182
 	lista_sentencias_ejecutable : sentencia_ejecutable punto_y_coma_cuerpo .  (59)
 
 	.  reduce 59
 
 
-state 182
+state 183
 	bloque_ejecutable : '{' lista_sentencias_ejecutable '}' .  (55)
 
 	.  reduce 55
 
 
-state 183
+state 184
 	lista_sentencias_ejecutable : lista_sentencias_ejecutable sentencia_ejecutable . punto_y_coma_cuerpo  (58)
 
-	error  shift 179
-	';'  shift 180
+	error  shift 180
+	';'  shift 181
 	.  error
 
-	punto_y_coma_cuerpo  goto 198
-
-
-state 184
-	expresion_lambda : header_lambda bloque_ejecutable $$1 '(' . factor_lambda ')'  (104)
-
-	'-'  shift 199
-	CTE  shift 200
-	ID  shift 13
-	.  error
-
-	identificador  goto 201
-	factor_lambda  goto 202
+	punto_y_coma_cuerpo  goto 200
 
 
 state 185
+	expresion_lambda : header_lambda bloque_ejecutable $$1 '(' . factor_lambda ')'  (104)
+
+	'-'  shift 201
+	CTE  shift 202
+	ID  shift 13
+	.  error
+
+	identificador  goto 203
+	factor_lambda  goto 204
+
+
+state 186
 	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' . list_sentencia '}'  (8)
 	list_sentencia : .  (11)
 
 	.  reduce 11
 
-	list_sentencia  goto 203
+	list_sentencia  goto 205
 
 
-state 186
+state 187
 	parametros_formales : parametros_formales ',' parametro_formal .  (24)
 
 	.  reduce 24
 
 
-state 187
+state 188
 	parametro_formal : semantica tipo ID .  (26)
 
 	.  reduce 26
 
 
-state 188
+state 189
 	list_ctes : list_ctes ',' CTE .  (34)
 
 	.  reduce 34
 
 
-state 189
+state 190
 	trunc : TRUNC error CTE error .  (135)
 
 	.  reduce 135
 
 
-state 190
+state 191
 	trunc : TRUNC error CTE ')' .  (134)
 
 	.  reduce 134
 
 
-state 191
-	trunc : TRUNC '(' CTE error .  (133)
-
-	.  reduce 133
-
-
 state 192
-	trunc : TRUNC '(' CTE ')' .  (132)
-
-	.  reduce 132
-
-
-state 193
-	factor_simple : inicio_llamado parametros_reales ')' .  (130)
-
-	.  reduce 130
-
-
-state 194
-	sentencia_if : if condicion_if cuerpo_ejecutable else cuerpo_ejecutable . end_if  (60)
-	end_if : .  (72)
-
-	ENDIF  shift 167
-	error  reduce 72
-	';'  reduce 72
-
-	end_if  goto 204
-
-
-state 195
-	parametro_real : expresion FLECHA ID .  (84)
-
-	.  reduce 84
-
-
-state 196
-	parametros_reales : parametros_reales ',' parametro_real .  (82)
-
-	.  reduce 82
-
-
-state 197
-	punto_y_coma_cuerpo : error '}' .  (21)
-
-	.  reduce 21
-
-
-state 198
-	lista_sentencias_ejecutable : lista_sentencias_ejecutable sentencia_ejecutable punto_y_coma_cuerpo .  (58)
-
-	.  reduce 58
-
-
-state 199
-	factor_lambda : '-' . CTE  (107)
-
-	CTE  shift 205
-	.  error
-
-
-state 200
-	factor_lambda : CTE .  (106)
-
-	.  reduce 106
-
-
-state 201
-	factor_lambda : identificador .  (105)
-
-	.  reduce 105
-
-
-state 202
-	expresion_lambda : header_lambda bloque_ejecutable $$1 '(' factor_lambda . ')'  (104)
+	trunc : TRUNC '(' '-' CTE . ')'  (136)
 
 	')'  shift 206
 	.  error
 
 
+state 193
+	trunc : TRUNC '(' CTE error .  (133)
+
+	.  reduce 133
+
+
+state 194
+	trunc : TRUNC '(' CTE ')' .  (132)
+
+	.  reduce 132
+
+
+state 195
+	factor_simple : inicio_llamado parametros_reales ')' .  (130)
+
+	.  reduce 130
+
+
+state 196
+	sentencia_if : if condicion_if cuerpo_ejecutable else cuerpo_ejecutable . end_if  (60)
+	end_if : .  (72)
+
+	ENDIF  shift 168
+	error  reduce 72
+	';'  reduce 72
+
+	end_if  goto 207
+
+
+state 197
+	parametro_real : expresion FLECHA ID .  (84)
+
+	.  reduce 84
+
+
+state 198
+	parametros_reales : parametros_reales ',' parametro_real .  (82)
+
+	.  reduce 82
+
+
+state 199
+	punto_y_coma_cuerpo : error '}' .  (21)
+
+	.  reduce 21
+
+
+state 200
+	lista_sentencias_ejecutable : lista_sentencias_ejecutable sentencia_ejecutable punto_y_coma_cuerpo .  (58)
+
+	.  reduce 58
+
+
+state 201
+	factor_lambda : '-' . CTE  (107)
+
+	CTE  shift 208
+	.  error
+
+
+state 202
+	factor_lambda : CTE .  (106)
+
+	.  reduce 106
+
+
 state 203
+	factor_lambda : identificador .  (105)
+
+	.  reduce 105
+
+
+state 204
+	expresion_lambda : header_lambda bloque_ejecutable $$1 '(' factor_lambda . ')'  (104)
+
+	')'  shift 209
+	.  error
+
+
+state 205
 	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia . '}'  (8)
 	list_sentencia : list_sentencia . sentencia  (12)
 
@@ -2340,7 +2358,7 @@ state 203
 	RETURN  shift 12
 	ID  shift 13
 	ULONG  shift 14
-	'}'  shift 207
+	'}'  shift 210
 	'('  shift 16
 	.  error
 
@@ -2365,29 +2383,35 @@ state 203
 	header_lambda  goto 35
 
 
-state 204
+state 206
+	trunc : TRUNC '(' '-' CTE ')' .  (136)
+
+	.  reduce 136
+
+
+state 207
 	sentencia_if : if condicion_if cuerpo_ejecutable else cuerpo_ejecutable end_if .  (60)
 
 	.  reduce 60
 
 
-state 205
+state 208
 	factor_lambda : '-' CTE .  (107)
 
 	.  reduce 107
 
 
-state 206
+state 209
 	expresion_lambda : header_lambda bloque_ejecutable $$1 '(' factor_lambda ')' .  (104)
 
 	.  reduce 104
 
 
-state 207
+state 210
 	declaracion_funcion : header_funcion '(' parametros_formales ')' '{' list_sentencia '}' .  (8)
 
 	.  reduce 8
 
 
 36 terminals, 53 nonterminals
-139 grammar rules, 208 states
+140 grammar rules, 211 states
